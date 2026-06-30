@@ -66,6 +66,7 @@
   .field select{width:110px; text-align:left}
   .field .unit{font-size:11px; color:var(--slate-2); width:34px;}
   .field input:focus,.field select:focus{outline:2px solid var(--teal); outline-offset:1px; border-color:var(--teal)}
+  .field input[type=checkbox]{width:auto; transform:scale(1.25); accent-color:var(--teal); cursor:pointer; margin-right:2px}
   .seg, .kid{border:1px solid var(--line); border-radius:10px; padding:10px; margin:8px 0; background:#FAFBFD;}
   .seg .row, .kid .row{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
   .seg .row .field, .kid .row .field{padding:3px 0}
@@ -176,6 +177,8 @@
         <div class="field"><label>再雇用 手取り（定年〜下記歳）</label><div class="ig"><input type="number" id="reemployIncome" value="260"><span class="unit">万/年</span></div></div>
         <div class="field"><label>再雇用の終了年齢</label><div class="ig"><input type="number" id="reemployTo" value="65"><span class="unit">歳</span></div></div>
         <div class="field"><label>年金 手取り（世帯・以降）</label><div class="ig"><input type="number" id="pensionIncome" value="300"><span class="unit">万/年</span></div></div>
+        <div class="field"><label>配偶者・扶養控除を考慮</label><input type="checkbox" id="considerDeduction" checked></div>
+        <div class="hint">オンで、配偶者控除（パートナーの収入で可否・額が変動：給与150万以下で満額、201万で消失）と扶養控除（子16〜18・19〜22歳）による減税を概算で手取りに反映します。</div>
       </div>
     </details>
 
@@ -252,7 +255,24 @@
         <div class="field"><label>NISA 積立額</label><div class="ig"><input type="number" id="nisaMonthly" value="3" step="0.5"><span class="unit">万/月</span></div></div>
         <div class="field"><label>想定利回り（年）</label><div class="ig"><input type="number" id="nisaYield" value="4.0" step="0.1"><span class="unit">%</span></div></div>
         <div class="field"><label>生涯投資枠</label><div class="ig"><input type="number" id="nisaCap" value="1800"><span class="unit">万</span></div></div>
+        <div class="field"><label>現預金の上限超過分をNISAへ</label><input type="checkbox" id="sweepNisa"></div>
+        <div class="field"><label>　└ 現預金の上限</label><div class="ig"><input type="number" id="cashCap" value="500"><span class="unit">万</span></div></div>
+        <div class="hint">オンにすると、生活防衛費とは別に設けた上限を超えた現預金を、年間枠（360万）・生涯投資枠の範囲でNISAに自動で回します。</div>
         <div class="hint">現預金が不足する年は、NISAを自動で取り崩して充当します（元本・評価額に反映）。</div>
+      </div>
+    </details>
+
+    <details class="grp">
+      <summary><span class="tag">退職</span>確定拠出年金・退職金<span class="chev">▶</span></summary>
+      <div class="body">
+        <div class="field"><label>確定拠出年金（iDeCo/企業型DC）</label><input type="checkbox" id="hasDC"></div>
+        <div class="field"><label>　└ 掛金（月）</label><div class="ig"><input type="number" id="dcMonthly" value="2.0" step="0.5"><span class="unit">万/月</span></div></div>
+        <div class="field"><label>　└ 受給開始年齢</label><div class="ig"><input type="number" id="dcReceiveAge" value="65"><span class="unit">歳</span></div></div>
+        <div class="hint">掛金は全額所得控除（節税分を手取りに反映）。運用利回りはNISAと同じ想定。受給開始以降、現預金が不足する年に取り崩します。総資産に含めて表示します。</div>
+        <div class="field"><label>退職金制度</label><input type="checkbox" id="hasRetireBonus"></div>
+        <div class="field"><label>　└ 退職金（額面）</label><div class="ig"><input type="number" id="retireBonus" value="1500"><span class="unit">万</span></div></div>
+        <div class="field"><label>　└ 入社年齢（勤続計算用）</label><div class="ig"><input type="number" id="joinAge" value="22"><span class="unit">歳</span></div></div>
+        <div class="hint">定年（本人の定年年齢）に、退職所得控除を適用した手取りを一括で現預金に計上します。</div>
       </div>
     </details>
 
@@ -276,13 +296,7 @@
     <div class="block">
       <div class="eyebrow">Asset formation</div>
       <h2>資産形成の推移</h2>
-      <div class="legend">
-        <span><i style="background:#0E7C73"></i>総資産</span>
-        <span><i style="background:#3B6FB0"></i>現預金</span>
-        <span><i style="background:#D69838"></i>NISA評価額（含み益込み）</span>
-        <span><i style="background:#D69838;opacity:.5"></i>NISA元本</span>
-        <span><i style="background:#C2526B"></i>生活防衛費</span>
-      </div>
+      <div class="legend" id="legend"></div>
       <div class="chartbox"><canvas id="assetChart"></canvas></div>
     </div>
 
@@ -305,7 +319,7 @@
         </tr></thead><tbody id="tbody"></tbody></table>
       </div>
       <p class="footnote" style="margin-top:10px">
-        ※ 金額は万円（一部は円表示）。手取りは概算（額面に対し収入帯で72〜82%を適用）。学費はMEXT等の平均をベースにした目安、保険・子の生活費・固定資産税は自動概算です。実際の制度・税額とは差が出るため、傾向把握用としてご利用ください。
+        ※ 金額は万円（一部は円表示）。手取りは概算（額面に対し収入帯で72〜82%を適用）。配偶者・扶養控除、確定拠出年金の節税、退職所得控除は税率を年収帯から推定する簡易計算で、実額とは差が出ます。学費はMEXT等の平均をベースにした目安、保険・子の生活費・固定資産税は自動概算です。総資産は現預金＋NISA評価額（＋確定拠出年金）。傾向把握用としてご利用ください。
       </p>
     </div>
   </div>
@@ -329,6 +343,25 @@ function tuition(a,P){
 function childLiving(a){ if(a<3)return 22; if(a<6)return 28; if(a<12)return 35; if(a<15)return 42; if(a<18)return 50; if(a<23)return 55; return 0; }
 function insurance(age){ if(age<30)return 8; if(age<40)return 14; if(age<50)return 22; if(age<60)return 28; if(age<70)return 22; return 14; }
 function takeHome(g){ if(g<=0)return 0; let r; if(g<500)r=.82; else if(g<800)r=.79; else if(g<1200)r=.75; else r=.72; return g*r; }
+function marginalRate(gross){ if(gross<300)return .05; if(gross<600)return .10; if(gross<900)return .20; if(gross<1200)return .23; return .33; }
+function deductionSaving(P,selfGross,partnerGross,childAges,married){
+  if(!P.considerDeduction) return 0;
+  const rate=marginalRate(selfGross), juRate=0.10; let dedTax=0,dedJu=0;
+  if(married && selfGross<=1200){
+    const p=partnerGross;
+    if(p<=150){ dedTax+=38; dedJu+=33; }
+    else if(p<201){ const f=(201-p)/51; dedTax+=38*f; dedJu+=33*f; }
+  }
+  childAges.forEach(a=>{ if(a==null)return; if(a>=16&&a<=18){dedTax+=38;dedJu+=33;} else if(a>=19&&a<=22){dedTax+=63;dedJu+=45;} });
+  return dedTax*rate + dedJu*juRate;
+}
+function retireBonusNet(P){
+  const years=Math.max(1,P.selfRetire-P.joinAge);
+  const deduction = years<=20 ? 40*years : 800+70*(years-20);
+  const taxable=Math.max(0,(P.retireBonus-deduction)/2);
+  const tax=taxable*(marginalRate(P.retireBonus)+0.10);
+  return Math.max(0,P.retireBonus-tax);
+}
 function loanCalc(P){ const borrow=Math.max(0,P.price-P.downpay); const r=P.rate/12,n=P.loanYears*12; let pay = r===0? (n>0?borrow/n:0) : borrow*r/(1-Math.pow(1+r,-n)); return {borrow,monthlyPay:pay,annualPay:pay*12,r,n}; }
 function balAfter(L,k){ if(k<=0)return L.borrow; if(k>=L.n/12)return 0; const m=k*12; if(L.r===0)return Math.max(0,L.borrow-L.monthlyPay*m); return L.borrow*Math.pow(1+L.r,m)-L.monthlyPay*(Math.pow(1+L.r,m)-1)/L.r; }
 
@@ -351,13 +384,15 @@ function eventsFor(P,age,childAges,L){
     if(sb===P.loanYears) e.push('住宅ローン完済');
   }
   if(age===P.selfRetire) e.push('定年退職');
+  if(P.hasRetireBonus && age===P.selfRetire) e.push('退職金 受取');
+  if(P.hasDC && age===P.dcReceiveAge) e.push('確定拠出年金 受給開始');
   if(age===P.reemployTo && P.reemployTo>P.selfRetire) e.push('再雇用終了');
   if(age===Math.max(P.selfRetire,P.reemployTo)) e.push('年金生活へ');
   return e;
 }
 
 function simulate(P){
-  const L=loanCalc(P); const rows=[]; let cash=P.initCash, nisaP=P.initNisaP, nisaV=(P.initNisaV>0?P.initNisaV:P.initNisaP);
+  const L=loanCalc(P); const rows=[]; let cash=P.initCash, nisaP=P.initNisaP, nisaV=(P.initNisaV>0?P.initNisaV:P.initNisaP), dcValue=0;
   const nY=Math.max(1,P.endAge-P.currentAge+1);
   for(let i=0;i<nY;i++){
     const age=P.currentAge+i, pAge=P.partnerCurrentAge+i, married=age>=P.marriageAge;
@@ -376,6 +411,7 @@ function simulate(P){
     const grant=P.children.filter(c=>c.birthAge===age).length*P.birthGrant;
     let credit=0;
     if(P.buyAge!=null&&age>=P.buyAge&&age<P.buyAge+P.creditYears){ const k=age-P.buyAge; credit=Math.min(balAfter(L,k)*P.creditRate,P.creditCap); }
+    const ded = age<P.selfRetire ? deductionSaving(P,selfGross,pGross,childAges,married) : 0;
     let living=P.monthlyBase*12*(married?1:P.singleFactor);
     living+=dep.reduce((s,a)=>s+childLiving(a),0);
     living+=insurance(age)+P.travelCount*P.travelCost;
@@ -387,15 +423,25 @@ function simulate(P){
     let annualNisa=P.nisaMonthly*12, contrib=0;
     if(nisaP+annualNisa<=P.nisaCap)contrib=annualNisa; else contrib=Math.max(0,P.nisaCap-nisaP);
     contrib=Math.min(contrib,360);
-    const incomeCash=net+allowance+grant+credit;
+    let dcContrib=0, dcDed=0;
+    if(P.hasDC && age<P.dcReceiveAge && age<65){ dcContrib=P.dcMonthly*12; if(age<P.selfRetire) dcDed=dcContrib*(marginalRate(selfGross)+0.10); }
+    const incomeCash=net+allowance+grant+credit+ded+dcDed;
     const expense=living+housing+edu+oneoff;
-    const saving=incomeCash-expense-contrib;
+    const saving=incomeCash-expense-contrib-dcContrib;
     cash+=saving; nisaV=nisaV*(1+P.nisaYield)+contrib; nisaP+=contrib;
+    dcValue=dcValue*(1+P.nisaYield)+dcContrib;
+    let retireNet=0;
+    if(P.hasRetireBonus && age===P.selfRetire){ retireNet=retireBonusNet(P); cash+=retireNet; }
     let drawdown=0; const target=P.emergency;
-    if(cash<target && nisaV>0){ drawdown=Math.min(nisaV,target-cash); const ratio=drawdown/nisaV; nisaP-=nisaP*ratio; nisaV-=drawdown; cash+=drawdown; }
-    const netWorth=cash+nisaV;
+    if(cash<target && nisaV>0){ const d=Math.min(nisaV,target-cash); const ratio=d/nisaV; nisaP-=nisaP*ratio; nisaV-=d; cash+=d; drawdown+=d; }
+    if(cash<target && P.hasDC && age>=P.dcReceiveAge && dcValue>0){ const d=Math.min(dcValue,target-cash); dcValue-=d; cash+=d; drawdown+=d; }
+    let sweep=0;
+    if(P.sweepNisa){ const floor=Math.max(P.cashCap,P.emergency);
+      if(cash>floor){ const annualRoom=Math.max(0,360-contrib), lifeRoom=Math.max(0,P.nisaCap-nisaP);
+        sweep=Math.min(cash-floor,annualRoom,lifeRoom); if(sweep>0){ cash-=sweep; nisaV+=sweep; nisaP+=sweep; } } }
+    const netWorth=cash+nisaV+dcValue;
     const events=eventsFor(P,age,childAges,L);
-    rows.push({i,age,pAge,married,childAges,dep:dep.length,gross,bonus,net,living,housing,edu,oneoff,oneoffLbl,saving,contrib,drawdown,nisaV,nisaP,cash,netWorth,incomeCash,expense,events});
+    rows.push({i,age,pAge,married,childAges,dep:dep.length,gross,bonus,net,living,housing,edu,oneoff,oneoffLbl,saving,contrib,sweep,ded,dcContrib,dcDed,retireNet,dcValue,drawdown,nisaV,nisaP,cash,netWorth,incomeCash,expense,events});
   }
   return rows;
 }
@@ -423,7 +469,11 @@ function readParams(){
     travelCount:num('travelCount'), travelCost:num('travelCost'),
     initCash:num('initCash'), emergency:num('emergency'), nisaMonthly:num('nisaMonthly'),
     initNisaP:num('initNisaP'), initNisaV:num('initNisaV'),
-    nisaYield:num('nisaYield')/100, nisaCap:num('nisaCap')
+    nisaYield:num('nisaYield')/100, nisaCap:num('nisaCap'),
+    considerDeduction:document.getElementById('considerDeduction').checked,
+    sweepNisa:document.getElementById('sweepNisa').checked, cashCap:num('cashCap'),
+    hasDC:document.getElementById('hasDC').checked, dcMonthly:num('dcMonthly'), dcReceiveAge:num('dcReceiveAge'),
+    hasRetireBonus:document.getElementById('hasRetireBonus').checked, retireBonus:num('retireBonus'), joinAge:num('joinAge')
   };
 }
 
@@ -495,17 +545,19 @@ function render(){
   const lifeIncome=rows.reduce((s,r)=>s+r.incomeCash,0);
   const lifeExpense=rows.reduce((s,r)=>s+r.expense,0);
   const buyRow=P.buyAge!=null?rows.find(r=>r.age===P.buyAge):null;
-  const peakAsset=Math.max(...rows.map(r=>r.netWorth));
+  let peak={v:-Infinity,age:0}; rows.forEach(r=>{ if(r.netWorth>peak.v)peak={v:r.netWorth,age:r.age}; });
 
   const cards=[
     {label:'最終 総資産', val:manY(last.netWorth), sub:`${P.endAge}歳時点`, cls:'accent'},
-    {label:'ピーク総資産', val:manY(peakAsset), sub:'期間中の最大'},
+    {label:'ピーク総資産', val:manY(peak.v), sub:`${peak.age}歳時点`},
     {label:'最低 現預金', val:manY(minCash.cash), sub:`${minCash.age}歳ごろ`, cls: minCash.cash<P.emergency?'warnk':''},
     {label:'NISA 最終評価', val:manY(last.nisaV), sub:`元本 ${man(last.nisaP)}万 / 含み益 ${man(last.nisaV-last.nisaP)}万`, cls:'accent'},
     {label:'生涯 手取り収入', val:manY(lifeIncome), sub:'給付・控除含む'},
     {label:'生涯 支出', val:manY(lifeExpense), sub:'NISA積立を除く'}
   ];
   if(buyRow) cards.splice(3,0,{label:'住宅購入後の現預金', val:manY(buyRow.cash), sub:`${P.buyAge}歳・頭金${man(P.downpay)}万`, cls: buyRow.cash<0?'warnk':''});
+  if(P.hasDC){ const dcPeak=Math.max(...rows.map(r=>r.dcValue)); cards.push({label:'確定拠出年金', val:manY(dcPeak), sub:`受給開始 ${P.dcReceiveAge}歳・節税含む`, cls:'accent'}); }
+  if(P.hasRetireBonus){ const rn=retireBonusNet(P); cards.push({label:'退職金（手取り）', val:manY(rn), sub:`${P.selfRetire}歳・額面${man(P.retireBonus)}万`}); }
   document.getElementById('cards').innerHTML=cards.map(c=>`
     <div class="kpi ${c.cls||''}"><div class="k-label">${c.label}</div><div class="k-val num">${c.val}</div><div class="k-sub">${c.sub}</div></div>`).join('');
 
@@ -542,16 +594,19 @@ function render(){
 
   /* --- charts --- */
   const labels=rows.map(r=>r.age);
-  const data={
-    labels,
-    datasets:[
+  const dsets=[
       {label:'総資産',data:rows.map(r=>r.netWorth),borderColor:'#0E7C73',backgroundColor:'rgba(14,124,115,.10)',fill:true,tension:.25,borderWidth:2.5,pointRadius:0},
       {label:'現預金',data:rows.map(r=>r.cash),borderColor:'#3B6FB0',backgroundColor:'transparent',fill:false,tension:.25,borderWidth:2,pointRadius:0},
       {label:'NISA評価額',data:rows.map(r=>r.nisaV),borderColor:'#D69838',backgroundColor:'transparent',fill:false,tension:.25,borderWidth:2,pointRadius:0},
-      {label:'NISA元本',data:rows.map(r=>r.nisaP),borderColor:'rgba(214,152,56,.55)',borderDash:[5,4],fill:false,tension:.25,borderWidth:1.5,pointRadius:0},
-      {label:'生活防衛費',data:rows.map(()=>P.emergency),borderColor:'rgba(194,82,107,.8)',borderDash:[3,3],fill:false,borderWidth:1.2,pointRadius:0}
-    ]
-  };
+      {label:'NISA元本',data:rows.map(r=>r.nisaP),borderColor:'rgba(214,152,56,.55)',borderDash:[5,4],fill:false,tension:.25,borderWidth:1.5,pointRadius:0}
+  ];
+  if(P.hasDC){ dsets.push({label:'確定拠出年金',data:rows.map(r=>r.dcValue),borderColor:'#7A5BA6',backgroundColor:'transparent',fill:false,tension:.25,borderWidth:2,pointRadius:0}); }
+  dsets.push({label:'生活防衛費',data:rows.map(()=>P.emergency),borderColor:'rgba(194,82,107,.8)',borderDash:[3,3],fill:false,borderWidth:1.2,pointRadius:0});
+  const data={labels,datasets:dsets};
+  const legItems=[['#0E7C73','総資産'],['#3B6FB0','現預金'],['#D69838','NISA評価額（含み益込み）'],['#D69838;opacity:.5','NISA元本']];
+  if(P.hasDC) legItems.push(['#7A5BA6','確定拠出年金']);
+  legItems.push(['#C2526B','生活防衛費']);
+  document.getElementById('legend').innerHTML=legItems.map(([c,l])=>`<span><i style="background:${c}"></i>${l}</span>`).join('');
   const commonOpts={
     responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
     plugins:{ legend:{display:false},
@@ -590,7 +645,7 @@ function render(){
       <td class="l">${r.i}年</td><td>${r.age}</td><td>${r.married?r.pAge:'-'}</td><td class="l">${kid}</td>
       <td class="ev">${evtxt}</td>
       <td>${man(r.gross)}</td><td>${yen(r.net/12)}</td><td>${yen(r.living/12)}</td><td>${man(r.bonus)}</td>
-      <td class="${saveCls}">${man(r.saving)}</td><td>${man(r.contrib)}</td><td>${man(r.nisaV)}</td><td>${man(r.nisaP)}</td>
+      <td class="${saveCls}">${man(r.saving)}</td><td>${man(r.contrib+r.sweep)}</td><td>${man(r.nisaV)}</td><td>${man(r.nisaP)}</td>
       <td class="${cashCls}">${man(r.cash)}</td><td><b>${man(r.netWorth)}</b></td><td>${cost}</td>
     </tr>`;
   }).join('');
@@ -606,18 +661,20 @@ const DEFAULTS={currentAge:26,endAge:90,marriageAge:28,partnerCurrentAge:26,
   buyAge:36,rentMonthly:9,price:3800,downpay:700,rate:1.2,loanYears:35,propertyTax:18,
   repair1Year:10,repair1Cost:120,repair2Year:35,repair2Cost:500,creditYears:13,creditRate:0.7,creditCap:21,
   monthlyBase:20,singleFactor:0.6,inflation:1.0,travelCount:1,travelCost:20,
-  initCash:250,emergency:200,nisaMonthly:3,nisaYield:4.0,nisaCap:1800,initNisaP:0,initNisaV:0};
+  initCash:250,emergency:200,nisaMonthly:3,nisaYield:4.0,nisaCap:1800,initNisaP:0,initNisaV:0,
+  considerDeduction:true,sweepNisa:false,cashCap:500,
+  hasDC:false,dcMonthly:2.0,dcReceiveAge:65,hasRetireBonus:false,retireBonus:1500,joinAge:22};
 const STATIC_IDS=Object.keys(DEFAULTS);
 function setDefaults(){
-  for(const k in DEFAULTS){ const el=document.getElementById(k); if(el) el.value=DEFAULTS[k]; }
+  for(const k in DEFAULTS){ const el=document.getElementById(k); if(!el)continue; if(el.type==='checkbox')el.checked=DEFAULTS[k]; else el.value=DEFAULTS[k]; }
   segs=DEF_SEGS.map(s=>({...s})); kids=DEF_KIDS.map(k=>({...k}));
   renderSegs(); renderKids();
 }
 
 /* ============ 保存・共有 ============ */
-function getState(){ const o={}; STATIC_IDS.forEach(id=>{const el=document.getElementById(id); if(el)o[id]=el.value;}); o.segs=segs; o.kids=kids; return o; }
+function getState(){ const o={}; STATIC_IDS.forEach(id=>{const el=document.getElementById(id); if(!el)return; o[id]=el.type==='checkbox'?el.checked:el.value;}); o.segs=segs; o.kids=kids; return o; }
 function applyState(s){
-  STATIC_IDS.forEach(id=>{const el=document.getElementById(id); if(el&&s[id]!=null)el.value=s[id];});
+  STATIC_IDS.forEach(id=>{const el=document.getElementById(id); if(el&&s[id]!=null){ if(el.type==='checkbox')el.checked=!!s[id]; else el.value=s[id]; }});
   if(Array.isArray(s.segs)) segs=s.segs.map(x=>({...x}));
   if(Array.isArray(s.kids)) kids=s.kids.map(x=>({...x}));
   renderSegs(); renderKids();
@@ -636,6 +693,7 @@ function init(){
   render();
 }
 document.getElementById('form').addEventListener('input',e=>{ if(e.target.matches('input,select')) render(); });
+document.getElementById('form').addEventListener('change',e=>{ if(e.target.matches('input,select')) render(); });
 document.getElementById('addSeg').addEventListener('click',()=>{ segs.push({from:35,to:60,base:13,allow:2,raise:0.2,cap:22,bonusMonths:2.0}); renderSegs(); render(); });
 document.getElementById('addKid').addEventListener('click',()=>{ kids.push({birthAge:34}); renderKids(); render(); });
 document.getElementById('resetBtn').addEventListener('click',()=>{
