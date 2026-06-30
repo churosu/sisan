@@ -269,6 +269,10 @@
         <div class="field"><label>　└ 掛金（月）</label><div class="ig"><input type="number" id="dcMonthly" value="2.0" step="0.5"><span class="unit">万/月</span></div></div>
         <div class="field"><label>　└ 受給開始年齢</label><div class="ig"><input type="number" id="dcReceiveAge" value="65"><span class="unit">歳</span></div></div>
         <div class="hint">掛金は全額所得控除（節税分を手取りに反映）。運用利回りはNISAと同じ想定。受給開始以降、現預金が不足する年に取り崩します。総資産に含めて表示します。</div>
+        <div class="field"><label>退職所得控除の枠内で一時金受取（残りは運用継続）</label><input type="checkbox" id="dcLumpStrategy" checked></div>
+        <div class="field"><label>老後の取り崩し順</label><select id="withdrawOrder"><option value="dc">確定拠出年金を優先（税効率・推奨）</option><option value="nisa">NISAを優先</option></select></div>
+        <div class="field"><label>DC受取の実効税率</label><div class="ig"><input type="number" id="dcTaxRate" value="15" step="1"><span class="unit">%</span></div></div>
+        <div class="hint">「枠内一時金」をオンにすると、受給時に退職所得控除の枠まで非課税で一時金受取し、超過分は運用を継続（不足時に取り崩し・実効税率で課税）。退職金がある場合は10年／19年ルールに沿って控除枠の重複を簡易調整します。NISAは引き出しても非課税のため、DCを先に使いNISAを残す方が税引後で有利になりやすいです（総資産は税引後で表示）。</div>
         <div class="field"><label>退職金制度</label><input type="checkbox" id="hasRetireBonus"></div>
         <div class="field"><label>　└ 退職金（額面）</label><div class="ig"><input type="number" id="retireBonus" value="1500"><span class="unit">万</span></div></div>
         <div class="field"><label>　└ 入社年齢（勤続計算用）</label><div class="ig"><input type="number" id="joinAge" value="22"><span class="unit">歳</span></div></div>
@@ -319,7 +323,7 @@
         </tr></thead><tbody id="tbody"></tbody></table>
       </div>
       <p class="footnote" style="margin-top:10px">
-        ※ 金額は万円（一部は円表示）。手取りは概算（額面に対し収入帯で72〜82%を適用）。配偶者・扶養控除、確定拠出年金の節税、退職所得控除は税率を年収帯から推定する簡易計算で、実額とは差が出ます。学費はMEXT等の平均をベースにした目安、保険・子の生活費・固定資産税は自動概算です。総資産は現預金＋NISA評価額（＋確定拠出年金）。傾向把握用としてご利用ください。
+        ※ 金額は万円（一部は円表示）。手取りは概算（額面に対し収入帯で72〜82%を適用）。配偶者・扶養控除、確定拠出年金の節税、退職所得控除は税率を年収帯から推定する簡易計算で、実額とは差が出ます。学費はMEXT等の平均をベースにした目安、保険・子の生活費・固定資産税は自動概算です。総資産は現預金＋NISA評価額＋確定拠出年金（DCは「枠内一時金」をオンにすると受給時に退職所得控除の枠まで非課税で受取り超過分は運用継続、退職金との控除枠重複は10年／19年ルールを簡易調整した概算。DC残りは将来課税のため実効税率を引いた税引後で計上）。NISAは引き出しても運用益が非課税。傾向把握用としてご利用ください。
       </p>
     </div>
   </div>
@@ -355,9 +359,30 @@ function deductionSaving(P,selfGross,partnerGross,childAges,married){
   childAges.forEach(a=>{ if(a==null)return; if(a>=16&&a<=18){dedTax+=38;dedJu+=33;} else if(a>=19&&a<=22){dedTax+=63;dedJu+=45;} });
   return dedTax*rate + dedJu*juRate;
 }
+function rscFor(years){ years=Math.max(1,Math.round(years)); return years<=20 ? 40*years : 800+70*(years-20); }
+function dcYearsOf(P){ return Math.max(1, Math.min(P.dcReceiveAge,65) - P.currentAge); }
+function dcRscEffective(P){
+  let rsc=rscFor(dcYearsOf(P));
+  if(P.hasRetireBonus){
+    const gap=Math.abs(P.dcReceiveAge-P.selfRetire);
+    const reqGap=(P.dcReceiveAge<P.selfRetire)?10:20;
+    if(P.dcReceiveAge>=P.selfRetire && gap<reqGap){
+      const overlap=Math.min(dcYearsOf(P), Math.max(1,P.selfRetire-P.joinAge));
+      rsc=Math.max(0, rsc-40*overlap);
+    }
+  }
+  return rsc;
+}
 function retireBonusNet(P){
   const years=Math.max(1,P.selfRetire-P.joinAge);
-  const deduction = years<=20 ? 40*years : 800+70*(years-20);
+  let deduction=rscFor(years);
+  if(P.hasDC){
+    const gap=Math.abs(P.dcReceiveAge-P.selfRetire);
+    if(P.dcReceiveAge<P.selfRetire && gap<10){
+      const overlap=Math.min(dcYearsOf(P),years);
+      deduction=Math.max(0, deduction-40*overlap);
+    }
+  }
   const taxable=Math.max(0,(P.retireBonus-deduction)/2);
   const tax=taxable*(marginalRate(P.retireBonus)+0.10);
   return Math.max(0,P.retireBonus-tax);
@@ -385,7 +410,7 @@ function eventsFor(P,age,childAges,L){
   }
   if(age===P.selfRetire) e.push('定年退職');
   if(P.hasRetireBonus && age===P.selfRetire) e.push('退職金 受取');
-  if(P.hasDC && age===P.dcReceiveAge) e.push('確定拠出年金 受給開始');
+  if(P.hasDC && age===P.dcReceiveAge) e.push(P.dcLumpStrategy?'確定拠出年金 一時金受取（控除枠内）':'確定拠出年金 受給開始');
   if(age===P.reemployTo && P.reemployTo>P.selfRetire) e.push('再雇用終了');
   if(age===Math.max(P.selfRetire,P.reemployTo)) e.push('年金生活へ');
   return e;
@@ -432,16 +457,23 @@ function simulate(P){
     dcValue=dcValue*(1+P.nisaYield)+dcContrib;
     let retireNet=0;
     if(P.hasRetireBonus && age===P.selfRetire){ retireNet=retireBonusNet(P); cash+=retireNet; }
-    let drawdown=0; const target=P.emergency;
-    if(cash<target && nisaV>0){ const d=Math.min(nisaV,target-cash); const ratio=d/nisaV; nisaP-=nisaP*ratio; nisaV-=d; cash+=d; drawdown+=d; }
-    if(cash<target && P.hasDC && age>=P.dcReceiveAge && dcValue>0){ const d=Math.min(dcValue,target-cash); dcValue-=d; cash+=d; drawdown+=d; }
+    let dcLumpFree=0;
+    if(P.hasDC && P.dcLumpStrategy && age===P.dcReceiveAge && dcValue>0){ dcLumpFree=Math.min(dcValue, Math.max(0,dcRscEffective(P))); dcValue-=dcLumpFree; cash+=dcLumpFree; }
+    let drawNisa=0, drawDc=0, dcTaxPaid=0; const target=P.emergency;
+    const takeNisa=(need)=>{ if(nisaV<=0||need<=0)return; const d=Math.min(nisaV,need); const ratio=d/nisaV; nisaP-=nisaP*ratio; nisaV-=d; cash+=d; drawNisa+=d; };
+    const takeDc=(need)=>{ if(!(P.hasDC&&age>=P.dcReceiveAge)||dcValue<=0||need<=0)return; const gross=Math.min(dcValue,need/(1-P.dcTaxRate)); const net=gross*(1-P.dcTaxRate); dcValue-=gross; cash+=net; drawDc+=gross; dcTaxPaid+=gross*P.dcTaxRate; };
+    if(cash<target){
+      if(P.withdrawOrder==='dc'){ takeDc(target-cash); if(cash<target) takeNisa(target-cash); }
+      else { takeNisa(target-cash); if(cash<target) takeDc(target-cash); }
+    }
+    const drawdown=drawNisa+drawDc;
     let sweep=0;
     if(P.sweepNisa){ const floor=Math.max(P.cashCap,P.emergency);
       if(cash>floor){ const annualRoom=Math.max(0,360-contrib), lifeRoom=Math.max(0,P.nisaCap-nisaP);
         sweep=Math.min(cash-floor,annualRoom,lifeRoom); if(sweep>0){ cash-=sweep; nisaV+=sweep; nisaP+=sweep; } } }
-    const netWorth=cash+nisaV+dcValue;
+    const netWorth=cash+nisaV+dcValue*(1-P.dcTaxRate);
     const events=eventsFor(P,age,childAges,L);
-    rows.push({i,age,pAge,married,childAges,dep:dep.length,gross,bonus,net,living,housing,edu,oneoff,oneoffLbl,saving,contrib,sweep,ded,dcContrib,dcDed,retireNet,dcValue,drawdown,nisaV,nisaP,cash,netWorth,incomeCash,expense,events});
+    rows.push({i,age,pAge,married,childAges,dep:dep.length,gross,bonus,net,living,housing,edu,oneoff,oneoffLbl,saving,contrib,sweep,ded,dcContrib,dcDed,retireNet,dcLumpFree,dcValue,drawNisa,drawDc,dcTaxPaid,drawdown,nisaV,nisaP,cash,netWorth,incomeCash,expense,events});
   }
   return rows;
 }
@@ -473,7 +505,9 @@ function readParams(){
     considerDeduction:document.getElementById('considerDeduction').checked,
     sweepNisa:document.getElementById('sweepNisa').checked, cashCap:num('cashCap'),
     hasDC:document.getElementById('hasDC').checked, dcMonthly:num('dcMonthly'), dcReceiveAge:num('dcReceiveAge'),
-    hasRetireBonus:document.getElementById('hasRetireBonus').checked, retireBonus:num('retireBonus'), joinAge:num('joinAge')
+    hasRetireBonus:document.getElementById('hasRetireBonus').checked, retireBonus:num('retireBonus'), joinAge:num('joinAge'),
+    withdrawOrder:val('withdrawOrder'), dcTaxRate:num('dcTaxRate')/100,
+    dcLumpStrategy:document.getElementById('dcLumpStrategy').checked
   };
 }
 
@@ -556,7 +590,11 @@ function render(){
     {label:'生涯 支出', val:manY(lifeExpense), sub:'NISA積立を除く'}
   ];
   if(buyRow) cards.splice(3,0,{label:'住宅購入後の現預金', val:manY(buyRow.cash), sub:`${P.buyAge}歳・頭金${man(P.downpay)}万`, cls: buyRow.cash<0?'warnk':''});
-  if(P.hasDC){ const dcPeak=Math.max(...rows.map(r=>r.dcValue)); cards.push({label:'確定拠出年金', val:manY(dcPeak), sub:`受給開始 ${P.dcReceiveAge}歳・節税含む`, cls:'accent'}); }
+  if(P.hasDC){
+    const recRow=rows.find(r=>r.age===P.dcReceiveAge);
+    if(P.dcLumpStrategy && recRow){ cards.push({label:'DC一時金（非課税）', val:manY(recRow.dcLumpFree), sub:`${P.dcReceiveAge}歳受取・残${man(recRow.dcValue)}万は運用継続`, cls:'accent'}); }
+    else { const dcPeak=Math.max(...rows.map(r=>r.dcValue)); cards.push({label:'確定拠出年金', val:manY(dcPeak), sub:`受給開始 ${P.dcReceiveAge}歳・節税含む`, cls:'accent'}); }
+  }
   if(P.hasRetireBonus){ const rn=retireBonusNet(P); cards.push({label:'退職金（手取り）', val:manY(rn), sub:`${P.selfRetire}歳・額面${man(P.retireBonus)}万`}); }
   document.getElementById('cards').innerHTML=cards.map(c=>`
     <div class="kpi ${c.cls||''}"><div class="k-label">${c.label}</div><div class="k-val num">${c.val}</div><div class="k-sub">${c.sub}</div></div>`).join('');
@@ -566,7 +604,7 @@ function render(){
   if(minCash.cash<0){
     b.className='banner warn'; b.innerHTML=`⚠️ <div><b>資金ショートの可能性</b>：NISAを取り崩しても${minCash.age}歳ごろに資産が尽きます。収入・支出・購入額・積立額の見直しを。</div>`;
   } else if(firstDraw!=null){
-    b.className='banner ok'; b.innerHTML=`✅ <div>給与・年金だけでは不足する分を、${firstDraw}歳以降にNISAを取り崩して補填（生活防衛費 ${man(P.emergency)}万を維持）。${P.endAge}歳の総資産は${manY(last.netWorth)}。</div>`;
+    b.className='banner ok'; b.innerHTML=`✅ <div>給与・年金だけでは不足する分を、${firstDraw}歳以降に資産（${P.withdrawOrder==='dc'?'確定拠出年金→NISA':'NISA→確定拠出年金'}）を取り崩して補填（生活防衛費 ${man(P.emergency)}万を維持）。${P.endAge}歳の税引後総資産は${manY(last.netWorth)}。</div>`;
   } else {
     b.className='banner ok'; b.innerHTML=`✅ <div>全期間を収入だけでまかない、NISAは取り崩しなし。現預金は常に生活防衛費（${man(P.emergency)}万）以上、${P.endAge}歳の総資産は${manY(last.netWorth)}。</div>`;
   }
@@ -663,7 +701,8 @@ const DEFAULTS={currentAge:26,endAge:90,marriageAge:28,partnerCurrentAge:26,
   monthlyBase:20,singleFactor:0.6,inflation:1.0,travelCount:1,travelCost:20,
   initCash:250,emergency:200,nisaMonthly:3,nisaYield:4.0,nisaCap:1800,initNisaP:0,initNisaV:0,
   considerDeduction:true,sweepNisa:false,cashCap:500,
-  hasDC:false,dcMonthly:2.0,dcReceiveAge:65,hasRetireBonus:false,retireBonus:1500,joinAge:22};
+  hasDC:false,dcMonthly:2.0,dcReceiveAge:65,hasRetireBonus:false,retireBonus:1500,joinAge:22,
+  withdrawOrder:'dc',dcTaxRate:15,dcLumpStrategy:true};
 const STATIC_IDS=Object.keys(DEFAULTS);
 function setDefaults(){
   for(const k in DEFAULTS){ const el=document.getElementById(k); if(!el)continue; if(el.type==='checkbox')el.checked=DEFAULTS[k]; else el.value=DEFAULTS[k]; }
