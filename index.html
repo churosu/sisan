@@ -188,7 +188,12 @@
         <div class="field"><label>定年（給与収入の終わり）</label><div class="ig"><input type="number" id="selfRetire" value="65"><span class="unit">歳</span></div></div>
         <div class="field"><label>再雇用 手取り（定年〜下記歳）</label><div class="ig"><input type="number" id="reemployIncome" value="260"><span class="unit">万/年</span></div></div>
         <div class="field"><label>再雇用の終了年齢</label><div class="ig"><input type="number" id="reemployTo" value="65"><span class="unit">歳</span></div></div>
-        <div class="field"><label>年金 手取り（世帯・以降）</label><div class="ig"><input type="number" id="pensionIncome" value="300"><span class="unit">万/年</span></div></div>
+        <div class="field"><label>職種（本人）</label><select id="jobType"><option value="kaisha">会社員（厚生年金）</option><option value="komuin">公務員（厚生年金）</option><option value="jieigyo">自営業・フリーランス（国民年金）</option><option value="part">パート・アルバイト（国民年金）</option><option value="sengyo">専業主婦(夫)・第3号（基礎のみ）</option></select></div>
+        <div class="field"><label>年金制度（本人）</label><select id="pensionType"><option value="kosei">厚生年金</option><option value="kokumin">国民年金（基礎のみ）</option></select></div>
+        <div class="field"><label>基礎年金 納付年数</label><div class="ig"><input type="number" id="pensionBasicYears" value="40" min="0" max="40"><span class="unit">年</span></div></div>
+        <div class="field"><label>マクロ経済スライドを考慮</label><select id="macroSlide"><option value="1">考慮する</option><option value="0">考慮しない</option></select></div>
+        <div class="field"><label>　└ スライド調整率</label><div class="ig"><input type="number" id="macroSlideRate" value="0.4" step="0.1"><span class="unit">%/年</span></div></div>
+        <div class="hint" id="pensionInfo"></div>
         <div class="field"><label>配偶者・扶養控除を考慮</label><input type="checkbox" id="considerDeduction" checked></div>
         <div class="hint">オンで、配偶者控除（パートナーの収入で可否・額が変動：給与150万以下で満額、201万で消失）と扶養控除（子16〜18・19〜22歳）による減税を概算で手取りに反映します。</div>
       </div>
@@ -385,6 +390,18 @@ function eduAnnual(a,P){ if(a==null)return 0; return tuition(a,P) + ((a>=6&&a<=1
 const EDU_SAVE_END=22;
 function eduTotalPerChild(P){ let t=0; for(let a=3;a<=21;a++) t+=eduAnnual(a,P); return t; }
 function insurance(age){ if(age<30)return 8; if(age<40)return 14; if(age<50)return 22; if(age<60)return 28; if(age<70)return 22; return 14; }
+/* 公的年金（令和7年度基準・概算）: 老齢基礎満額83.17万/年、報酬比例乗率5.481/1000（2003年4月〜）、標準報酬の年間上限概算1230万 */
+const PENSION_FULL=83.17, PENSION_RATE=5.481/1000, PENSION_CAP=1230, PENSION_NET=0.90;
+function computePension(P,pcSelf,pcSpouse,married){
+  let selfBasic=PENSION_FULL*Math.min(1,(P.pensionBasicYears||40)/40);
+  let selfKosei=(P.pensionType==='kokumin')?0:pcSelf*PENSION_RATE;
+  let spouse=married?(PENSION_FULL+pcSpouse*PENSION_RATE):0;
+  let f=1;
+  if(P.macroSlide){ const n=Math.max(0,P.reemployTo-P.currentAge); f=Math.pow(1-(P.macroSlideRate||0)/100,n); }
+  selfBasic*=f; selfKosei*=f; spouse*=f;
+  const gross=selfBasic+selfKosei+spouse;
+  return {gross, net:gross*PENSION_NET, selfBasic, selfKosei, spouse};
+}
 function takeHome(g){ if(g<=0)return 0; let r; if(g<500)r=.82; else if(g<800)r=.79; else if(g<1200)r=.75; else r=.72; return g*r; }
 function marginalRate(gross){ if(gross<300)return .05; if(gross<600)return .10; if(gross<900)return .20; if(gross<1200)return .23; return .33; }
 function deductionSaving(P,selfGross,partnerGross,childAges,married){
@@ -460,6 +477,7 @@ function eventsFor(P,age,childAges,L){
 function simulate(P){
   const L=loanCalc(P); const rows=[]; let cash=P.initCash, nisaP=P.initNisaP, nisaV=(P.initNisaV>0?P.initNisaV:P.initNisaP), dcValue=0;
   const eduTotalEach=eduTotalPerChild(P); const eduMonthlyEach=eduTotalEach/(EDU_SAVE_END*12); const totalEduAll=eduTotalEach*P.children.length; let eduFund=0, eduPaid=0; let lastCarPrice=0;
+  let pcSelf=0, pcSpouse=0, pensionCalc=null;
   const nY=Math.max(1,P.endAge-P.currentAge+1);
   for(let i=0;i<nY;i++){
     const age=P.currentAge+i, pAge=P.partnerCurrentAge+i, married=age>=P.marriageAge;
@@ -470,10 +488,13 @@ function simulate(P){
     let pMonthly=0,pBonus=0,pGross=0;
     if(married){ for(const s of P.partnerSegs){ if(age>=s.from&&age<=s.to){ const base=Math.min(s.base+(s.raise||0)*Math.max(0,age-s.from),s.cap||s.base); const m=base+(s.allow||0); pMonthly+=m; pBonus+=base*(s.bonusMonths||0);} } pGross=pMonthly*12+pBonus; }
     const gross=selfGross+pGross, bonus=selfBonus+(married?pBonus:0);
+    /* 厚生年金の標準報酬を積み立て（就労中・上限あり） */
+    if(age<P.selfRetire && P.pensionType!=='kokumin' && age>=P.joinAge) pcSelf+=Math.min(selfGross,PENSION_CAP);
+    if(married && pGross>0) pcSpouse+=Math.min(pGross,PENSION_CAP);
     let net;
     if(age<P.selfRetire) net=takeHome(selfGross)+(married?takeHome(pGross):0);
     else if(age<P.reemployTo) net=P.reemployIncome;
-    else net=P.pensionIncome;
+    else { if(pensionCalc==null) pensionCalc=computePension(P,pcSelf,pcSpouse,married); net=pensionCalc.net; }
     const allowance=dep.reduce((s,a)=>s+(a<=P.allowanceAge?P.childAllowance:0),0);
     const grant=P.children.filter(c=>c.birthAge===age).length*P.birthGrant;
     let credit=0;
@@ -543,7 +564,7 @@ function simulate(P){
     const drawdown=drawNisa+drawDc;
     const netWorth=cash+nisaV+dcValue*(1-P.dcTaxRate);
     const events=eventsFor(P,age,childAges,L);
-    rows.push({i,age,pAge,married,childAges,dep:dep.length,earners,emgMonths,emergency,gross,bonus,net,living,housing,edu,oneoff,oneoffLbl,saving,contrib,sweep,ded,dcContrib,dcDed,retireNet,dcLumpFree,dcValue,eduFund,drawNisa,drawDc,dcTaxPaid,drawdown,nisaV,nisaP,cash,netWorth,incomeCash,expense,events});
+    rows.push({i,age,pAge,married,childAges,dep:dep.length,earners,emgMonths,emergency,pension:(age>=P.reemployTo?pensionCalc:null),gross,bonus,net,living,housing,edu,oneoff,oneoffLbl,saving,contrib,sweep,ded,dcContrib,dcDed,retireNet,dcLumpFree,dcValue,eduFund,drawNisa,drawDc,dcTaxPaid,drawdown,nisaV,nisaP,cash,netWorth,incomeCash,expense,events});
   }
   return rows;
 }
@@ -557,7 +578,9 @@ function readParams(){
     currentAge:num('currentAge'), endAge:num('endAge'), marriageAge:num('marriageAge'), partnerCurrentAge:num('partnerCurrentAge'),
     selfBaseMonthly:num('selfBaseMonthly'), selfAllowance:num('selfAllowance'), selfRaise:num('selfRaise'), selfCapMonthly:num('selfCapMonthly'),
     selfBonusMonths:num('selfBonusMonths'), selfRetire:num('selfRetire'),
-    reemployIncome:num('reemployIncome'), reemployTo:num('reemployTo'), pensionIncome:num('pensionIncome'),
+    reemployIncome:num('reemployIncome'), reemployTo:num('reemployTo'),
+    jobType:val('jobType'), pensionType:val('pensionType'), pensionBasicYears:num('pensionBasicYears'),
+    macroSlide:val('macroSlide')==='1', macroSlideRate:num('macroSlideRate'),
     partnerSegs:segs.map(s=>({from:s.from,to:s.to,base:s.base,allow:s.allow,raise:s.raise,cap:s.cap,bonusMonths:s.bonusMonths})),
     children:kids.map(k=>({birthAge:k.birthAge})), childIndependAge:num('childIndependAge'),
     eduKinder:val('eduKinder'),eduElem:val('eduElem'),eduJunior:val('eduJunior'),eduHigh:val('eduHigh'),
@@ -724,6 +747,16 @@ function render(){
       carEl.innerHTML=`${P.carFirstAge}歳で初回購入（${man(firstPrice)}万）、以後${P.carCycle}年ごとに買い替え（車体は年${(P.carInflation*100).toFixed(1)}%上昇、買い替え時は前の車の${Math.round(P.carTradeIn*100)}%を下取り）。${P.carReturnAge}歳で免許返納し以降は買い替えなし。生涯の車関連支出は約 <b>${man(totalCar)}万円</b>（${buys.length}回）。`;
     } else { carEl.textContent='「車を保有する」をオンにすると、購入・買い替えの支出が資産に反映されます。'; }
   }
+  /* --- 年金プレビュー --- */
+  const pRow=rows.find(r=>r.pension); const pi=document.getElementById('pensionInfo');
+  if(pi){
+    if(pRow){ const pc=pRow.pension; const parts=[`本人基礎 ${man(pc.selfBasic)}万`];
+      if(pc.selfKosei>0) parts.push(`本人厚生 ${man(pc.selfKosei)}万`);
+      if(pc.spouse>0) parts.push(`配偶者 ${man(pc.spouse)}万`);
+      pi.innerHTML=`${P.reemployTo}歳〜の年金（世帯・手取り概算）：<b>${manY(pc.net)}</b>／年（額面${man(pc.gross)}万）。内訳 ${parts.join('＋')}。${P.macroSlide?`マクロ経済スライド▲${P.macroSlideRate}%/年×${Math.max(0,P.reemployTo-P.currentAge)}年を反映。`:'スライド調整なし。'} 令和7年度基準の概算（額面の90%を手取りと仮定）。`;
+      cards.push({label:'公的年金(世帯/年)', val:manY(pc.net), sub:`${P.reemployTo}歳〜・手取り概算`});
+    } else pi.textContent='退職後（再雇用終了）以降の公的年金をここに表示します。';
+  }
   document.getElementById('cards').innerHTML=cards.map(c=>`
     <div class="kpi ${c.cls||''}"><div class="k-label">${c.label}</div><div class="k-val num">${c.val}</div><div class="k-sub">${c.sub}</div></div>`).join('');
 
@@ -827,7 +860,7 @@ function render(){
 /* ============ 初期化 ============ */
 const DEFAULTS={currentAge:26,endAge:90,marriageAge:28,partnerCurrentAge:26,
   selfBaseMonthly:24,selfAllowance:4,selfRaise:0.7,selfCapMonthly:46,selfBonusMonths:4.2,selfBonusCount:2,selfRetire:65,
-  reemployIncome:260,reemployTo:65,pensionIncome:300,childIndependAge:22,
+  reemployIncome:260,reemployTo:65,jobType:'kaisha',pensionType:'kosei',pensionBasicYears:40,macroSlide:'1',macroSlideRate:0.4,childIndependAge:22,
   eduKinder:'pub',eduElem:'pub',eduJunior:'pub',eduHigh:'pub',eduUniv:'kokuritsu',eduAway:'no',jukuMonthly:0,
   childAllowance:12,allowanceAge:18,birthGrant:50,
   buyAge:36,rentMonthly:9,price:3800,downpay:700,rate:1.2,loanYears:35,propertyTax:18,
@@ -883,6 +916,7 @@ document.getElementById('shareBtn').addEventListener('click',(e)=>{
   } else { window.prompt('このリンクをコピーして共有：',url); }
 });
 document.getElementById('pdfBtn').addEventListener('click',()=>window.print());
+document.getElementById('jobType').addEventListener('change',e=>{ const kosei=(e.target.value==='kaisha'||e.target.value==='komuin'); document.getElementById('pensionType').value=kosei?'kosei':'kokumin'; render(); });
 
 init();
 </script>
