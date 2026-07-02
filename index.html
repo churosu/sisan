@@ -207,6 +207,8 @@
         <div class="field"><label>児童手当（〜下記歳・人）</label><div class="ig"><input type="number" id="childAllowance" value="12"><span class="unit">万/年</span></div></div>
         <div class="field"><label>児童手当の対象上限</label><div class="ig"><input type="number" id="allowanceAge" value="18"><span class="unit">歳</span></div></div>
         <div class="field"><label>出産育児一時金（給付）</label><div class="ig"><input type="number" id="birthGrant" value="50"><span class="unit">万</span></div></div>
+        <div class="field"><label>教育費を現預金で積立（NISAスイープ対象外）</label><input type="checkbox" id="eduReserve" checked></div>
+        <div class="hint" id="eduSaveInfo">選んだ進路の教育費を、出生から積み立てる月額を表示します。</div>
       </div>
     </details>
 
@@ -232,15 +234,29 @@
     </details>
 
     <details class="grp">
+      <summary><span class="tag">車</span>自動車の購入・買い替え<span class="chev">▶</span></summary>
+      <div class="body">
+        <div class="field"><label>車を保有する</label><input type="checkbox" id="hasCar"></div>
+        <div class="field"><label>初回購入年齢</label><div class="ig"><input type="number" id="carFirstAge" value="30"><span class="unit">歳</span></div></div>
+        <div class="field"><label>購入金額（現在価格）</label><div class="ig"><input type="number" id="carPrice" value="250"><span class="unit">万</span></div></div>
+        <div class="field"><label>買い替え周期</label><div class="ig"><input type="number" id="carCycle" value="8"><span class="unit">年</span></div></div>
+        <div class="field"><label>下取り率（前の車の）</label><div class="ig"><input type="number" id="carTradeIn" value="20"><span class="unit">%</span></div></div>
+        <div class="field"><label>車体価格の上昇率（年）</label><div class="ig"><input type="number" id="carInflation" value="2.5" step="0.1"><span class="unit">%</span></div></div>
+        <div class="field"><label>免許返納年齢</label><div class="ig"><input type="number" id="carReturnAge" value="70"><span class="unit">歳</span></div></div>
+        <div class="hint" id="carInfo">初回購入後は買い替え周期ごとに買い替え。車体価格は毎年上昇率で上がり、買い替え時は前の車の購入価格の下取り率分が戻ります（現預金から支出）。免許返納年齢以降は買い替えを行いません。</div>
+      </div>
+    </details>
+
+    <details class="grp">
       <summary><span class="tag">生活費</span>支出目安・保険・旅行<span class="chev">▶</span></summary>
       <div class="body">
-        <div class="field"><label>月あたり支出目安（二人）</label><div class="ig"><input type="number" id="monthlyBase" value="20" step="0.5"><span class="unit">万/月</span></div></div>
-        <div class="hint">食費・日用品・通信など基礎生活費（住居・教育・保険・旅行を除く）。単身期は自動で下げます。</div>
-        <div class="field"><label>単身期の係数</label><div class="ig"><input type="number" id="singleFactor" value="0.6" step="0.05"><span class="unit">×</span></div></div>
+        <div class="field"><label>現在の世帯人数</label><div class="ig"><input type="number" id="curHouseholdSize" value="2" step="1"><span class="unit">人</span></div></div>
+        <div class="field"><label>現在の月々の生活費（家賃・特別費除く）</label><div class="ig"><input type="number" id="curMonthlyLiving" value="20" step="0.5"><span class="unit">万/月</span></div></div>
+        <div class="hint" id="livingInfo">今の世帯人数と生活費から1人あたりの生活水準を割り出し、世帯人数が変わっても同水準を保つ生活費を自動算出します（等価尺度：本人1.0／配偶者0.5／子0.3・14歳以上0.5）。住居・教育・保険・旅行は別項目。</div>
         <div class="field"><label>インフレ率（年）</label><div class="ig"><input type="number" id="inflation" value="1.0" step="0.1"><span class="unit">%</span></div></div>
         <div class="field"><label>旅行の回数</label><div class="ig"><input type="number" id="travelCount" value="1"><span class="unit">回/年</span></div></div>
         <div class="field"><label>　└ 1回あたり費用</label><div class="ig"><input type="number" id="travelCost" value="20"><span class="unit">万</span></div></div>
-        <div class="hint">保険は年齢に応じて自動計上（20代8→30代14→40代22→50代28→60代22→70代〜14 万/年）。子の生活費も年齢に応じ自動加算。</div>
+        <div class="hint">保険は年齢に応じて自動計上（20代8→30代14→40代22→50代28→60代22→70代〜14 万/年）。</div>
       </div>
     </details>
 
@@ -323,7 +339,7 @@
         </tr></thead><tbody id="tbody"></tbody></table>
       </div>
       <p class="footnote" style="margin-top:10px">
-        ※ 金額は万円（一部は円表示）。手取りは概算（額面に対し収入帯で72〜82%を適用）。配偶者・扶養控除、確定拠出年金の節税、退職所得控除は税率を年収帯から推定する簡易計算で、実額とは差が出ます。学費はMEXT等の平均をベースにした目安、保険・子の生活費・固定資産税は自動概算です。総資産は現預金＋NISA評価額＋確定拠出年金（DCは「枠内一時金」をオンにすると受給時に退職所得控除の枠まで非課税で受取り超過分は運用継続、退職金との控除枠重複は10年／19年ルールを簡易調整した概算。DC残りは将来課税のため実効税率を引いた税引後で計上）。NISAは引き出しても運用益が非課税。傾向把握用としてご利用ください。
+        ※ 金額は万円（一部は円表示）。手取りは概算（額面に対し収入帯で72〜82%を適用）。配偶者・扶養控除、確定拠出年金の節税、退職所得控除は税率を年収帯から推定する簡易計算で、実額とは差が出ます。学費はMEXT等の平均をベースにした目安、保険・固定資産税は自動概算です。生活費は「現在の世帯人数・月額」を基準に等価尺度（本人1.0／配偶者0.5／子0.3・14歳以上0.5）で世帯人数に応じて自動算出（家賃・教育・保険・旅行は別項目）。総資産は現預金＋NISA評価額＋確定拠出年金（DCは「枠内一時金」をオンにすると受給時に退職所得控除の枠まで非課税で受取り超過分は運用継続、退職金との控除枠重複は10年／19年ルールを簡易調整した概算。DC残りは将来課税のため実効税率を引いた税引後で計上）。NISAは引き出しても運用益が非課税。傾向把握用としてご利用ください。
       </p>
     </div>
   </div>
@@ -345,6 +361,8 @@ function tuition(a,P){
   return 0;
 }
 function childLiving(a){ if(a<3)return 22; if(a<6)return 28; if(a<12)return 35; if(a<15)return 42; if(a<18)return 50; if(a<23)return 55; return 0; }
+const EDU_SAVE_END=22;
+function eduTotalPerChild(P){ let t=0; for(let a=3;a<=21;a++) t+=tuition(a,P); return t; }
 function insurance(age){ if(age<30)return 8; if(age<40)return 14; if(age<50)return 22; if(age<60)return 28; if(age<70)return 22; return 14; }
 function takeHome(g){ if(g<=0)return 0; let r; if(g<500)r=.82; else if(g<800)r=.79; else if(g<1200)r=.75; else r=.72; return g*r; }
 function marginalRate(gross){ if(gross<300)return .05; if(gross<600)return .10; if(gross<900)return .20; if(gross<1200)return .23; return .33; }
@@ -408,6 +426,8 @@ function eventsFor(P,age,childAges,L){
     if(sb===P.repair2Year) e.push('大型リフォーム');
     if(sb===P.loanYears) e.push('住宅ローン完済');
   }
+  if(P.hasCar && age>=P.carFirstAge && age<P.carReturnAge && (age-P.carFirstAge)%Math.max(1,P.carCycle)===0) e.push(age===P.carFirstAge?'車 購入':'車 買い替え（下取り）');
+  if(P.hasCar && age===P.carReturnAge) e.push('免許返納');
   if(age===P.selfRetire) e.push('定年退職');
   if(P.hasRetireBonus && age===P.selfRetire) e.push('退職金 受取');
   if(P.hasDC && age===P.dcReceiveAge) e.push(P.dcLumpStrategy?'確定拠出年金 一時金受取（控除枠内）':'確定拠出年金 受給開始');
@@ -418,6 +438,7 @@ function eventsFor(P,age,childAges,L){
 
 function simulate(P){
   const L=loanCalc(P); const rows=[]; let cash=P.initCash, nisaP=P.initNisaP, nisaV=(P.initNisaV>0?P.initNisaV:P.initNisaP), dcValue=0;
+  const eduTotalEach=eduTotalPerChild(P); const eduMonthlyEach=eduTotalEach/(EDU_SAVE_END*12); const totalEduAll=eduTotalEach*P.children.length; let eduFund=0, eduPaid=0; let lastCarPrice=0;
   const nY=Math.max(1,P.endAge-P.currentAge+1);
   for(let i=0;i<nY;i++){
     const age=P.currentAge+i, pAge=P.partnerCurrentAge+i, married=age>=P.marriageAge;
@@ -437,14 +458,25 @@ function simulate(P){
     let credit=0;
     if(P.buyAge!=null&&age>=P.buyAge&&age<P.buyAge+P.creditYears){ const k=age-P.buyAge; credit=Math.min(balAfter(L,k)*P.creditRate,P.creditCap); }
     const ded = age<P.selfRetire ? deductionSaving(P,selfGross,pGross,childAges,married) : 0;
-    let living=P.monthlyBase*12*(married?1:P.singleFactor);
-    living+=dep.reduce((s,a)=>s+childLiving(a),0);
+    const eqNow=Math.max(1, 1+0.5*(P.curHouseholdSize-1));
+    const perEq=(P.curMonthlyLiving*12)/eqNow;
+    let eq=1+(married?0.5:0);
+    dep.forEach(a=>{ eq+=(a<14?0.3:0.5); });
+    let living=perEq*eq;
     living+=insurance(age)+P.travelCount*P.travelCost;
     living*=Math.pow(1+P.inflation,i);
     let housing=0,oneoff=0,oneoffLbl=[];
     if(P.buyAge==null||age<P.buyAge){ housing=P.rentMonthly*12; }
     else { const sb=age-P.buyAge; if(age===P.buyAge){oneoff+=P.downpay;oneoffLbl.push('頭金'+P.downpay);} if(sb<P.loanYears)housing+=L.annualPay; housing+=P.propertyTax; if(sb===P.repair1Year){oneoff+=P.repair1Cost;oneoffLbl.push('水廻り'+P.repair1Cost);} if(sb===P.repair2Year){oneoff+=P.repair2Cost;oneoffLbl.push('改修'+P.repair2Cost);} }
     const edu=P.children.reduce((s,c)=>s+tuition(age-c.birthAge,P),0);
+    if(P.hasCar && age>=P.carFirstAge && age<P.carReturnAge && (age-P.carFirstAge)%Math.max(1,P.carCycle)===0){
+      const price=P.carPrice*Math.pow(1+P.carInflation,i);
+      const isFirst=(age===P.carFirstAge);
+      const tradeIn=isFirst?0:P.carTradeIn*lastCarPrice;
+      const carOut=Math.max(0,price-tradeIn);
+      oneoff+=carOut; oneoffLbl.push((isFirst?'車購入':'車買替')+Math.round(carOut));
+      lastCarPrice=price;
+    }
     let annualNisa=P.nisaMonthly*12, contrib=0;
     if(nisaP+annualNisa<=P.nisaCap)contrib=annualNisa; else contrib=Math.max(0,P.nisaCap-nisaP);
     contrib=Math.min(contrib,360);
@@ -467,13 +499,19 @@ function simulate(P){
       else { takeNisa(target-cash); if(cash<target) takeDc(target-cash); }
     }
     const drawdown=drawNisa+drawDc;
+    let eduSaveAnnual=0;
+    P.children.forEach(c=>{ const ca=age-c.birthAge; if(ca>=0 && ca<EDU_SAVE_END) eduSaveAnnual+=eduMonthlyEach*12; });
+    eduPaid+=edu;
+    eduFund=Math.max(0, eduFund+eduSaveAnnual-edu);
+    eduFund=Math.min(eduFund, Math.max(0,totalEduAll-eduPaid), Math.max(0,cash));
     let sweep=0;
-    if(P.sweepNisa){ const floor=Math.max(P.cashCap,P.emergency);
-      if(cash>floor){ const annualRoom=Math.max(0,360-contrib), lifeRoom=Math.max(0,P.nisaCap-nisaP);
-        sweep=Math.min(cash-floor,annualRoom,lifeRoom); if(sweep>0){ cash-=sweep; nisaV+=sweep; nisaP+=sweep; } } }
+    if(P.sweepNisa){ const floor=Math.max(P.cashCap,P.emergency); const reserve=P.eduReserve?eduFund:0;
+      const sweepable=cash-floor-reserve;
+      if(sweepable>0){ const annualRoom=Math.max(0,360-contrib), lifeRoom=Math.max(0,P.nisaCap-nisaP);
+        sweep=Math.min(sweepable,annualRoom,lifeRoom); if(sweep>0){ cash-=sweep; nisaV+=sweep; nisaP+=sweep; } } }
     const netWorth=cash+nisaV+dcValue*(1-P.dcTaxRate);
     const events=eventsFor(P,age,childAges,L);
-    rows.push({i,age,pAge,married,childAges,dep:dep.length,gross,bonus,net,living,housing,edu,oneoff,oneoffLbl,saving,contrib,sweep,ded,dcContrib,dcDed,retireNet,dcLumpFree,dcValue,drawNisa,drawDc,dcTaxPaid,drawdown,nisaV,nisaP,cash,netWorth,incomeCash,expense,events});
+    rows.push({i,age,pAge,married,childAges,dep:dep.length,gross,bonus,net,living,housing,edu,oneoff,oneoffLbl,saving,contrib,sweep,ded,dcContrib,dcDed,retireNet,dcLumpFree,dcValue,eduFund,drawNisa,drawDc,dcTaxPaid,drawdown,nisaV,nisaP,cash,netWorth,incomeCash,expense,events});
   }
   return rows;
 }
@@ -497,7 +535,7 @@ function readParams(){
     rentMonthly:num('rentMonthly'), propertyTax:num('propertyTax'),
     repair1Year:num('repair1Year'), repair1Cost:num('repair1Cost'), repair2Year:num('repair2Year'), repair2Cost:num('repair2Cost'),
     creditYears:num('creditYears'), creditRate:num('creditRate')/100, creditCap:num('creditCap'),
-    monthlyBase:num('monthlyBase'), singleFactor:num('singleFactor'), inflation:num('inflation')/100,
+    curHouseholdSize:num('curHouseholdSize'), curMonthlyLiving:num('curMonthlyLiving'), inflation:num('inflation')/100,
     travelCount:num('travelCount'), travelCost:num('travelCost'),
     initCash:num('initCash'), emergency:num('emergency'), nisaMonthly:num('nisaMonthly'),
     initNisaP:num('initNisaP'), initNisaV:num('initNisaV'),
@@ -507,7 +545,10 @@ function readParams(){
     hasDC:document.getElementById('hasDC').checked, dcMonthly:num('dcMonthly'), dcReceiveAge:num('dcReceiveAge'),
     hasRetireBonus:document.getElementById('hasRetireBonus').checked, retireBonus:num('retireBonus'), joinAge:num('joinAge'),
     withdrawOrder:val('withdrawOrder'), dcTaxRate:num('dcTaxRate')/100,
-    dcLumpStrategy:document.getElementById('dcLumpStrategy').checked
+    dcLumpStrategy:document.getElementById('dcLumpStrategy').checked,
+    eduReserve:document.getElementById('eduReserve').checked,
+    hasCar:document.getElementById('hasCar').checked, carFirstAge:num('carFirstAge'), carPrice:num('carPrice'),
+    carCycle:num('carCycle'), carInflation:num('carInflation')/100, carTradeIn:num('carTradeIn')/100, carReturnAge:num('carReturnAge')
   };
 }
 
@@ -596,6 +637,32 @@ function render(){
     else { const dcPeak=Math.max(...rows.map(r=>r.dcValue)); cards.push({label:'確定拠出年金', val:manY(dcPeak), sub:`受給開始 ${P.dcReceiveAge}歳・節税含む`, cls:'accent'}); }
   }
   if(P.hasRetireBonus){ const rn=retireBonusNet(P); cards.push({label:'退職金（手取り）', val:manY(rn), sub:`${P.selfRetire}歳・額面${man(P.retireBonus)}万`}); }
+  /* --- 教育積立 --- */
+  const eduEach=eduTotalPerChild(P); const eduMoEach=eduEach/(EDU_SAVE_END*12);
+  const nKids=P.children.length;
+  if(nKids>0){
+    const perYen=Math.round(eduMoEach*10000/100)*100;
+    const totYen=Math.round(eduMoEach*nKids*10000/100)*100;
+    cards.push({label:'教育積立 月額(世帯)', val:`¥${totYen.toLocaleString('ja-JP')}`, sub:`子${nKids}人・1人あたり¥${perYen.toLocaleString('ja-JP')}/月`});
+    document.getElementById('eduSaveInfo').innerHTML=`選んだ進路の教育費は1人あたり総額 <b>${man(eduEach)}万円</b>。出生から22歳まで積み立てるなら <b>1人 ¥${perYen.toLocaleString('ja-JP')}/月</b>（子${nKids}人で ¥${totYen.toLocaleString('ja-JP')}/月）。この積立分は現預金に確保し、${P.eduReserve?'NISAスイープの対象から除きます。':'（現在スイープ対象外設定はオフ）'}`;
+  } else {
+    document.getElementById('eduSaveInfo').textContent='子どもを追加すると、選んだ進路に必要な月々の教育積立額を表示します。';
+  }
+  /* --- 生活費の自動算出プレビュー --- */
+  const eqNow=Math.max(1,1+0.5*(P.curHouseholdSize-1));
+  const perEqMo=(P.curMonthlyLiving)/eqNow;
+  const yenMo=(eq)=>'¥'+(Math.round(perEqMo*eq*10000/100)*100).toLocaleString('ja-JP');
+  document.getElementById('livingInfo').innerHTML=`今の世帯（${P.curHouseholdSize}人・月${P.curMonthlyLiving}万）と同水準を保つ生活費（家賃・特別費除く／保険・旅行別）：単身 <b>${yenMo(1)}</b>／夫婦 <b>${yenMo(1.5)}</b>／夫婦+子1（幼〜13歳）<b>${yenMo(1.8)}</b>／夫婦+子2 <b>${yenMo(2.1)}</b>。子は14歳以上0.5で計算。インフレはこれに加算。`;
+  /* --- 車 --- */
+  const carEl=document.getElementById('carInfo');
+  if(carEl){
+    if(P.hasCar){
+      const buys=rows.filter(r=>r.oneoffLbl.some(l=>l.startsWith('車')));
+      const totalCar=buys.reduce((s,r)=>s+r.oneoffLbl.filter(l=>l.startsWith('車')).reduce((t,l)=>t+(parseInt(l.replace(/\D/g,''))||0),0),0);
+      const firstPrice=Math.round(P.carPrice);
+      carEl.innerHTML=`${P.carFirstAge}歳で初回購入（${man(firstPrice)}万）、以後${P.carCycle}年ごとに買い替え（車体は年${(P.carInflation*100).toFixed(1)}%上昇、買い替え時は前の車の${Math.round(P.carTradeIn*100)}%を下取り）。${P.carReturnAge}歳で免許返納し以降は買い替えなし。生涯の車関連支出は約 <b>${man(totalCar)}万円</b>（${buys.length}回）。`;
+    } else { carEl.textContent='「車を保有する」をオンにすると、購入・買い替えの支出が資産に反映されます。'; }
+  }
   document.getElementById('cards').innerHTML=cards.map(c=>`
     <div class="kpi ${c.cls||''}"><div class="k-label">${c.label}</div><div class="k-val num">${c.val}</div><div class="k-sub">${c.sub}</div></div>`).join('');
 
@@ -698,11 +765,12 @@ const DEFAULTS={currentAge:26,endAge:90,marriageAge:28,partnerCurrentAge:26,
   childAllowance:12,allowanceAge:18,birthGrant:50,
   buyAge:36,rentMonthly:9,price:3800,downpay:700,rate:1.2,loanYears:35,propertyTax:18,
   repair1Year:10,repair1Cost:120,repair2Year:35,repair2Cost:500,creditYears:13,creditRate:0.7,creditCap:21,
-  monthlyBase:20,singleFactor:0.6,inflation:1.0,travelCount:1,travelCost:20,
+  curHouseholdSize:2,curMonthlyLiving:20,inflation:1.0,travelCount:1,travelCost:20,
   initCash:250,emergency:200,nisaMonthly:3,nisaYield:4.0,nisaCap:1800,initNisaP:0,initNisaV:0,
   considerDeduction:true,sweepNisa:false,cashCap:500,
   hasDC:false,dcMonthly:2.0,dcReceiveAge:65,hasRetireBonus:false,retireBonus:1500,joinAge:22,
-  withdrawOrder:'dc',dcTaxRate:15,dcLumpStrategy:true};
+  withdrawOrder:'dc',dcTaxRate:15,dcLumpStrategy:true,eduReserve:true,
+  hasCar:false,carFirstAge:30,carPrice:250,carCycle:8,carInflation:2.5,carTradeIn:20,carReturnAge:70};
 const STATIC_IDS=Object.keys(DEFAULTS);
 function setDefaults(){
   for(const k in DEFAULTS){ const el=document.getElementById(k); if(!el)continue; if(el.type==='checkbox')el.checked=DEFAULTS[k]; else el.value=DEFAULTS[k]; }
