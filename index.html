@@ -194,7 +194,7 @@
     <details class="grp">
       <summary><span class="tag">子ども</span>人数・タイミング・学費<span class="chev">▶</span></summary>
       <div class="body">
-        <div class="hint">子ども1人ごとに「出産時の本人年齢」を設定。学費は公私を選べます（全員共通プラン）。</div>
+        <div class="hint">子ども1人ごとに「出産時の本人年齢」を設定。学費は公私を選べます（全員共通プラン）。公立小・中は義務教育で授業料無償、公立高校も無償化。表示額は授業料以外の実費（給食・教材・制服・修学旅行等）で、塾・習い事は下の欄で別途加算します。私立高校の授業料は就学支援金でほぼ相殺した実費目安です。</div>
         <div id="kidList"></div>
         <button class="addbtn" id="addKid">＋ 子どもを追加</button>
         <div class="field" style="margin-top:8px"><label>独立する年齢（子の年齢）</label><div class="ig"><input type="number" id="childIndependAge" value="22"><span class="unit">歳</span></div></div>
@@ -204,6 +204,7 @@
         <div class="field"><label>高校</label><select id="eduHigh"><option value="pub">公立</option><option value="pri">私立</option></select></div>
         <div class="field"><label>大学</label><select id="eduUniv"><option value="kokuritsu">国公立</option><option value="bunkei">私立文系</option><option value="rikei">私立理系</option></select></div>
         <div class="field"><label>大学は自宅外（仕送り）</label><select id="eduAway"><option value="no">いいえ</option><option value="yes">はい</option></select></div>
+        <div class="field"><label>塾・習い事（小〜高・1人）</label><div class="ig"><input type="number" id="jukuMonthly" value="0" step="0.5"><span class="unit">万/月</span></div></div>
         <div class="field"><label>児童手当（〜下記歳・人）</label><div class="ig"><input type="number" id="childAllowance" value="12"><span class="unit">万/年</span></div></div>
         <div class="field"><label>児童手当の対象上限</label><div class="ig"><input type="number" id="allowanceAge" value="18"><span class="unit">歳</span></div></div>
         <div class="field"><label>出産育児一時金（給付）</label><div class="ig"><input type="number" id="birthGrant" value="50"><span class="unit">万</span></div></div>
@@ -339,7 +340,7 @@
         </tr></thead><tbody id="tbody"></tbody></table>
       </div>
       <p class="footnote" style="margin-top:10px">
-        ※ 金額は万円（一部は円表示）。手取りは概算（額面に対し収入帯で72〜82%を適用）。配偶者・扶養控除、確定拠出年金の節税、退職所得控除は税率を年収帯から推定する簡易計算で、実額とは差が出ます。学費はMEXT等の平均をベースにした目安、保険・固定資産税は自動概算です。生活費は「現在の世帯人数・月額」を基準に等価尺度（本人1.0／配偶者0.5／子0.3・14歳以上0.5）で世帯人数に応じて自動算出（家賃・教育・保険・旅行は別項目）。総資産は現預金＋NISA評価額＋確定拠出年金（DCは「枠内一時金」をオンにすると受給時に退職所得控除の枠まで非課税で受取り超過分は運用継続、退職金との控除枠重複は10年／19年ルールを簡易調整した概算。DC残りは将来課税のため実効税率を引いた税引後で計上）。NISAは引き出しても運用益が非課税。NISA積立は生活防衛費を超える余剰現預金の範囲でのみ行い、取り崩す年は入金しません（入金と取り崩しの往復を回避）。傾向把握用としてご利用ください。
+        ※ 金額は万円（一部は円表示）。手取りは概算（額面に対し収入帯で72〜82%を適用）。配偶者・扶養控除、確定拠出年金の節税、退職所得控除は税率を年収帯から推定する簡易計算で、実額とは差が出ます。学費は授業料無償化を反映し、公立小中高は授業料0で給食・教材・制服等の実費のみ（私立高校は就学支援金で授業料をほぼ相殺した実費目安、大学はMEXT等の平均）。塾・習い事は任意で別途加算。保険・固定資産税は自動概算です。生活費は「現在の世帯人数・月額」を基準に等価尺度（本人1.0／配偶者0.5／子0.3・14歳以上0.5）で世帯人数に応じて自動算出（家賃・教育・保険・旅行は別項目）。総資産は現預金＋NISA評価額＋確定拠出年金（DCは「枠内一時金」をオンにすると受給時に退職所得控除の枠まで非課税で受取り超過分は運用継続、退職金との控除枠重複は10年／19年ルールを簡易調整した概算。DC残りは将来課税のため実効税率を引いた税引後で計上）。NISAは引き出しても運用益が非課税。NISA積立は生活防衛費を超える余剰現預金の範囲でのみ行い、取り崩す年は入金しません（入金と取り崩しの往復を回避）。傾向把握用としてご利用ください。
       </p>
     </div>
   </div>
@@ -348,8 +349,8 @@
 <script>
 /* ============ 計算エンジン ============ */
 const EDU = {
-  kinder:{pub:16.5,pri:31}, elem:{pub:35,pri:167}, junior:{pub:54,pri:144},
-  high:{pub:51,pri:105}, univ:{kokuritsu:67,bunkei:102,rikei:136}, awayBonus:110
+  kinder:{pub:8,pri:16}, elem:{pub:10,pri:100}, junior:{pub:17,pri:110},
+  high:{pub:15,pri:40}, univ:{kokuritsu:67,bunkei:102,rikei:136}, awayBonus:110
 };
 function tuition(a,P){
   if(a==null||a<3) return 0;
@@ -360,9 +361,9 @@ function tuition(a,P){
   if(a<=21) return EDU.univ[P.eduUniv] + (P.eduAway?EDU.awayBonus:0);
   return 0;
 }
-function childLiving(a){ if(a<3)return 22; if(a<6)return 28; if(a<12)return 35; if(a<15)return 42; if(a<18)return 50; if(a<23)return 55; return 0; }
+function eduAnnual(a,P){ if(a==null)return 0; return tuition(a,P) + ((a>=6&&a<=18)?(P.jukuMonthly||0)*12:0); }
 const EDU_SAVE_END=22;
-function eduTotalPerChild(P){ let t=0; for(let a=3;a<=21;a++) t+=tuition(a,P); return t; }
+function eduTotalPerChild(P){ let t=0; for(let a=3;a<=21;a++) t+=eduAnnual(a,P); return t; }
 function insurance(age){ if(age<30)return 8; if(age<40)return 14; if(age<50)return 22; if(age<60)return 28; if(age<70)return 22; return 14; }
 function takeHome(g){ if(g<=0)return 0; let r; if(g<500)r=.82; else if(g<800)r=.79; else if(g<1200)r=.75; else r=.72; return g*r; }
 function marginalRate(gross){ if(gross<300)return .05; if(gross<600)return .10; if(gross<900)return .20; if(gross<1200)return .23; return .33; }
@@ -468,7 +469,7 @@ function simulate(P){
     let housing=0,oneoff=0,oneoffLbl=[];
     if(P.buyAge==null||age<P.buyAge){ housing=P.rentMonthly*12; }
     else { const sb=age-P.buyAge; if(age===P.buyAge){oneoff+=P.downpay;oneoffLbl.push('頭金 '+man(P.downpay)+'万');} if(sb<P.loanYears)housing+=L.annualPay; housing+=P.propertyTax; if(sb===P.repair1Year){oneoff+=P.repair1Cost;oneoffLbl.push('水廻り修繕 '+man(P.repair1Cost)+'万');} if(sb===P.repair2Year){oneoff+=P.repair2Cost;oneoffLbl.push('リフォーム '+man(P.repair2Cost)+'万');} }
-    const edu=P.children.reduce((s,c)=>s+tuition(age-c.birthAge,P),0);
+    const edu=P.children.reduce((s,c)=>s+eduAnnual(age-c.birthAge,P),0);
     if(P.hasCar && age>=P.carFirstAge && age<P.carReturnAge && (age-P.carFirstAge)%Math.max(1,P.carCycle)===0){
       const price=P.carPrice*Math.pow(1+P.carInflation,i);
       const isFirst=(age===P.carFirstAge);
@@ -535,7 +536,7 @@ function readParams(){
     partnerSegs:segs.map(s=>({from:s.from,to:s.to,base:s.base,allow:s.allow,raise:s.raise,cap:s.cap,bonusMonths:s.bonusMonths})),
     children:kids.map(k=>({birthAge:k.birthAge})), childIndependAge:num('childIndependAge'),
     eduKinder:val('eduKinder'),eduElem:val('eduElem'),eduJunior:val('eduJunior'),eduHigh:val('eduHigh'),
-    eduUniv:val('eduUniv'),eduAway:val('eduAway')==='yes',
+    eduUniv:val('eduUniv'),eduAway:val('eduAway')==='yes', jukuMonthly:num('jukuMonthly'),
     childAllowance:num('childAllowance'), allowanceAge:num('allowanceAge'), birthGrant:num('birthGrant'),
     buyAge:num('buyAge'), price:num('price'), downpay:num('downpay'), rate:num('rate')/100, loanYears:num('loanYears'),
     rentMonthly:num('rentMonthly'), propertyTax:num('propertyTax'),
@@ -767,7 +768,7 @@ function render(){
 const DEFAULTS={currentAge:26,endAge:90,marriageAge:28,partnerCurrentAge:26,
   selfBaseMonthly:24,selfAllowance:4,selfRaise:0.7,selfCapMonthly:46,selfBonusMonths:4.2,selfBonusCount:2,selfRetire:65,
   reemployIncome:260,reemployTo:65,pensionIncome:300,childIndependAge:22,
-  eduKinder:'pub',eduElem:'pub',eduJunior:'pub',eduHigh:'pub',eduUniv:'kokuritsu',eduAway:'no',
+  eduKinder:'pub',eduElem:'pub',eduJunior:'pub',eduHigh:'pub',eduUniv:'kokuritsu',eduAway:'no',jukuMonthly:0,
   childAllowance:12,allowanceAge:18,birthGrant:50,
   buyAge:36,rentMonthly:9,price:3800,downpay:700,rate:1.2,loanYears:35,propertyTax:18,
   repair1Year:10,repair1Cost:120,repair2Year:35,repair2Cost:500,creditYears:13,creditRate:0.7,creditCap:21,
