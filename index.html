@@ -93,6 +93,18 @@
   .kpi .k-sub{font-size:11px; color:var(--slate-2); margin-top:2px}
   .kpi.accent .k-val{color:var(--teal)}
   .kpi.warnk .k-val{color:var(--rose)}
+  .rank-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(96px,1fr)); gap:10px; margin-top:4px}
+  .rank-cell{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:11px 8px; text-align:center;}
+  .rank-cell .rc-dec{font-size:11px; color:var(--slate); font-weight:700; margin-bottom:5px}
+  .rank-cell .rc-sub{font-size:10px; color:var(--slate-2); margin-top:4px; font-variant-numeric:tabular-nums}
+  .rbadge{display:inline-flex; align-items:center; justify-content:center; min-width:38px; height:34px; padding:0 8px; border-radius:9px; font-weight:900; font-size:18px; letter-spacing:.02em; color:#fff; box-shadow:inset 0 -2px 0 rgba(0,0,0,.12)}
+  .rank-overall{display:flex; align-items:center; gap:14px; background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 16px; margin-bottom:12px}
+  .rank-overall .ro-big{min-width:62px; height:58px; border-radius:12px; font-size:30px}
+  .rank-overall .ro-txt{font-size:12px; color:var(--slate)}
+  .rank-overall .ro-txt b{display:block; font-size:15px; color:var(--ink); margin-bottom:2px; font-weight:800}
+  .r-SS{background:linear-gradient(135deg,#E4B53C,#C8901A)} .r-S{background:linear-gradient(135deg,#8E6FC4,#6C4EA6)}
+  .r-A{background:linear-gradient(135deg,#2E9E93,#0E7C73)} .r-B{background:linear-gradient(135deg,#4E82C0,#3B6FB0)}
+  .r-C{background:linear-gradient(135deg,#E0A94D,#C98A28)} .r-D{background:linear-gradient(135deg,#C96A82,#B0455F)}
   .block{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:16px clamp(12px,2vw,20px);}
   .block h2{margin:0 0 2px; font-size:14px; font-weight:800; letter-spacing:-.01em; display:flex; align-items:center; gap:8px;}
   .block .eyebrow{font-size:10px; font-weight:800; letter-spacing:.14em; color:var(--slate-2); text-transform:uppercase; margin-bottom:10px}
@@ -265,7 +277,7 @@
       <summary><span class="tag">資産</span>現預金・NISA<span class="chev">▶</span></summary>
       <div class="body">
         <div class="field"><label>現在の現預金</label><div class="ig"><input type="number" id="initCash" value="250"><span class="unit">万</span></div></div>
-        <div class="hint">生活防衛費は毎年自動算出：稼ぎ手が1人以下なら生活費の10ヶ月分、2人なら6ヶ月分、子どもがいる期間は（稼ぎ手数に関わらず）12ヶ月分。老後（年金生活・就労なし）は4ヶ月分。現預金はこの水準を保つよう調整します。</div>
+        <div class="hint">生活防衛費は毎年自動算出：稼ぎ手が1人以下なら生活費の10ヶ月分、2人なら6ヶ月分、子どもがいる期間は（稼ぎ手数に関わらず）12ヶ月分。老後（年金生活・就労なし）は現金保有なし＝0（不足分はNISA/DCから取り崩し）。現預金はこの水準を保つよう調整します。</div>
         <div class="field"><label>現在のNISA元本</label><div class="ig"><input type="number" id="initNisaP" value="0"><span class="unit">万</span></div></div>
         <div class="field"><label>現在のNISA評価額</label><div class="ig"><input type="number" id="initNisaV" value="0"><span class="unit">万</span></div></div>
         <div class="hint">すでに積立中の場合は開始時点の元本（と含み益込みの評価額）を入力。評価額が0なら元本と同額として扱い、生涯投資枠の残りも元本ぶん差し引きます。</div>
@@ -303,6 +315,14 @@
   <div class="results">
     <div id="banner"></div>
     <div class="cards" id="cards"></div>
+
+    <div class="block" id="rankBlock">
+      <div class="eyebrow">Rating</div>
+      <h2>資産形成の評価</h2>
+      <div class="rank-overall" id="rankOverall"></div>
+      <div class="rank-grid" id="rankGrid"></div>
+      <div class="hint" id="rankNote"></div>
+    </div>
 
     <div class="block">
       <div class="eyebrow">Life timeline</div>
@@ -469,7 +489,7 @@ function simulate(P){
     let earners=(age<P.selfRetire?1:0);
     if(married && P.partnerSegs.some(s=>age>=s.from&&age<=s.to)) earners++;
     const retired = age>=P.reemployTo;
-    const emgMonths = dep.length>0 ? 12 : (retired ? 4 : (earners>=2 ? 6 : 10));
+    const emgMonths = dep.length>0 ? 12 : (retired ? 0 : (earners>=2 ? 6 : 10));
     const emergency = living*emgMonths/12;
     let housing=0,oneoff=0,oneoffLbl=[];
     if(P.buyAge==null||age<P.buyAge){ housing=P.rentMonthly*12; }
@@ -620,6 +640,35 @@ const ROWBG={single:'#F4F8FC',couple:'#F1F8F6',kids:'#FEF8EE',edu:'#FBF1F4',old:
 
 /* ============ メイン描画 ============ */
 let assetChart, flowChart;
+const RANK_TH={
+  '20代':{SS:5,S:3.5,A:2.2,B:1.2,C:0.5},
+  '30代':{SS:5,S:3.5,A:2.3,B:1.3,C:0.6},
+  '40代':{SS:7,S:5,A:3.3,B:2,C:1},
+  '50代':{SS:12,S:9,A:6,B:3.5,C:2},
+  '60代':{SS:15,S:11,A:7.5,B:4.5,C:2.5},
+  '70代〜':{SS:9,S:6,A:3.5,B:1.8,C:0.6}
+};
+const RANK_SCORE={SS:6,S:5,A:4,B:3,C:2,D:1};
+const RANK_W={'20代':1,'30代':1,'40代':1,'50代':1.3,'60代':1.3,'70代〜':1.5};
+function rankFor(key,years){const t=RANK_TH[key];if(!t)return'D';if(years>=t.SS)return'SS';if(years>=t.S)return'S';if(years>=t.A)return'A';if(years>=t.B)return'B';if(years>=t.C)return'C';return'D';}
+function computeRanks(rows){
+  const bands=[['20代',20,29],['30代',30,39],['40代',40,49],['50代',50,59],['60代',60,69],['70代〜',70,200]];
+  const out=[];
+  bands.forEach(([key,lo,hi])=>{
+    const inBand=rows.filter(r=>r.age>=lo&&r.age<=hi);
+    if(!inBand.length) return;
+    const rep=inBand[inBand.length-1];
+    const years=rep.netWorth/Math.max(1,rep.living);
+    let rank;
+    if(key==='70代〜'){ const bust=inBand.some(r=>r.netWorth<0); rank=bust?'D':rankFor(key,years); }
+    else rank=rankFor(key,years);
+    out.push({key,age:rep.age,years,rank,net:rep.netWorth});
+  });
+  let sw=0,ws=0; out.forEach(o=>{const w=RANK_W[o.key]||1; sw+=RANK_SCORE[o.rank]*w; ws+=w;});
+  const avg=ws?sw/ws:0;
+  const overall=avg>=5.5?'SS':avg>=4.6?'S':avg>=3.7?'A':avg>=2.8?'B':avg>=1.8?'C':'D';
+  return {decades:out,overall};
+}
 function render(){
   const P=readParams();
   if(P.endAge<=P.currentAge){ return; }
@@ -678,14 +727,20 @@ function render(){
   document.getElementById('cards').innerHTML=cards.map(c=>`
     <div class="kpi ${c.cls||''}"><div class="k-label">${c.label}</div><div class="k-val num">${c.val}</div><div class="k-sub">${c.sub}</div></div>`).join('');
 
-  /* --- banner --- */
+  /* --- 資産形成の評価 --- */
+  const rk=computeRanks(rows);
+  const OVR_TXT={SS:'極めて優秀',S:'非常に優秀',A:'良好',B:'標準的',C:'やや不足',D:'要改善'};
+  document.getElementById('rankOverall').innerHTML=`<span class="rbadge ro-big r-${rk.overall}">${rk.overall}</span><div class="ro-txt"><b>総合評価：${rk.overall}（${OVR_TXT[rk.overall]}）</b>各年代の「総資産 ÷ その年の年間生活費（＝資産が生活費の何年分か）」を年代別の目安と比べた簡易評価です。ピーク期・老後をやや重めに加重。</div>`;
+  document.getElementById('rankGrid').innerHTML=rk.decades.map(d=>`<div class="rank-cell"><div class="rc-dec">${d.key}</div><span class="rbadge r-${d.rank}">${d.rank}</span><div class="rc-sub">${d.years.toFixed(1)}年分<br>${d.age}歳 ${manY(d.net)}</div></div>`).join('');
+  document.getElementById('rankNote').textContent='「資産が年間生活費の何年分か」で判定（年代が上がるほど高い基準）。老後は資産が尽きないこと＋残存額を評価。目安を示す簡易指標です。';
+
   const b=document.getElementById('banner');
   if(minCash.cash<0){
     b.className='banner warn'; b.innerHTML=`⚠️ <div><b>資金ショートの可能性</b>：NISAを取り崩しても${minCash.age}歳ごろに資産が尽きます。収入・支出・購入額・積立額の見直しを。</div>`;
   } else if(firstDraw!=null){
-    b.className='banner ok'; b.innerHTML=`✅ <div>給与・年金だけでは不足する分を、${firstDraw}歳以降に資産（${P.withdrawOrder==='dc'?'確定拠出年金→NISA':'NISA→確定拠出年金'}）を取り崩して補填（生活防衛費：生活費の4〜12ヶ月を維持）。${P.endAge}歳の税引後総資産は${manY(last.netWorth)}。</div>`;
+    b.className='banner ok'; b.innerHTML=`✅ <div>給与・年金だけでは不足する分を、${firstDraw}歳以降に資産（${P.withdrawOrder==='dc'?'確定拠出年金→NISA':'NISA→確定拠出年金'}）を取り崩して補填（生活防衛費：生活費の最大12ヶ月（老後は取り崩し前提で0））。${P.endAge}歳の税引後総資産は${manY(last.netWorth)}。</div>`;
   } else {
-    b.className='banner ok'; b.innerHTML=`✅ <div>全期間を収入だけでまかない、NISAは取り崩しなし。現預金は常に生活防衛費（生活費の4〜12ヶ月）以上、${P.endAge}歳の総資産は${manY(last.netWorth)}。</div>`;
+    b.className='banner ok'; b.innerHTML=`✅ <div>全期間を収入だけでまかない、NISAは取り崩しなし。現預金は常に生活防衛費（現役最大12ヶ月・老後0）を確保、${P.endAge}歳の総資産は${manY(last.netWorth)}。</div>`;
   }
 
   /* --- timeline ribbon --- */
