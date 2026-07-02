@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ライフプラン資産形成シミュレーター</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
 <style>
   :root{
     --ink:#16202E; --paper:#EEF1F6; --card:#FFFFFF; --line:#DCE2EB;
@@ -888,14 +889,34 @@ function applyState(s){
 }
 function b64e(str){ return btoa(unescape(encodeURIComponent(str))); }
 function b64d(b){ return decodeURIComponent(escape(atob(b))); }
-function encodeState(){ return b64e(JSON.stringify(getState())); }
+/* 共有URL短縮：既定値との差分のみ＋LZString圧縮（無ければbase64にフォールバック） */
+function getDiffState(){
+  const full=getState(), o={};
+  STATIC_IDS.forEach(id=>{ if(full[id]==null)return; if(String(full[id])!==String(DEFAULTS[id])) o[id]=full[id]; });
+  if(JSON.stringify(full.segs)!==JSON.stringify(DEF_SEGS)) o.segs=full.segs;
+  if(JSON.stringify(full.kids)!==JSON.stringify(DEF_KIDS)) o.kids=full.kids;
+  return o;
+}
+function encodeShare(){
+  const json=JSON.stringify(getDiffState());
+  if(window.LZString&&LZString.compressToEncodedURIComponent) return 'c='+LZString.compressToEncodedURIComponent(json);
+  return 'd='+b64e(json);
+}
+function decodeShare(hash){
+  const m=/^#(c|d|s)=([\s\S]*)$/.exec(hash||''); if(!m) return null;
+  try{
+    if(m[1]==='c'){ if(!(window.LZString&&LZString.decompressFromEncodedURIComponent))return null; const j=LZString.decompressFromEncodedURIComponent(m[2]); return j?JSON.parse(j):null; }
+    return JSON.parse(b64d(m[2])); /* d=差分base64 / s=旧・全項目 */
+  }catch(e){ return null; }
+}
 function saveLocal(){ try{ localStorage.setItem('lifeplan', JSON.stringify(getState())); }catch(e){} }
 function flash(btn,msg){ const t=btn.textContent; btn.textContent=msg; setTimeout(()=>btn.textContent=t,1600); }
 
 function init(){
   setDefaults();
   let loaded=false;
-  if(location.hash.indexOf('#s=')===0){ try{ applyState(JSON.parse(b64d(location.hash.slice(3)))); loaded=true; }catch(e){} }
+  const s=decodeShare(location.hash);
+  if(s){ try{ applyState(s); loaded=true; }catch(e){} }
   if(!loaded){ try{ const ls=localStorage.getItem('lifeplan'); if(ls){ applyState(JSON.parse(ls)); } }catch(e){} }
   render();
 }
@@ -910,7 +931,7 @@ document.getElementById('resetBtn').addEventListener('click',()=>{
   render();
 });
 document.getElementById('shareBtn').addEventListener('click',(e)=>{
-  const url=location.origin+location.pathname+location.search+'#s='+encodeState();
+  const url=location.origin+location.pathname+location.search+'#'+encodeShare();
   if(navigator.clipboard&&navigator.clipboard.writeText){
     navigator.clipboard.writeText(url).then(()=>flash(e.target,'コピーしました ✓')).catch(()=>window.prompt('このリンクをコピーして共有：',url));
   } else { window.prompt('このリンクをコピーして共有：',url); }
