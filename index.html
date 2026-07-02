@@ -335,11 +335,11 @@
           <th class="l">ライフイベント</th>
           <th>額面年収</th><th>月手取り</th><th>月生活費</th><th>ボーナス</th>
           <th>年間貯蓄</th><th>NISA積立</th><th>NISA評価</th><th>NISA元本</th>
-          <th>現預金</th><th>総資産</th><th>イベント費用</th>
+          <th>現預金</th><th>総資産</th><th class="l">イベント費用（備考）</th>
         </tr></thead><tbody id="tbody"></tbody></table>
       </div>
       <p class="footnote" style="margin-top:10px">
-        ※ 金額は万円（一部は円表示）。手取りは概算（額面に対し収入帯で72〜82%を適用）。配偶者・扶養控除、確定拠出年金の節税、退職所得控除は税率を年収帯から推定する簡易計算で、実額とは差が出ます。学費はMEXT等の平均をベースにした目安、保険・固定資産税は自動概算です。生活費は「現在の世帯人数・月額」を基準に等価尺度（本人1.0／配偶者0.5／子0.3・14歳以上0.5）で世帯人数に応じて自動算出（家賃・教育・保険・旅行は別項目）。総資産は現預金＋NISA評価額＋確定拠出年金（DCは「枠内一時金」をオンにすると受給時に退職所得控除の枠まで非課税で受取り超過分は運用継続、退職金との控除枠重複は10年／19年ルールを簡易調整した概算。DC残りは将来課税のため実効税率を引いた税引後で計上）。NISAは引き出しても運用益が非課税。傾向把握用としてご利用ください。
+        ※ 金額は万円（一部は円表示）。手取りは概算（額面に対し収入帯で72〜82%を適用）。配偶者・扶養控除、確定拠出年金の節税、退職所得控除は税率を年収帯から推定する簡易計算で、実額とは差が出ます。学費はMEXT等の平均をベースにした目安、保険・固定資産税は自動概算です。生活費は「現在の世帯人数・月額」を基準に等価尺度（本人1.0／配偶者0.5／子0.3・14歳以上0.5）で世帯人数に応じて自動算出（家賃・教育・保険・旅行は別項目）。総資産は現預金＋NISA評価額＋確定拠出年金（DCは「枠内一時金」をオンにすると受給時に退職所得控除の枠まで非課税で受取り超過分は運用継続、退職金との控除枠重複は10年／19年ルールを簡易調整した概算。DC残りは将来課税のため実効税率を引いた税引後で計上）。NISAは引き出しても運用益が非課税。NISA積立は生活防衛費を超える余剰現預金の範囲でのみ行い、取り崩す年は入金しません（入金と取り崩しの往復を回避）。傾向把握用としてご利用ください。
       </p>
     </div>
   </div>
@@ -467,30 +467,46 @@ function simulate(P){
     living*=Math.pow(1+P.inflation,i);
     let housing=0,oneoff=0,oneoffLbl=[];
     if(P.buyAge==null||age<P.buyAge){ housing=P.rentMonthly*12; }
-    else { const sb=age-P.buyAge; if(age===P.buyAge){oneoff+=P.downpay;oneoffLbl.push('頭金'+P.downpay);} if(sb<P.loanYears)housing+=L.annualPay; housing+=P.propertyTax; if(sb===P.repair1Year){oneoff+=P.repair1Cost;oneoffLbl.push('水廻り'+P.repair1Cost);} if(sb===P.repair2Year){oneoff+=P.repair2Cost;oneoffLbl.push('改修'+P.repair2Cost);} }
+    else { const sb=age-P.buyAge; if(age===P.buyAge){oneoff+=P.downpay;oneoffLbl.push('頭金 '+man(P.downpay)+'万');} if(sb<P.loanYears)housing+=L.annualPay; housing+=P.propertyTax; if(sb===P.repair1Year){oneoff+=P.repair1Cost;oneoffLbl.push('水廻り修繕 '+man(P.repair1Cost)+'万');} if(sb===P.repair2Year){oneoff+=P.repair2Cost;oneoffLbl.push('リフォーム '+man(P.repair2Cost)+'万');} }
     const edu=P.children.reduce((s,c)=>s+tuition(age-c.birthAge,P),0);
     if(P.hasCar && age>=P.carFirstAge && age<P.carReturnAge && (age-P.carFirstAge)%Math.max(1,P.carCycle)===0){
       const price=P.carPrice*Math.pow(1+P.carInflation,i);
       const isFirst=(age===P.carFirstAge);
       const tradeIn=isFirst?0:P.carTradeIn*lastCarPrice;
       const carOut=Math.max(0,price-tradeIn);
-      oneoff+=carOut; oneoffLbl.push((isFirst?'車購入':'車買替')+Math.round(carOut));
+      oneoff+=carOut; oneoffLbl.push((isFirst?'車購入 ':'車買替 ')+man(carOut)+'万');
       lastCarPrice=price;
     }
-    let annualNisa=P.nisaMonthly*12, contrib=0;
-    if(nisaP+annualNisa<=P.nisaCap)contrib=annualNisa; else contrib=Math.max(0,P.nisaCap-nisaP);
-    contrib=Math.min(contrib,360);
     let dcContrib=0, dcDed=0;
     if(P.hasDC && age<P.dcReceiveAge && age<65){ dcContrib=P.dcMonthly*12; if(age<P.selfRetire) dcDed=dcContrib*(marginalRate(selfGross)+0.10); }
     const incomeCash=net+allowance+grant+credit+ded+dcDed;
     const expense=living+housing+edu+oneoff;
-    const saving=incomeCash-expense-contrib-dcContrib;
-    cash+=saving; nisaV=nisaV*(1+P.nisaYield)+contrib; nisaP+=contrib;
+    const saving=incomeCash-expense-dcContrib;
+    cash+=saving;
+    nisaV=nisaV*(1+P.nisaYield);
     dcValue=dcValue*(1+P.nisaYield)+dcContrib;
     let retireNet=0;
     if(P.hasRetireBonus && age===P.selfRetire){ retireNet=retireBonusNet(P); cash+=retireNet; }
     let dcLumpFree=0;
     if(P.hasDC && P.dcLumpStrategy && age===P.dcReceiveAge && dcValue>0){ dcLumpFree=Math.min(dcValue, Math.max(0,dcRscEffective(P))); dcValue-=dcLumpFree; cash+=dcLumpFree; }
+    // NISA積立：生活防衛費を超える余剰現預金の範囲でのみ実行（取り崩す年は入金しない）
+    let contrib=0;
+    { const annualNisa=P.nisaMonthly*12; const room=Math.min(Math.max(0,P.nisaCap-nisaP),360);
+      contrib=Math.min(annualNisa, room, Math.max(0, cash-P.emergency));
+      if(contrib>0){ cash-=contrib; nisaV+=contrib; nisaP+=contrib; } }
+    // 教育予約（現預金内の確保額）
+    let eduSaveAnnual=0;
+    P.children.forEach(c=>{ const ca=age-c.birthAge; if(ca>=0 && ca<EDU_SAVE_END) eduSaveAnnual+=eduMonthlyEach*12; });
+    eduPaid+=edu;
+    eduFund=Math.max(0, eduFund+eduSaveAnnual-edu);
+    eduFund=Math.min(eduFund, Math.max(0,totalEduAll-eduPaid), Math.max(0,cash));
+    // スイープ：上限超過分をNISAへ（教育予約分を除く）
+    let sweep=0;
+    if(P.sweepNisa){ const floor=Math.max(P.cashCap,P.emergency); const reserve=P.eduReserve?eduFund:0;
+      const sweepable=cash-floor-reserve;
+      if(sweepable>0){ const annualRoom=Math.max(0,360-contrib), lifeRoom=Math.max(0,P.nisaCap-nisaP);
+        sweep=Math.min(sweepable,annualRoom,lifeRoom); if(sweep>0){ cash-=sweep; nisaV+=sweep; nisaP+=sweep; } } }
+    // 取り崩し：現預金が生活防衛費を下回る年のみ（この年は上のとおり入金していない）
     let drawNisa=0, drawDc=0, dcTaxPaid=0; const target=P.emergency;
     const takeNisa=(need)=>{ if(nisaV<=0||need<=0)return; const d=Math.min(nisaV,need); const ratio=d/nisaV; nisaP-=nisaP*ratio; nisaV-=d; cash+=d; drawNisa+=d; };
     const takeDc=(need)=>{ if(!(P.hasDC&&age>=P.dcReceiveAge)||dcValue<=0||need<=0)return; const gross=Math.min(dcValue,need/(1-P.dcTaxRate)); const net=gross*(1-P.dcTaxRate); dcValue-=gross; cash+=net; drawDc+=gross; dcTaxPaid+=gross*P.dcTaxRate; };
@@ -499,16 +515,6 @@ function simulate(P){
       else { takeNisa(target-cash); if(cash<target) takeDc(target-cash); }
     }
     const drawdown=drawNisa+drawDc;
-    let eduSaveAnnual=0;
-    P.children.forEach(c=>{ const ca=age-c.birthAge; if(ca>=0 && ca<EDU_SAVE_END) eduSaveAnnual+=eduMonthlyEach*12; });
-    eduPaid+=edu;
-    eduFund=Math.max(0, eduFund+eduSaveAnnual-edu);
-    eduFund=Math.min(eduFund, Math.max(0,totalEduAll-eduPaid), Math.max(0,cash));
-    let sweep=0;
-    if(P.sweepNisa){ const floor=Math.max(P.cashCap,P.emergency); const reserve=P.eduReserve?eduFund:0;
-      const sweepable=cash-floor-reserve;
-      if(sweepable>0){ const annualRoom=Math.max(0,360-contrib), lifeRoom=Math.max(0,P.nisaCap-nisaP);
-        sweep=Math.min(sweepable,annualRoom,lifeRoom); if(sweep>0){ cash-=sweep; nisaV+=sweep; nisaP+=sweep; } } }
     const netWorth=cash+nisaV+dcValue*(1-P.dcTaxRate);
     const events=eventsFor(P,age,childAges,L);
     rows.push({i,age,pAge,married,childAges,dep:dep.length,gross,bonus,net,living,housing,edu,oneoff,oneoffLbl,saving,contrib,sweep,ded,dcContrib,dcDed,retireNet,dcLumpFree,dcValue,eduFund,drawNisa,drawDc,dcTaxPaid,drawdown,nisaV,nisaP,cash,netWorth,incomeCash,expense,events});
@@ -743,7 +749,7 @@ function render(){
     const st=stageOf(P,r); const bg=ROWBG[st.key];
     const kid=r.childAges.map(a=>a==null?'-':a).join('/');
     const evtxt=r.events.length?r.events.join('・'):'';
-    const cost=r.oneoff>0?man(r.oneoff)+'万':'';
+    const cost=r.oneoffLbl.length?r.oneoffLbl.join('・'):'';
     const cashCls=r.cash<P.emergency?'neg':'';
     const saveCls=r.saving<0?'neg':'';
     return `<tr style="background:${bg}">
@@ -751,7 +757,7 @@ function render(){
       <td class="ev">${evtxt}</td>
       <td>${man(r.gross)}</td><td>${yen(r.net/12)}</td><td>${yen(r.living/12)}</td><td>${man(r.bonus)}</td>
       <td class="${saveCls}">${man(r.saving)}</td><td>${man(r.contrib+r.sweep)}</td><td>${man(r.nisaV)}</td><td>${man(r.nisaP)}</td>
-      <td class="${cashCls}">${man(r.cash)}</td><td><b>${man(r.netWorth)}</b></td><td>${cost}</td>
+      <td class="${cashCls}">${man(r.cash)}</td><td><b>${man(r.netWorth)}</b></td><td class="ev">${cost}</td>
     </tr>`;
   }).join('');
   saveLocal();
