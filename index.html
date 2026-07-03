@@ -139,6 +139,17 @@
   .advice.done{opacity:.65}
   .advice.done .a-when{background:var(--slate-2)}
 
+  /* diagnosis & proposals */
+  .diag{font-size:13px; line-height:1.75; background:#F7FAFC; border:1px solid var(--line); border-radius:10px; padding:12px 14px; color:var(--ink); margin-bottom:12px}
+  .diag.warn{background:#FDF6F8; border-color:#F1C9D2}
+  .proposal-list{display:flex; flex-direction:column; gap:10px}
+  .proposal{display:flex; gap:12px; background:var(--card); border:1px solid var(--line); border-left:4px solid var(--teal); border-radius:12px; padding:12px 15px; align-items:flex-start}
+  .proposal .p-rank{flex:none; width:24px; height:24px; border-radius:50%; background:var(--teal); color:#fff; font-weight:800; font-size:12px; display:flex; align-items:center; justify-content:center; margin-top:1px}
+  .proposal .p-body{min-width:0}
+  .proposal .p-title{font-weight:800; font-size:13px}
+  .proposal .p-eff{font-size:12.5px; color:var(--slate); margin-top:4px; line-height:1.6}
+  .proposal .p-how{font-size:11.5px; color:var(--slate-2); margin-top:5px}
+
   /* inflation scenario */
   .infl-note{font-size:12px; color:var(--slate); line-height:1.7; margin:0 0 10px}
   #inflTbl td.base-row{font-weight:700}
@@ -354,6 +365,14 @@
       <h2>ライフイベントに備えるアドバイス</h2>
       <div class="hint" style="margin-top:0">これから訪れるライフイベントごとに、シミュレーション結果をもとにした準備額の目安と注意点を表示します。イベント時期・金額を変更すると自動で更新されます。</div>
       <div class="advice-list" id="adviceList"></div>
+    </div>
+
+    <div class="block" id="proposalBlock">
+      <div class="eyebrow">Personal check-up</div>
+      <h2>あなたのプラン診断と改善提案</h2>
+      <div class="diag" id="planDiag"></div>
+      <div class="proposal-list" id="proposalList"></div>
+      <div class="hint" style="margin-top:10px">各提案は、実際にその値へ変更した場合のシミュレーションを裏側で再計算し、効果を実測したものです（効果のあった案だけを影響の大きい順に表示）。</div>
     </div>
 
     <div class="block" id="inflBlock">
@@ -734,7 +753,7 @@ function computeRanks(rows){
   return {decades:out,overall};
 }
 
-/* ============ ライフイベント別アドバイス ============ */
+/* ============ ライフイベント別アドバイス（パーソナル診断） ============ */
 function yenMonthly(man10k, months){ if(months<=0)return '—'; const y=Math.round(man10k*10000/months/100)*100; return '¥'+y.toLocaleString('ja-JP')+'/月'; }
 function renderAdvice(P, rows){
   const list=document.getElementById('adviceList'); if(!list) return;
@@ -742,58 +761,73 @@ function renderAdvice(P, rows){
   const rowAt=a=>rows.find(r=>r.age===a);
   const monthsTo=a=>Math.max(1,(a-now)*12);
   const push=(age,icon,title,lines,warn)=>{ items.push({age,icon,title,lines:lines.filter(Boolean),warn:!!warn}); };
+  const segCovers=a=>P.partnerSegs.some(s=>a>=s.from&&a<=s.to);
 
   /* --- 結婚 --- */
   if(P.marriageAge>now && P.marriageAge<=P.endAge){
-    const r=rowAt(P.marriageAge); const cost=250;
+    const r=rowAt(P.marriageAge); const cost=250; const dual=segCovers(P.marriageAge);
     push(P.marriageAge,'💍','結婚・新生活',[
-      `挙式・指輪・新居準備の一般的な目安は<b>200〜300万円</b>（※本シミュレーションの支出には未計上）。今から準備するなら <b>${yenMonthly(cost,monthsTo(P.marriageAge))}</b> 程度の確保が目安です。`,
-      r?`この年の予測現預金は <b>${man(r.cash)}万円</b>。結婚後は生活防衛費の基準が変わる（共働き6ヶ月分／片働き10ヶ月分）ため、現預金に余裕を持たせておくと安心です。`:null
-    ], r&&r.cash<cost);
+      `挙式・指輪・新居準備の一般的な目安は<b>200〜300万円</b>（本シミュレーション未計上）。${(P.marriageAge-now)<=2
+        ?`あと${(P.marriageAge-now)*12}ヶ月と期間が短いため、月々<b>${yenMonthly(cost,monthsTo(P.marriageAge))}</b>の準備か、現在の現預金${man(P.initCash)}万円からの充当が必要です。`
+        :`今から<b>${yenMonthly(cost,monthsTo(P.marriageAge))}</b>を確保すれば無理なく間に合います。`}`,
+      r?`結婚後の生活防衛費は${dual?`共働き設定のため生活費6ヶ月分（約${man(r.emergency)}万円）`:`この時点でパートナーの収入設定がないため10ヶ月分（約${man(r.emergency)}万円）`}。この年の予測現預金は<b>${man(r.cash)}万円</b>です。`:null,
+      !dual?`「収入 相手」欄に結婚時点をカバーする勤務パターンがありません。実態と違う場合は期間を追加すると試算の精度が上がります。`:null
+    ], r&&r.cash<r.emergency+cost);
   }
 
-  /* --- 出産・教育積立 --- */
-  const eduEach=eduTotalPerChild(P); const eduMoEach=eduEach/(EDU_SAVE_END*12);
+  /* --- 出産・教育 --- */
+  const eduEach=eduTotalPerChild(P);
   P.children.forEach((c,idx)=>{
     if(c.birthAge>now && c.birthAge<=P.endAge){
       const r=rowAt(c.birthAge);
+      const workBefore=segCovers(c.birthAge-1), workDuring=segCovers(c.birthAge), workAfter=segCovers(c.birthAge+1);
+      const gapModeled=workBefore&&(!workDuring||!workAfter);
       push(c.birthAge,'👶',`第${idx+1}子 誕生`,[
-        `出産費用は出産育児一時金（${man(P.birthGrant)}万円）でおおむね相殺されますが、産前産後のパートナー収入減が家計に影響します。勤務パターン設定と照らして確認を。`,
-        `選択中の進路での教育費は1人あたり総額 <b>${man(eduEach)}万円</b>。出生と同時に <b>${yenMonthly(eduEach,EDU_SAVE_END*12)}</b> の教育積立を始めると、大学卒業まで平準化できます。`,
-        r?`この年の予測現預金 <b>${man(r.cash)}万円</b>（生活防衛費の目安 ${man(r.emergency)}万円）。`:null
+        gapModeled
+          ?`出産前後のパートナー収入減は勤務パターンで織り込み済みです。育児休業給付（手取りの約5〜7割）を受給できる場合、実際はこの試算より少し余裕が出ます。`
+          :(workDuring?`出産年もパートナーの収入が途切れない設定です。実際は産休・育休で減るため、「収入 相手」欄で${c.birthAge}歳前後の期間を分けると精度が上がります（育休中は給付で手取りの約5〜7割）。`:null),
+        `選択中の進路での教育費は1人あたり<b>${man(eduEach)}万円</b>。出生と同時に<b>${yenMonthly(eduEach,EDU_SAVE_END*12)}</b>を積み立てれば大学卒業まで平準化できます（「教育予約」として計算に反映済み）。`,
+        r?`この年の予測現預金<b>${man(r.cash)}万円</b>／生活防衛費${man(r.emergency)}万円${r.cash<r.emergency?'。<b>下回るため要注意</b>——出産一時金の入金前に大型支出を重ねないでください。':'。余裕を確保できています。'}`:null
       ], r&&r.cash<r.emergency);
     }
-    /* 大学入学 */
     const univAge=c.birthAge+18;
     if(univAge>now && univAge<=P.endAge){
       let univCost=0; for(let a=18;a<=21;a++) univCost+=eduAnnual(a,P);
       const r=rowAt(univAge);
+      const draws=rows.filter(x=>x.age>=univAge&&x.age<=Math.min(univAge+3,P.endAge)).reduce((s,x)=>s+x.drawNisa+x.drawDc,0);
+      const shortage=r?Math.max(0,univCost-r.eduFund):univCost;
       push(univAge,'🎓',`第${idx+1}子 大学入学`,[
-        `大学4年間の費用は入学金・授業料${P.eduAway?'＋自宅外仕送り':''}で <b>約${man(univCost)}万円</b>。教育費のピークです。`,
-        r?`入学年の予測現預金は <b>${man(r.cash)}万円</b>、教育予約残高 <b>${man(r.eduFund)}万円</b>。${r.eduFund>=univCost*0.7?'積立でおおむねカバーできる見込みです。':'積立だけでは不足気味。<b>'+yenMonthly(Math.max(0,univCost-r.eduFund),monthsTo(univAge))+'</b> の上乗せを検討してください。'}`:null,
-        `入学前年は入学金・受験費用（＋10〜30万円/校）が先行します。NISAの取り崩しに頼らず現預金で払えるよう、入学2〜3年前からは新規の大型支出を控えるのが安全です。`
-      ], r&&(r.cash<r.emergency||r.saving<0));
+        `大学4年間の費用は<b>約${man(univCost)}万円</b>${P.eduAway?'（自宅外の仕送り込み）':''}。入学年の教育予約残高は<b>${man(r?r.eduFund:0)}万円</b>の見込みで、${shortage<=1
+          ?'積立でほぼ全額カバーできる試算です。'
+          :`<b>約${man(shortage)}万円不足</b>します。今から<b>${yenMonthly(shortage,monthsTo(univAge))}</b>を上乗せすれば埋められます。`}`,
+        draws>1
+          ?`この在学4年間で資産の取り崩しが<b>計${man(draws)}万円</b>発生する試算です。相場下落時に売らされるリスクを避けるため、入学の2〜3年前から現預金を厚めにしておくと安全です。`
+          :`在学中、NISA等の取り崩しなしで乗り切れる試算です。`,
+        `入学前年は受験料・入学金（＋10〜30万円/校）が先行して発生します。`
+      ], shortage>1||(r&&r.cash<r.emergency));
     }
   });
 
-  /* --- 住宅購入 --- */
+  /* --- 住宅 --- */
   if(P.buyAge!=null && P.buyAge>now && P.buyAge<=P.endAge){
-    const r=rowAt(P.buyAge); const L=loanCalc(P);
-    const misc=Math.round(P.price*0.07);
+    const r=rowAt(P.buyAge); const L=loanCalc(P); const misc=Math.round(P.price*0.07);
+    const ratio=(r&&r.net>0)?(L.monthlyPay/(r.net/12))*100:0;
+    const shortCash=r?Math.max(0,r.emergency-r.cash):0;
     push(P.buyAge,'🏠','戸建て購入',[
-      `頭金 <b>${man(P.downpay)}万円</b> に加え、諸費用（登記・仲介・火災保険等）が物件価格の約7%＝<b>約${man(misc)}万円</b> かかるのが一般的です（※諸費用は本シミュレーション未計上）。合計を今から貯めるなら <b>${yenMonthly(P.downpay+misc,monthsTo(P.buyAge))}</b> が目安。`,
-      `ローンは借入${man(L.borrow)}万円・月々 <b>${yen(L.monthlyPay)}</b>（年${man(L.annualPay)}万円）。手取り月収の25%以内に収まっているか確認を。`,
-      r?`購入直後の予測現預金は <b>${man(r.cash)}万円</b>${r.cash<r.emergency?'で、生活防衛費（'+man(r.emergency)+'万円）を下回ります。頭金の圧縮か購入時期の後ろ倒しを検討してください。':'。生活防衛費を維持できる見込みです。'}`:null,
-      `住宅ローン減税（残高×${(P.creditRate*100).toFixed(1)}%・${P.creditYears}年間）を反映済み。繰上返済は減税期間終了後に検討するのが有利です。`
-    ], r&&r.cash<r.emergency);
-    /* 修繕 */
+      `頭金<b>${man(P.downpay)}万円</b>＋諸費用<b>約${man(misc)}万円</b>（価格の約7%・本試算未計上）＝計${man(P.downpay+misc)}万円。今から貯めるなら<b>${yenMonthly(P.downpay+misc,monthsTo(P.buyAge))}</b>が目安です。`,
+      r?`あなたの返済は月<b>${yen(L.monthlyPay)}</b>。${P.buyAge}歳時点の世帯手取り月収${yen(r.net/12)}に対して<b>${ratio.toFixed(0)}%</b>で、${ratio<=25?'安全圏（25%以下）です。':ratio<=30?'やや高め（25%超）です。物件価格か頭金の調整余地があります。':'<b>30%を超えており家計を圧迫します。物件価格の引き下げか時期の見直しを強く推奨します。</b>'}`:null,
+      r?(shortCash>0
+        ?`購入直後の現預金<b>${man(r.cash)}万円</b>は生活防衛費を<b>${man(shortCash)}万円下回ります</b>。頭金を${man(Math.ceil(shortCash/50)*50)}万円ほど圧縮するか購入を後ろ倒しすれば解消できます（効果は下の改善提案で実測）。`
+        :`購入直後も現預金<b>${man(r.cash)}万円</b>で生活防衛費を維持できる試算です。`):null,
+      `ローン減税（残高×${(P.creditRate*100).toFixed(1)}%・${P.creditYears}年）は計上済み。繰上返済は減税が切れる<b>${P.buyAge+P.creditYears}歳以降</b>に行うのが有利です。`
+    ], ratio>30||shortCash>0);
     [[P.repair1Year,P.repair1Cost,'水廻り修繕','🔧'],[P.repair2Year,P.repair2Cost,'大型リフォーム','🛠️']].forEach(([y,cost,lbl,ico])=>{
       const age=P.buyAge+y;
       if(age>now && age<=P.endAge && cost>0){
         const r2=rowAt(age);
         push(age,ico,lbl,[
-          `購入から${y}年目に <b>${man(cost)}万円</b> を想定。修繕積立として <b>${yenMonthly(cost,monthsTo(age))}</b> を住宅費とは別に確保しておくと、取り崩しなしで対応できます。`,
-          r2?`この年の予測現預金 <b>${man(r2.cash)}万円</b>。`:null
+          `購入${y}年目に<b>${man(cost)}万円</b>。修繕積立<b>${yenMonthly(cost,monthsTo(age))}</b>を住宅費と別に確保しておけば取り崩し不要です。`,
+          r2&&r2.cash<r2.emergency?`この年は現預金が生活防衛費を下回る試算（${man(r2.cash)}万円）。時期を動かせる工事なら余裕のある年へずらしてください。`:null
         ], r2&&r2.cash<r2.emergency);
       }
     });
@@ -801,19 +835,21 @@ function renderAdvice(P, rows){
 
   /* --- 車 --- */
   if(P.hasCar && P.carFirstAge>now && P.carFirstAge<=P.endAge){
+    const buys=rows.filter(r=>r.oneoffLbl.some(l=>l.startsWith('車')));
+    const totalCar=buys.reduce((s,r)=>s+r.oneoffLbl.filter(l=>l.startsWith('車')).reduce((t,l)=>t+(parseInt(l.replace(/\D/g,''))||0),0),0);
     push(P.carFirstAge,'🚗','車の初回購入',[
-      `初回 <b>${man(P.carPrice)}万円</b>、以後${P.carCycle}年周期で買い替え（車体価格は年${(P.carInflation*100).toFixed(1)}%上昇の想定）。買い替え費用は <b>${yenMonthly(P.carPrice,P.carCycle*12)}</b> を「車積立」として毎月確保すると平準化できます。`,
-      `維持費（税・保険・車検・燃料で年30〜50万円程度)は生活費に含めて考えてください。`
+      `あなたの設定では生涯${buys.length}回の購入・買い替えで<b>計約${man(totalCar)}万円</b>。買い替え費用は<b>${yenMonthly(P.carPrice,P.carCycle*12)}</b>を「車積立」として確保すると平準化できます。`,
+      `維持費（税・保険・車検・燃料で年30〜50万円程度）は生活費に含めて考えてください。`
     ]);
   }
 
-  /* --- 定年・退職 --- */
+  /* --- 定年 --- */
   if(P.selfRetire>now && P.selfRetire<=P.endAge){
     const r=rowAt(P.selfRetire);
     push(P.selfRetire,'🏢','定年退職',[
-      r?`定年時の予測総資産は <b>${manY(r.netWorth)}</b>（その年の生活費の約${(r.netWorth/Math.max(1,r.living)).toFixed(1)}年分）。`:null,
-      P.hasRetireBonus?`退職金は手取り <b>約${man(retireBonusNet(P))}万円</b> を現預金に計上済み。受取直後の一括投資は避け、数年に分けてNISA等へ移すのが安全です。`:'退職金制度がない前提です。その分、NISA・iDeCoの積立比重を高めに保つことが重要です。',
-      P.hasDC?null:`確定拠出年金（iDeCo）が未設定です。掛金は全額所得控除になるため、月1〜2万円でも節税効果込みで老後資金の効率が上がります。左の「退職」欄で試算できます。`
+      r?`定年時の予測総資産は<b>${manY(r.netWorth)}</b>（当時の年間生活費の約${(r.netWorth/Math.max(1,r.living)).toFixed(1)}年分）。`:null,
+      P.hasRetireBonus?`退職金は手取り<b>約${man(retireBonusNet(P))}万円</b>で計上済み。受取直後の一括投資は避け、数年に分けてNISAへ移すのが安全です。`:null,
+      !P.hasDC?`iDeCo/DCが未設定です。掛金は全額所得控除のため節税効果が大きく、月2万円拠出した場合の実測効果を下の改善提案で確認できます。`:null
     ]);
   }
 
@@ -821,13 +857,18 @@ function renderAdvice(P, rows){
   const pStart=Math.max(P.selfRetire,P.reemployTo);
   if(pStart>now && pStart<=P.endAge){
     const r=rowAt(pStart); const pc=r&&r.pension;
-    const gap=r?Math.max(0,r.expense-r.incomeCash):0;
+    const post=rows.filter(x=>x.age>=pStart);
+    const totalGap=post.reduce((s,x)=>s+Math.max(0,x.expense-x.incomeCash),0);
+    const startAssets=r?r.netWorth:0;
     const bust=rows.find(x=>x.netWorth<0);
     push(pStart,'🌅','年金生活スタート',[
-      pc?`年金は世帯で手取り <b>約${man(pc.net)}万円/年</b>。初年の支出予測 ${man(r.expense)}万円に対し、不足分は <b>年${man(gap)}万円</b> を資産の取り崩しでまかないます（${P.withdrawOrder==='dc'?'DC→NISA':'NISA→DC'}の順・税効率${P.withdrawOrder==='dc'?'重視':'は要検討'}）。`:null,
-      bust?`<b>⚠️ ${bust.age}歳ごろに資産が尽きる見込みです。</b>現役中の積立増額・支出の見直し・退職年齢の延長のいずれかが必要です。`:`このペースなら${P.endAge}歳まで資産は尽きない見込みです（最終 ${manY(rows[rows.length-1].netWorth)}）。`,
-      `年金は繰下げ受給（最大75歳・1ヶ月あたり+0.7%）で増額できます。資産に余裕がある場合の選択肢として覚えておくと有利です。`
-    ], !!bust);
+      pc?`年金は世帯手取り<b>約${man(pc.net)}万円/年</b>。${P.endAge}歳までの生活費不足の累計は<b>約${man(totalGap)}万円</b>で、開始時点の総資産<b>${man(startAssets)}万円</b>で${startAssets>=totalGap
+        ?`まかなえる試算です（余裕 約${man(startAssets-totalGap)}万円）。`
+        :`は<b>約${man(totalGap-startAssets)}万円不足</b>します。`}`:null,
+      bust
+        ?`<b>⚠️ ${bust.age}歳ごろに資産が尽きる試算です。</b>下の「改善提案」に、効果を実測した具体策を影響の大きい順に挙げています。`
+        :`資産は${P.endAge}歳まで持つ試算です（最終 ${manY(rows[rows.length-1].netWorth)}）。${(startAssets-totalGap)>1000?'余裕が大きいため、年金の繰下げ受給（最大75歳・+0.7%/月）や資産の「使い方」の設計も選択肢になります。':''}`
+    ], !!bust||startAssets<totalGap);
   }
 
   items.sort((a,b)=>a.age-b.age);
@@ -840,6 +881,80 @@ function renderAdvice(P, rows){
         ${it.lines.map(l=>`<p class="a-line">${l}</p>`).join('')}
       </div>
     </div>`).join('');
+}
+
+/* ============ プラン診断と改善提案（対案を実シミュレーションで実測） ============ */
+function metricsOf(rows){
+  const last=rows[rows.length-1];
+  let minGap=Infinity, minGapAge=0, bust=null;
+  rows.forEach(r=>{ const g=r.cash-r.emergency; if(g<minGap){minGap=g;minGapAge=r.age;} if(!bust&&r.netWorth<0)bust=r.age; });
+  return {final:last.netWorth, minGap, minGapAge, bust};
+}
+function renderProposals(P, rows){
+  const el=document.getElementById('proposalList'), dg=document.getElementById('planDiag');
+  if(!el||!dg) return;
+  const base=metricsOf(rows);
+
+  /* --- 診断（このプラン固有の弱点を特定） --- */
+  let diag, diagWarn=false;
+  if(base.bust){
+    diag=`<b>最優先の課題：${base.bust}歳ごろに資産が尽きる試算です。</b>${P.endAge}歳まで持たせるには最終時点換算で約<b>${manY(-base.final)}</b>の上積みが必要です。下の提案から効果の大きいものを組み合わせてください。`; diagWarn=true;
+  } else if(base.minGap<-0.5){
+    const near=[...new Set(rows.filter(r=>Math.abs(r.age-base.minGapAge)<=2).flatMap(r=>r.events))];
+    diag=`資産は${P.endAge}歳まで持ちますが、<b>${base.minGapAge}歳ごろに現預金が生活防衛費を約${man(-base.minGap)}万円下回ります</b>${near.length?`（この前後のイベント：${near.join('・')}）`:''}。まずこの谷を埋めるのが優先です。`; diagWarn=true;
+  } else {
+    const idleYears=rows.filter(r=>r.cash>Math.max(P.cashCap,r.emergency)+200).length;
+    if(!P.sweepNisa&&idleYears>=10){
+      diag=`資金ショートの懸念はありません。一方で、<b>現預金が上限を200万円以上超えて滞留する年が${idleYears}年</b>あります。現金はインフレで実質価値が目減りするため、余剰分を運用へ回す効果を下で実測しています。`;
+    } else {
+      diag=`現時点のプランに大きな弱点は見当たりません（最終総資産 ${manY(base.final)}、現預金が最も薄いのは${base.minGapAge}歳で防衛費＋${man(Math.max(0,base.minGap))}万円）。以下は、さらに効率を高めたい場合の選択肢です。`;
+    }
+  }
+  dg.className='diag'+(diagWarn?' warn':''); dg.innerHTML=diag;
+
+  /* --- 対案を実測 --- */
+  const cands=[];
+  const test=(cond,icon,label,how,note,patch)=>{ if(!cond)return; try{ const m=metricsOf(simulate({...P,...patch})); cands.push({icon,label,how,note,m}); }catch(e){} };
+  const early=rows.slice(0,Math.min(10,rows.length));
+  const avgSave=early.reduce((s,r)=>s+r.saving,0)/Math.max(1,early.length);
+
+  if(avgSave>24) test(P.nisaMonthly<30,'📈',`NISA積立を月${P.nisaMonthly}万 → ${P.nisaMonthly+2}万に増額`,'「資産」欄：NISA 積立額',`直近10年の平均貯蓄が年${man(avgSave)}万円あるため無理のない範囲です。`,{nisaMonthly:P.nisaMonthly+2});
+  else if(avgSave>12) test(P.nisaMonthly<30,'📈',`NISA積立を月${P.nisaMonthly}万 → ${P.nisaMonthly+1}万に増額`,'「資産」欄：NISA 積立額',null,{nisaMonthly:P.nisaMonthly+1});
+  test(!P.sweepNisa,'🔁','余剰現預金のNISAスイープをオン','「資産」欄：現預金の上限超過分をNISAへ',`現預金${man(P.cashCap)}万円と生活防衛費は常に確保した上で、超過分だけを回します。`,{sweepNisa:true});
+  test(!P.hasDC,'🏦','iDeCo/DCを月2万円で開始','「退職」欄：確定拠出年金','掛金の全額所得控除による節税分も手取りに反映して実測しています。',{hasDC:true,dcMonthly:2});
+  test(P.hasDC&&!P.dcLumpStrategy,'🧾','DCを退職所得控除の枠内で一時金受取に','「退職」欄：枠内一時金',null,{dcLumpStrategy:true});
+  test(true,'🔀',`老後の取り崩し順を${P.withdrawOrder==='dc'?'NISA優先':'DC優先'}に変更`,'「退職」欄：老後の取り崩し順',null,{withdrawOrder:P.withdrawOrder==='dc'?'nisa':'dc'});
+  test(P.buyAge!=null&&P.buyAge>P.currentAge&&P.buyAge+2<P.endAge,'🏠',`住宅購入を2年後ろ倒し（${P.buyAge} → ${P.buyAge+2}歳）`,'「住居」欄：戸建てを購入する年齢','家賃2年分の増加と頭金準備・ローン減税の変化を込みで実測しています。',{buyAge:P.buyAge+2});
+  test(P.buyAge!=null&&P.buyAge>P.currentAge&&P.price>1000,'🏠',`物件価格を300万円圧縮（${man(P.price)} → ${man(P.price-300)}万円）`,'「住居」欄：物件価格',null,{price:P.price-300});
+  test(P.curMonthlyLiving>10,'🧺','生活費を月1万円見直し','「生活費」欄：現在の月々の生活費','固定費（通信・保険・サブスク）の見直しが現実的です。',{curMonthlyLiving:P.curMonthlyLiving-1});
+  test(P.hasCar&&P.carFirstAge<P.carReturnAge,'🚗',`車の買い替え周期を${P.carCycle} → ${P.carCycle+3}年に延長`,'「車」欄：買い替え周期',null,{carCycle:P.carCycle+3});
+  test(P.reemployTo<70&&P.reemployTo>=P.selfRetire&&P.reemployIncome>0,'👔',`再雇用を70歳まで延長（現在${P.reemployTo}歳まで）`,'「収入 本人」欄：再雇用の終了年齢','再雇用収入が延び、年金開始も後ろ倒しになる簡易試算です。',{reemployTo:70});
+
+  const scored=cands.map(c=>({...c,
+      dFinal:c.m.final-base.final,
+      bustFix:!!(base.bust&&!c.m.bust),
+      bustDelay:(base.bust&&c.m.bust)?(c.m.bust-base.bust):0,
+      dGap:c.m.minGap-base.minGap}))
+    .filter(c=>c.dFinal>5||c.bustFix||c.bustDelay>0||(base.minGap<-0.5&&c.dGap>5))
+    .sort((a,b)=>((b.bustFix?1:0)-(a.bustFix?1:0))||(b.dFinal-a.dFinal))
+    .slice(0,6);
+
+  if(!scored.length){
+    el.innerHTML='<div class="hint">試した改善パターン（積立増額・スイープ・iDeCo・住宅条件・生活費・車・再雇用延長）では、現在の設定を上回る効果は見つかりませんでした。すでに効率的なプランです。</div>';
+    return;
+  }
+  el.innerHTML=scored.map((c,i)=>{
+    const eff=[];
+    if(c.bustFix) eff.push(`<b style="color:var(--teal)">資金ショート解消</b>（${base.bust}歳枯渇 → ${P.endAge}歳まで維持）`);
+    else if(c.bustDelay>0) eff.push(`枯渇を${c.bustDelay}年先送り（${base.bust} → ${c.m.bust}歳）`);
+    eff.push(`最終総資産 ${man(base.final)} → <b>${man(c.m.final)}万円</b>（<b style="color:${c.dFinal>=0?'var(--teal)':'var(--rose)'}">${c.dFinal>=0?'+':''}${man(c.dFinal)}万円</b>）`);
+    if(base.minGap<-0.5&&c.dGap>5) eff.push(`現預金の谷が${man(c.dGap)}万円改善`);
+    return `<div class="proposal"><div class="p-rank">${i+1}</div><div class="p-body">
+      <div class="p-title">${c.icon} ${c.label}</div>
+      <div class="p-eff">${eff.join('　／　')}</div>
+      <div class="p-how">変更箇所：${c.how}${c.note?`　<span>${c.note}</span>`:''}</div>
+    </div></div>`;
+  }).join('');
 }
 
 /* ============ インフレ率シナリオ比較 ============ */
@@ -982,8 +1097,9 @@ function render(){
   document.getElementById('rankGrid').innerHTML=rk.decades.map(d=>`<div class="rank-cell"><div class="rc-dec">${d.key}</div><span class="rbadge r-${d.rank}">${d.rank}</span><div class="rc-sub">${d.years.toFixed(1)}年分<br>${d.age}歳 ${manY(d.net)}</div></div>`).join('');
   document.getElementById('rankNote').textContent='「資産が年間生活費の何年分か」で判定（年代が上がるほど高い基準）。老後は資産が尽きないこと＋残存額を評価。目安を示す簡易指標です。';
 
-  /* --- ライフイベント別アドバイス & インフレシナリオ --- */
+  /* --- ライフイベント別アドバイス & 診断・改善提案 & インフレシナリオ --- */
   renderAdvice(P,rows);
+  renderProposals(P,rows);
   renderInflation(P,rows);
 
   const b=document.getElementById('banner');
