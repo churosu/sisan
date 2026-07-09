@@ -66,6 +66,8 @@
   }
   .field select{width:110px; text-align:left}
   .field .unit{font-size:11px; color:var(--slate-2); width:34px;}
+  .field .ig input.mo{width:52px; padding-left:6px; padding-right:6px}
+  .field .ig .unit.mo{width:auto; margin-right:2px}
   .field input:focus,.field select:focus{outline:2px solid var(--teal); outline-offset:1px; border-color:var(--teal)}
   .field input[type=checkbox]{width:auto; transform:scale(1.25); accent-color:var(--teal); cursor:pointer; margin-right:2px}
   .seg, .kid{border:1px solid var(--line); border-radius:10px; padding:10px; margin:8px 0; background:#FAFBFD;}
@@ -211,9 +213,9 @@
     <details class="grp" open>
       <summary><span class="tag">基本</span>あなたと家族の前提<span class="chev">▶</span></summary>
       <div class="body">
-        <div class="field"><label>現在の年齢（本人）</label><div class="ig"><input type="number" id="currentAge" value="26"><span class="unit">歳</span></div></div>
+        <div class="field"><label>現在の年齢（本人）</label><div class="ig"><input type="number" id="currentAge" value="26"><span class="unit mo">歳</span><input type="number" class="mo" id="currentAgeMonths" value="0" min="0" max="11" step="1"><span class="unit mo">ヶ月</span></div></div>
         <div class="field"><label>シミュレーション最終年齢</label><div class="ig"><input type="number" id="endAge" value="90"><span class="unit">歳</span></div></div>
-        <div class="field"><label>結婚する年齢（本人）</label><div class="ig"><input type="number" id="marriageAge" value="28"><span class="unit">歳</span></div></div>
+        <div class="field"><label>結婚する年齢（本人）</label><div class="ig"><input type="number" id="marriageAge" value="28"><span class="unit mo">歳</span><input type="number" class="mo" id="marriageAgeMonths" value="0" min="0" max="11" step="1"><span class="unit mo">ヶ月</span></div></div>
         <div class="field"><label>挙式・新生活の特別費</label><div class="ig"><input type="number" id="weddingCost" value="250"><span class="unit">万</span></div></div>
         <div class="hint" style="margin-top:0">挙式・披露宴・指輪・新居の初期費用など。結婚する年に現金で支払います（ご祝儀等で相殺後の自己負担額の目安を入力。0にすれば計上しません）。</div>
         <div class="field"><label>パートナーの現在年齢</label><div class="ig"><input type="number" id="partnerCurrentAge" value="26"><span class="unit">歳</span></div></div>
@@ -543,7 +545,7 @@ function balAfter(L,k){ if(k<=0)return L.borrow; if(k>=L.n/12)return 0; const m=
 
 function eventsFor(P,age,childAges,L){
   const e=[];
-  if(age===P.marriageAge) e.push('結婚・新生活');
+  if(age===P.marriageAgeEff && P.marriageRow>=0) e.push('結婚・新生活');
   P.children.forEach((c,idx)=>{ if(c.birthAge===age) e.push(`第${idx+1}子 誕生`); });
   childAges.forEach((ca,idx)=>{
     if(ca==null) return;
@@ -570,18 +572,26 @@ function eventsFor(P,age,childAges,L){
 }
 
 function simulate(P){
+  /* 月単位フィールドの安全な補完（patch適用時やテスト時にも整合させる） */
+  if(P.currentAgeFrac==null) P.currentAgeFrac=P.currentAge+((P.currentAgeMonths||0)/12);
+  if(P.marriageAgeFrac==null) P.marriageAgeFrac=P.marriageAge+((P.marriageAgeMonths||0)/12);
+  if(P.marriageRow==null) P.marriageRow=(P.marriageAgeFrac>P.currentAgeFrac)?Math.floor(P.marriageAgeFrac-P.currentAgeFrac):((P.marriageAgeFrac<=P.currentAgeFrac&&P.marriageAge>0)?0:-1);
+  if(P.marriageAgeEff==null) P.marriageAgeEff=(P.marriageRow>=0)?P.currentAge+P.marriageRow:P.marriageAge;
   const L=loanCalc(P); const rows=[]; let cash=P.initCash, nisaP=P.initNisaP, nisaV=(P.initNisaV>0?P.initNisaV:P.initNisaP), dcValue=0;
   const eduTotalEach=eduTotalPerChild(P); const eduMonthlyEach=eduTotalEach/(EDU_SAVE_END*12); const totalEduAll=eduTotalEach*P.children.length; let eduFund=0, eduPaid=0; let lastCarPrice=0;
   let pcSelf=0, pcSpouse=0, pensionCalc=null;
   const nY=Math.max(1,P.endAge-P.currentAge+1);
   for(let i=0;i<nY;i++){
-    const age=P.currentAge+i, pAge=P.partnerCurrentAge+i, married=age>=P.marriageAge;
+    const age=P.currentAge+i, pAge=P.partnerCurrentAge+i;
+    /* 結婚の月単位対応：結婚が発生する行だけ在婚期間を按分（0〜1）。以降は1、以前は0 */
+    const marriedFrac=Math.max(0,Math.min(1,(P.currentAgeFrac+i+1)-P.marriageAgeFrac));
+    const married=marriedFrac>0;
     const childAges=P.children.map(c=>{const a=age-c.birthAge; return a>=0?a:null;});
     const dep=childAges.filter(a=>a!=null && a<P.childIndependAge);
     let selfBase=0,selfAllow=0,selfMonthly=0,selfBonus=0,selfGross=0;
-    if(age<P.selfRetire){ selfBase=Math.min(P.selfBaseMonthly+P.selfRaise*i,P.selfCapMonthly); const famAllow=(married?(P.famAllowSpouse||0):0)+dep.length*(P.famAllowChild||0); selfAllow=P.selfAllowance+famAllow; selfMonthly=selfBase+selfAllow; selfBonus=selfBase*P.selfBonusMonths; selfGross=selfMonthly*12+selfBonus; }
+    if(age<P.selfRetire){ selfBase=Math.min(P.selfBaseMonthly+P.selfRaise*i,P.selfCapMonthly); const famAllow=(P.famAllowSpouse||0)*marriedFrac+dep.length*(P.famAllowChild||0); selfAllow=P.selfAllowance+famAllow; selfMonthly=selfBase+selfAllow; selfBonus=selfBase*P.selfBonusMonths; selfGross=selfMonthly*12+selfBonus; }
     let pMonthly=0,pBonus=0,pGross=0;
-    if(married){ for(const s of P.partnerSegs){ if(age>=s.from&&age<=s.to){ const base=Math.min(s.base+(s.raise||0)*Math.max(0,age-s.from),s.cap||s.base); const m=base+(s.allow||0); pMonthly+=m; pBonus+=base*(s.bonusMonths||0);} } pGross=pMonthly*12+pBonus; }
+    if(married){ for(const s of P.partnerSegs){ if(age>=s.from&&age<=s.to){ const base=Math.min(s.base+(s.raise||0)*Math.max(0,age-s.from),s.cap||s.base); const m=base+(s.allow||0); pMonthly+=m; pBonus+=base*(s.bonusMonths||0);} } pMonthly*=marriedFrac; pBonus*=marriedFrac; pGross=pMonthly*12+pBonus; }
     const gross=selfGross+pGross, bonus=selfBonus+(married?pBonus:0);
     /* 厚生年金の標準報酬を積み立て（就労中・上限あり） */
     if(age<P.selfRetire && P.pensionType!=='kokumin' && age>=P.joinAge) pcSelf+=Math.min(selfGross,PENSION_CAP);
@@ -597,7 +607,7 @@ function simulate(P){
     const ded = age<P.selfRetire ? deductionSaving(P,selfGross,pGross,childAges,married) : 0;
     const eqNow=Math.max(1, 1+0.5*(P.curHouseholdSize-1));
     const perEq=(P.curMonthlyLiving*12)/eqNow;
-    let eq=1+(married?0.5:0);
+    let eq=1+0.5*marriedFrac;
     dep.forEach(a=>{ eq+=(a<14?0.3:0.5); });
     let living=perEq*eq;
     living+=insurance(age)+P.travelCount*P.travelCost;
@@ -608,7 +618,7 @@ function simulate(P){
     const emgMonths = dep.length>0 ? 12 : (retired ? 0 : (earners>=2 ? 6 : 10));
     const emergency = living*emgMonths/12;
     let housing=0,oneoff=0,oneoffLbl=[];
-    if(P.marriageAge>P.currentAge && age===P.marriageAge && (P.weddingCost||0)>0){ oneoff+=P.weddingCost; oneoffLbl.push('挙式・新生活 '+man(P.weddingCost)+'万'); }
+    if(P.marriageAgeFrac>P.currentAgeFrac && i===P.marriageRow && (P.weddingCost||0)>0){ oneoff+=P.weddingCost; oneoffLbl.push('挙式・新生活 '+man(P.weddingCost)+'万'); }
     if(P.buyAge==null||age<P.buyAge){ housing=P.rentMonthly*12; }
     else { const sb=age-P.buyAge; if(age===P.buyAge){ oneoff+=P.downpay; oneoffLbl.push('頭金 '+man(P.downpay)+'万'); const closing=P.price*(P.closingRate||0); if(closing>0){ oneoff+=closing; oneoffLbl.push('購入諸費用 '+man(closing)+'万'); } } if(sb<P.loanYears)housing+=L.annualPay; housing+=P.propertyTax; if(sb===P.repair1Year){oneoff+=P.repair1Cost;oneoffLbl.push('水廻り修繕 '+man(P.repair1Cost)+'万');} if(sb===P.repair2Year){oneoff+=P.repair2Cost;oneoffLbl.push('リフォーム '+man(P.repair2Cost)+'万');} }
     const edu=P.children.reduce((s,c)=>s+eduAnnual(age-c.birthAge,P),0);
@@ -670,8 +680,9 @@ let segs=[], kids=[];
 function num(id){ const el=document.getElementById(id); const v=parseFloat(el.value); return isNaN(v)?0:v; }
 function val(id){ return document.getElementById(id).value; }
 function readParams(){
-  return {
+  const P = {
     currentAge:num('currentAge'), endAge:num('endAge'), marriageAge:num('marriageAge'), partnerCurrentAge:num('partnerCurrentAge'),
+    currentAgeMonths:num('currentAgeMonths'), marriageAgeMonths:num('marriageAgeMonths'),
     weddingCost:num('weddingCost'),
     selfBaseMonthly:num('selfBaseMonthly'), selfAllowance:num('selfAllowance'), famAllowSpouse:num('famAllowSpouse'), famAllowChild:num('famAllowChild'), selfRaise:num('selfRaise'), selfCapMonthly:num('selfCapMonthly'),
     selfBonusMonths:num('selfBonusMonths'), selfRetire:num('selfRetire'),
@@ -702,6 +713,17 @@ function readParams(){
     hasCar:document.getElementById('hasCar').checked, carFirstAge:num('carFirstAge'), carPrice:num('carPrice'),
     carCycle:num('carCycle'), carInflation:num('carInflation')/100, carTradeIn:num('carTradeIn')/100, carReturnAge:num('carReturnAge')
   };
+  /* --- 月単位（現在年齢・結婚年齢）を小数の年齢に変換し、結婚が起きる行を確定 --- */
+  const cm=Math.min(11,Math.max(0,Math.round(P.currentAgeMonths||0)));
+  const mm=Math.min(11,Math.max(0,Math.round(P.marriageAgeMonths||0)));
+  P.currentAgeMonths=cm; P.marriageAgeMonths=mm;
+  P.currentAgeFrac=P.currentAge+cm/12;
+  P.marriageAgeFrac=P.marriageAge+mm/12;
+  /* 結婚が起きる行インデックス（現在＝行0）。過去/未指定なら-1 */
+  P.marriageRow=(P.marriageAgeFrac>P.currentAgeFrac)?Math.floor(P.marriageAgeFrac-P.currentAgeFrac):((P.marriageAgeFrac<=P.currentAgeFrac&&P.marriageAge>0)?0:-1);
+  /* 結婚行のラベル年齢（既存の age===X 系ロジックが参照する実効結婚年齢） */
+  P.marriageAgeEff=(P.marriageRow>=0)?P.currentAge+P.marriageRow:P.marriageAge;
+  return P;
 }
 
 /* ============ 動的リスト（勤務パターン・子ども） ============ */
@@ -794,24 +816,27 @@ function computeRanks(rows){
 function yenMonthly(man10k, months){ if(months<=0)return '—'; const y=Math.round(man10k*10000/months/100)*100; return '¥'+y.toLocaleString('ja-JP')+'/月'; }
 function renderAdvice(P, rows){
   const list=document.getElementById('adviceList'); if(!list) return;
-  const now=P.currentAge, items=[];
+  const now=P.currentAge, nowFrac=(P.currentAgeFrac!=null?P.currentAgeFrac:now), items=[];
   const rowAt=a=>rows.find(r=>r.age===a);
-  const monthsTo=a=>Math.max(1,(a-now)*12);
-  const push=(age,icon,title,lines,warn)=>{ items.push({age,icon,title,lines:lines.filter(Boolean),warn:!!warn}); };
+  const monthsTo=a=>Math.max(1,Math.round((a-nowFrac)*12));       /* 現在(小数)からの月数 */
+  const fmtYM=frac=>{ const y=Math.floor(frac+1e-9), m=Math.round((frac-y)*12); return m>0?`${y}歳${m}ヶ月`:`${y}歳`; };
+  const fmtAfter=months=>{ const y=Math.floor(months/12), m=months%12; return (y>0?`${y}年`:'')+(m>0?`${m}ヶ月`:(y>0?'':'0ヶ月'))+'後'; };
+  const push=(age,icon,title,lines,warn,whenText)=>{ items.push({age,icon,title,lines:lines.filter(Boolean),warn:!!warn,whenText:whenText||`${age}歳・${Math.max(0,Math.round(age-nowFrac))}年後`}); };
   const segCovers=a=>P.partnerSegs.some(s=>a>=s.from&&a<=s.to);
 
   /* --- 結婚 --- */
-  if(P.marriageAge>now && P.marriageAge<=P.endAge){
-    const r=rowAt(P.marriageAge); const cost=P.weddingCost||0; const dual=segCovers(P.marriageAge);
-    push(P.marriageAge,'💍','結婚・新生活',[
+  if(P.marriageRow>=0 && P.marriageAgeFrac>nowFrac && P.marriageAgeEff<=P.endAge){
+    const mEff=P.marriageAgeEff; const r=rowAt(mEff); const cost=P.weddingCost||0; const dual=segCovers(mEff);
+    const mo=Math.max(1,Math.round((P.marriageAgeFrac-nowFrac)*12));
+    push(mEff,'💍','結婚・新生活',[
       cost>0
-        ?`挙式・新生活の特別費<b>${man(cost)}万円</b>を${P.marriageAge}歳で計上済みです。${(P.marriageAge-now)<=2
-            ?`あと${(P.marriageAge-now)*12}ヶ月と期間が短いため、月々<b>${yenMonthly(cost,monthsTo(P.marriageAge))}</b>の準備か、現在の現預金${man(P.initCash)}万円からの充当が現実的です。`
-            :`今から<b>${yenMonthly(cost,monthsTo(P.marriageAge))}</b>を確保すれば無理なく間に合います。`}`
+        ?`挙式・新生活の特別費<b>${man(cost)}万円</b>を<b>${fmtYM(P.marriageAgeFrac)}</b>（${fmtAfter(mo)}）で計上済みです。${mo<=24
+            ?`あと${mo}ヶ月と期間が短いため、月々<b>${yenMonthly(cost,mo)}</b>の準備か、現在の現預金${man(P.initCash)}万円からの充当が現実的です。`
+            :`今から<b>${yenMonthly(cost,mo)}</b>を確保すれば無理なく間に合います。`}`
         :`挙式・新生活の特別費は0で計上していません。費用を見込む場合は「基本」欄の挙式・新生活の特別費に入力すると資産推移へ反映されます（自己負担の目安200〜300万円）。`,
       r?`結婚後の生活防衛費は${dual?`共働き設定のため生活費6ヶ月分（約${man(r.emergency)}万円）`:`この時点でパートナーの収入設定がないため10ヶ月分（約${man(r.emergency)}万円）`}。特別費を差し引いた後の予測現預金は<b>${man(r.cash)}万円</b>です。`:null,
       !dual?`「収入 相手」欄に結婚時点をカバーする勤務パターンがありません。実態と違う場合は期間を追加すると試算の精度が上がります。`:null
-    ], r&&r.cash<r.emergency+cost);
+    ], r&&r.cash<r.emergency+cost, `${fmtYM(P.marriageAgeFrac)}・${fmtAfter(mo)}`);
   }
 
   /* --- 出産・教育 --- */
@@ -916,7 +941,7 @@ function renderAdvice(P, rows){
     <div class="advice ${it.warn?'warn':''}">
       <div class="a-ico">${it.icon}</div>
       <div class="a-body">
-        <div class="a-title">${it.title}<span class="a-when">${it.age}歳・${it.age-now}年後</span></div>
+        <div class="a-title">${it.title}<span class="a-when">${it.whenText}</span></div>
         ${it.lines.map(l=>`<p class="a-line">${l}</p>`).join('')}
       </div>
     </div>`).join('');
@@ -1166,7 +1191,7 @@ function render(){
     return `<div class="band" style="width:${w}%;background:${bd.color}">${showLbl?`<span>${bd.label}</span>`:''}</div>`;
   }).join('');
   const flagDefs=[];
-  if(P.marriageAge>=start&&P.marriageAge<=P.endAge) flagDefs.push({age:P.marriageAge,lbl:'結婚'});
+  if(P.marriageRow>=0 && P.marriageAgeEff>=start && P.marriageAgeEff<=P.endAge) flagDefs.push({age:P.marriageAgeEff,lbl:'結婚'});
   P.children.forEach((c,i)=>{ if(c.birthAge>=start&&c.birthAge<=P.endAge) flagDefs.push({age:c.birthAge,lbl:`第${i+1}子`}); });
   if(P.buyAge>=start&&P.buyAge<=P.endAge) flagDefs.push({age:P.buyAge,lbl:'住宅'});
   const firstUniv=rows.find(r=>r.childAges.some(a=>a===18)); if(firstUniv) flagDefs.push({age:firstUniv.age,lbl:'大学'});
@@ -1239,7 +1264,7 @@ function render(){
 }
 
 /* ============ 初期化 ============ */
-const DEFAULTS={currentAge:26,endAge:90,marriageAge:28,weddingCost:250,partnerCurrentAge:26,
+const DEFAULTS={currentAge:26,currentAgeMonths:0,endAge:90,marriageAge:28,marriageAgeMonths:0,weddingCost:250,partnerCurrentAge:26,
   selfBaseMonthly:24,selfAllowance:4,famAllowSpouse:1,famAllowChild:0.5,selfRaise:0.7,selfCapMonthly:46,selfBonusMonths:4.2,selfBonusCount:2,selfRetire:65,
   reemployIncome:260,reemployTo:65,jobType:'kaisha',pensionType:'kosei',pensionBasicYears:40,macroSlide:'1',macroSlideRate:0.4,childIndependAge:22,
   eduKinder:'pub',eduElem:'pub',eduJunior:'pub',eduHigh:'pub',eduUniv:'kokuritsu',eduAway:'no',jukuMonthly:0,
