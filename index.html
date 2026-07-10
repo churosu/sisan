@@ -123,6 +123,28 @@
   .tab-btn .tb-badge.warn{background:var(--rose)}
   .tab-panel{display:none}
   .tab-panel.active{display:block}
+
+  .snap-agebar{display:flex; align-items:center; justify-content:space-between; gap:10px; background:#F4F7FA; border:1px solid var(--line); border-radius:10px; padding:10px 14px; margin-bottom:10px}
+  .snap-agebar label{font-size:13px; font-weight:700; color:var(--ink)}
+  .snap-agebar .ig{display:flex; align-items:center; gap:5px}
+  .snap-hero{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:12px 0}
+  .snap-hero .sh{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:13px 15px}
+  .snap-hero .sh.accent{border-color:var(--teal); background:#F2FAF9}
+  .snap-hero .sh .sh-l{font-size:11px; color:var(--slate-2); font-weight:700}
+  .snap-hero .sh .sh-nom{font-size:21px; font-weight:800; color:var(--ink); margin-top:3px; font-variant-numeric:tabular-nums}
+  .snap-hero .sh .sh-real{font-size:12px; color:var(--teal); font-weight:700; margin-top:2px}
+  .snap-hero .sh.warnk{border-color:var(--rose); background:#FDF6F8}
+  .snap-hero .sh.warnk .sh-nom{color:var(--rose)}
+  .snap-tbl{width:100%; border-collapse:collapse; margin-top:6px}
+  .snap-tbl td{padding:7px 4px; border-bottom:1px solid var(--line); font-size:12.5px; font-variant-numeric:tabular-nums}
+  .snap-tbl td:first-child{color:var(--slate); text-align:left}
+  .snap-tbl td:nth-child(2),.snap-tbl td:nth-child(3){text-align:right; color:var(--ink)}
+  .snap-tbl thead td{color:var(--slate-2); font-weight:800; font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; border-bottom:1.5px solid var(--line)}
+  .snap-tbl td.pos{color:var(--teal)} .snap-tbl td.neg{color:var(--rose)}
+  .snap-note{font-size:11.5px; color:var(--slate); line-height:1.7; margin-top:10px; background:#F7FAFC; border:1px solid var(--line); border-radius:10px; padding:11px 13px}
+  .snap-ev{font-size:12px; color:var(--slate); margin-top:8px}
+  .snap-ev b{color:var(--ink)}
+  @media (max-width:560px){ .snap-hero{grid-template-columns:1fr} }
   @media print{ .tabs{display:none} .tab-panel{display:block!important} .tab-panel{margin-bottom:20px} }
 
   /* timeline ribbon (signature) */
@@ -379,6 +401,7 @@
         <button class="tab-btn active" data-tab="tab-rank">資産形成の評価 <span class="tb-badge" id="tabBadgeRank"></span></button>
         <button class="tab-btn" data-tab="tab-advice">イベント別アドバイス <span class="tb-badge" id="tabBadgeAdvice"></span></button>
         <button class="tab-btn" data-tab="tab-proposal">診断・改善提案 <span class="tb-badge" id="tabBadgeProposal"></span></button>
+        <button class="tab-btn" data-tab="tab-snapshot">指定年齢の詳細</button>
       </div>
 
       <div class="tab-panel active" id="tab-rank">
@@ -402,6 +425,17 @@
         <div class="diag" id="planDiag"></div>
         <div class="proposal-list" id="proposalList"></div>
         <div class="hint" style="margin-top:10px">各提案は、実際にその値へ変更した場合のシミュレーションを裏側で再計算し、効果を実測したものです（効果のあった案だけを影響の大きい順に表示）。</div>
+      </div>
+
+      <div class="tab-panel" id="tab-snapshot">
+        <div class="eyebrow">Snapshot</div>
+        <h2>指定した年齢時点の詳細</h2>
+        <div class="snap-agebar">
+          <label for="snapAge">参照したい年齢（本人）</label>
+          <div class="ig"><input type="number" id="snapAge" value="65" step="1"><span class="unit mo">歳</span></div>
+        </div>
+        <div class="hint" style="margin-top:0">入力した年齢時点の資産・収支と、その時点の金額を「今の価値（実質購買力）」に換算した額を表示します。</div>
+        <div id="snapBody"></div>
       </div>
     </div>
 
@@ -669,8 +703,9 @@ function simulate(P){
     }
     const drawdown=drawNisa+drawDc;
     const netWorth=cash+nisaV+dcValue*(1-P.dcTaxRate);
+    const defl=Math.pow(1+P.inflation,i);
     const events=eventsFor(P,age,childAges,L);
-    rows.push({i,age,pAge,married,childAges,dep:dep.length,earners,emgMonths,emergency,pension:(age>=P.reemployTo?pensionCalc:null),gross,bonus,net,living,housing,edu,oneoff,oneoffLbl,saving,contrib,sweep,ded,dcContrib,dcDed,retireNet,dcLumpFree,dcValue,eduFund,drawNisa,drawDc,dcTaxPaid,drawdown,nisaV,nisaP,cash,netWorth,incomeCash,expense,events});
+    rows.push({i,age,pAge,married,childAges,dep:dep.length,earners,emgMonths,emergency,pension:(age>=P.reemployTo?pensionCalc:null),gross,bonus,net,living,housing,edu,oneoff,oneoffLbl,saving,contrib,sweep,ded,dcContrib,dcDed,retireNet,dcLumpFree,dcValue,eduFund,drawNisa,drawDc,dcTaxPaid,drawdown,nisaV,nisaP,cash,netWorth,defl,incomeCash,expense,events});
   }
   return rows;
 }
@@ -782,6 +817,7 @@ const ROWBG={single:'#F4F8FC',couple:'#F1F8F6',kids:'#FEF8EE',edu:'#FBF1F4',old:
 
 /* ============ メイン描画 ============ */
 let assetChart, flowChart, inflChart;
+let SNAP_LAST=null;
 const RANK_TH={
   '20代':{SS:5,S:3.5,A:2.2,B:1.2,C:0.5},
   '30代':{SS:5,S:3.5,A:2.3,B:1.3,C:0.6},
@@ -1088,6 +1124,70 @@ function renderInflation(P, baseRows){
   document.getElementById('inflAdvice').innerHTML=adv;
 }
 
+/* ============ 指定年齢の詳細スナップショット ============ */
+function renderSnapshot(){
+  const body=document.getElementById('snapBody'); if(!body||!SNAP_LAST) return;
+  const {P,rows}=SNAP_LAST;
+  const inp=document.getElementById('snapAge'); if(!inp) return;
+  let target=Math.round(parseFloat(inp.value));
+  if(isNaN(target)) target=P.selfRetire;
+  const lo=rows[0].age, hi=rows[rows.length-1].age;
+  target=Math.max(lo,Math.min(hi,target));
+  const r=rows.find(x=>x.age===target)||rows[rows.length-1];
+  const defl=r.defl||1;
+  const real=v=>v/defl;
+  const inflPct=(P.inflation*100).toFixed(1);
+  const cumPct=((defl-1)*100);
+  const yearsFromNow=r.age-Math.floor(P.currentAgeFrac!=null?P.currentAgeFrac:P.currentAge);
+  const powerPct=(1/defl*100);
+
+  /* NISA/DC 実質も */
+  const dcNet=r.dcValue*(1-P.dcTaxRate);
+  const rowsTbl=[
+    ['現預金', r.cash, true],
+    ['NISA 評価額', r.nisaV, false],
+    ['DC 税引後評価額', dcNet, false],
+    ['― 総資産（合計）', r.netWorth, true],
+    ['生活防衛費（目安）', r.emergency, false],
+    ['年間 手取り収入', r.incomeCash, false],
+    ['年間 支出', r.expense, false],
+    ['年間 収支（貯蓄）', r.saving, false]
+  ];
+
+  const nomVal=r.netWorth, nomCash=r.cash;
+  const cashWarn=r.cash<r.emergency-0.5;
+  const nwWarn=r.netWorth<0;
+
+  body.innerHTML=`
+    <div class="snap-hero">
+      <div class="sh ${nwWarn?'warnk':'accent'}">
+        <div class="sh-l">総資産（名目）</div>
+        <div class="sh-nom">${manY(nomVal)}</div>
+        <div class="sh-real">実質 ${manY(real(nomVal))}（今の価値）</div>
+      </div>
+      <div class="sh ${cashWarn?'warnk':''}">
+        <div class="sh-l">現預金（名目）</div>
+        <div class="sh-nom">${manY(nomCash)}</div>
+        <div class="sh-real">実質 ${manY(real(nomCash))}（今の価値）</div>
+      </div>
+    </div>
+
+    <table class="snap-tbl">
+      <thead><tr><td>項目</td><td>名目（その年の額）</td><td>実質（今の価値）</td></tr></thead>
+      <tbody>
+        ${rowsTbl.map(([lbl,v])=>`<tr><td>${lbl}</td><td class="${v<0?'neg':''}">${manY(v)}</td><td class="${v<0?'neg':''}">${manY(real(v))}</td></tr>`).join('')}
+      </tbody>
+    </table>
+
+    ${r.events&&r.events.length?`<div class="snap-ev">この年のイベント：<b>${r.events.join('・')}</b></div>`:''}
+
+    <div class="snap-note">
+      <b>${r.age}歳（今から${yearsFromNow}年後）</b>時点の試算です。年${inflPct}%のインフレが続くと、この時点までに物価は累計<b>${cumPct>=0?'+':''}${cumPct.toFixed(1)}%</b>になり、同じ1万円で買えるものは今の<b>${powerPct.toFixed(1)}%</b>相当に目減りします。<br>
+      つまり名目総資産${manY(nomVal)}は、<b>今のお金に換算すると${manY(real(nomVal))}の購買力</b>しかありません。老後の必要額を「今の感覚の金額」で考えると不足しやすいため、実質額での確認が重要です。
+      ${P.inflation<=0?'<br><span style="color:var(--slate-2)">※インフレ率が0のため、名目と実質は一致します。</span>':''}
+    </div>`;
+}
+
 function render(){
   const P=readParams();
   if(P.endAge<=P.currentAge){ return; }
@@ -1103,8 +1203,8 @@ function render(){
   let peak={v:-Infinity,age:0}; rows.forEach(r=>{ if(r.netWorth>peak.v)peak={v:r.netWorth,age:r.age}; });
 
   const cards=[
-    {label:'最終 総資産', val:manY(last.netWorth), sub:`${P.endAge}歳時点`, cls:'accent'},
-    {label:'ピーク総資産', val:manY(peak.v), sub:`${peak.age}歳時点`},
+    {label:'最終 総資産', val:manY(last.netWorth), sub:`${P.endAge}歳・実質${manY(last.netWorth/last.defl)}（今の価値）`, cls:'accent'},
+    {label:'ピーク総資産', val:manY(peak.v), sub:`${peak.age}歳・実質${manY(peak.v/(rows.find(r=>r.age===peak.age)||{defl:1}).defl)}`},
     {label:'最低 現預金', val:manY(minCash.cash), sub:`${minCash.age}歳ごろ`, cls: minCash.cash<minCash.emg-0.5?'warnk':''},
     {label:'NISA 最終評価', val:manY(last.nisaV), sub:`元本 ${man(last.nisaP)}万 / 含み益 ${man(last.nisaV-last.nisaP)}万`, cls:'accent'},
     {label:'生涯 手取り収入', val:manY(lifeIncome), sub:'給付・控除含む'},
@@ -1167,6 +1267,8 @@ function render(){
   const adviceMeta=renderAdvice(P,rows);
   const propMeta=renderProposals(P,rows);
   renderInflation(P,rows);
+  SNAP_LAST={P,rows};
+  renderSnapshot();
 
   /* --- タブのバッジ更新 --- */
   const bRank=document.getElementById('tabBadgeRank'); if(bRank){ bRank.textContent=rk.overall; bRank.className='tb-badge'+((rk.overall==='C'||rk.overall==='D')?' warn':''); }
@@ -1350,6 +1452,7 @@ document.getElementById('resultTabs').addEventListener('click',e=>{
   const id=btn.dataset.tab;
   document.querySelectorAll('#tabBlock .tab-panel').forEach(p=>p.classList.toggle('active',p.id===id));
 });
+document.getElementById('snapAge').addEventListener('input',renderSnapshot);
 
 init();
 </script>
