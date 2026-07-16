@@ -135,6 +135,13 @@
   .snap-hero .sh .sh-real{font-size:12px; color:var(--teal); font-weight:700; margin-top:2px}
   .snap-hero .sh.warnk{border-color:var(--rose); background:#FDF6F8}
   .snap-hero .sh.warnk .sh-nom{color:var(--rose)}
+
+  .loannote{line-height:1.65}
+  .loannote b{color:var(--ink)}
+  .loannote .ln-ratio{font-weight:800}
+  .loannote.warn{background:#FDF6F8; border:1px solid #F1C9D2; border-radius:8px; padding:8px 10px; margin-top:6px}
+  .loannote.warn b,.loannote.warn .ln-ratio,.loannote.warn .ln-warn{color:var(--rose)}
+  .loannote .ln-warn{font-weight:800}
   .snap-tbl{width:100%; border-collapse:collapse; margin-top:6px}
   .snap-tbl td{padding:7px 4px; border-bottom:1px solid var(--line); font-size:12.5px; font-variant-numeric:tabular-nums}
   .snap-tbl td:first-child{color:var(--slate); text-align:left}
@@ -310,14 +317,16 @@
         <div class="hint">購入しない場合は最終年齢より大きい値に。</div>
         <div class="field"><label>購入前の家賃</label><div class="ig"><input type="number" id="rentMonthly" value="9" step="0.5"><span class="unit">万/月</span></div></div>
         <div class="field"><label>物件価格</label><div class="ig"><input type="number" id="price" value="3800"><span class="unit">万</span></div></div>
+        <div class="hint loannote" id="loanNote"></div>
         <div class="field"><label>頭金</label><div class="ig"><input type="number" id="downpay" value="700"><span class="unit">万</span></div></div>
         <div class="field"><label>購入諸費用（物件価格の）</label><div class="ig"><input type="number" id="closingRate" value="7" step="0.5"><span class="unit">%</span></div></div>
         <div class="hint">登記・仲介手数料・ローン事務手数料・火災保険・不動産取得税など。頭金と合わせて購入年に現金で支払います（ローンには含めません）。</div>
         <div class="field"><label>住宅ローン 金利</label><div class="ig"><input type="number" id="rate" value="1.2" step="0.1"><span class="unit">%</span></div></div>
         <div class="field"><label>住宅ローン 返済年数</label><div class="ig"><input type="number" id="loanYears" value="35"><span class="unit">年</span></div></div>
         <div class="field"><label>固定資産税・管理（年）</label><div class="ig"><input type="number" id="propertyTax" value="18"><span class="unit">万/年</span></div></div>
-        <div class="field"><label>水廻り修繕（購入から）</label><div class="ig"><input type="number" id="repair1Year" value="10"><span class="unit">年目</span></div></div>
-        <div class="field"><label>　└ 金額</label><div class="ig"><input type="number" id="repair1Cost" value="120"><span class="unit">万</span></div></div>
+        <div class="field"><label>水廻り修繕（周期）</label><div class="ig"><input type="number" id="repair1Year" value="10"><span class="unit">年おき</span></div></div>
+        <div class="field"><label>　└ 金額（1回あたり）</label><div class="ig"><input type="number" id="repair1Cost" value="120"><span class="unit">万</span></div></div>
+        <div class="hint" style="margin-top:0">給湯器・水栓・トイレ等の水廻りは、購入からこの周期で繰り返し発生します（例：10年おきなら10・20・30…年目）。0にすると計上しません。</div>
         <div class="field"><label>大型リフォーム（購入から）</label><div class="ig"><input type="number" id="repair2Year" value="35"><span class="unit">年目</span></div></div>
         <div class="field"><label>　└ 金額</label><div class="ig"><input type="number" id="repair2Cost" value="500"><span class="unit">万</span></div></div>
         <div class="field"><label>住宅ローン減税 期間</label><div class="ig"><input type="number" id="creditYears" value="13"><span class="unit">年</span></div></div>
@@ -591,7 +600,7 @@ function eventsFor(P,age,childAges,L){
   });
   if(P.buyAge!=null && age===P.buyAge) e.push('戸建て購入');
   if(P.buyAge!=null){ const sb=age-P.buyAge;
-    if(sb===P.repair1Year) e.push('水廻り修繕');
+    if(P.repair1Year>0 && sb>0 && sb%P.repair1Year===0) e.push('水廻り修繕');
     if(sb===P.repair2Year) e.push('大型リフォーム');
     if(sb===P.loanYears) e.push('住宅ローン完済');
   }
@@ -654,7 +663,7 @@ function simulate(P){
     let housing=0,oneoff=0,oneoffLbl=[];
     if(P.marriageAgeFrac>P.currentAgeFrac && i===P.marriageRow && (P.weddingCost||0)>0){ oneoff+=P.weddingCost; oneoffLbl.push('挙式・新生活 '+man(P.weddingCost)+'万'); }
     if(P.buyAge==null||age<P.buyAge){ housing=P.rentMonthly*12; }
-    else { const sb=age-P.buyAge; if(age===P.buyAge){ oneoff+=P.downpay; oneoffLbl.push('頭金 '+man(P.downpay)+'万'); const closing=P.price*(P.closingRate||0); if(closing>0){ oneoff+=closing; oneoffLbl.push('購入諸費用 '+man(closing)+'万'); } } if(sb<P.loanYears)housing+=L.annualPay; housing+=P.propertyTax; if(sb===P.repair1Year){oneoff+=P.repair1Cost;oneoffLbl.push('水廻り修繕 '+man(P.repair1Cost)+'万');} if(sb===P.repair2Year){oneoff+=P.repair2Cost;oneoffLbl.push('リフォーム '+man(P.repair2Cost)+'万');} }
+    else { const sb=age-P.buyAge; if(age===P.buyAge){ oneoff+=P.downpay; oneoffLbl.push('頭金 '+man(P.downpay)+'万'); const closing=P.price*(P.closingRate||0); if(closing>0){ oneoff+=closing; oneoffLbl.push('購入諸費用 '+man(closing)+'万'); } } if(sb<P.loanYears)housing+=L.annualPay; housing+=P.propertyTax; if(P.repair1Year>0 && sb>0 && sb%P.repair1Year===0){oneoff+=P.repair1Cost;oneoffLbl.push('水廻り修繕 '+man(P.repair1Cost)+'万');} if(sb===P.repair2Year){oneoff+=P.repair2Cost;oneoffLbl.push('リフォーム '+man(P.repair2Cost)+'万');} }
     const edu=P.children.reduce((s,c)=>s+eduAnnual(age-c.birthAge,P),0);
     if(P.hasCar && age>=P.carFirstAge && age<P.carReturnAge && (age-P.carFirstAge)%Math.max(1,P.carCycle)===0){
       const price=P.carPrice*Math.pow(1+P.carInflation,i);
@@ -921,16 +930,30 @@ function renderAdvice(P, rows){
         :`購入直後も現預金<b>${man(r.cash)}万円</b>で生活防衛費を維持できる試算です。`):null,
       `ローン減税（残高×${(P.creditRate*100).toFixed(1)}%・${P.creditYears}年）は計上済み。繰上返済は減税が切れる<b>${P.buyAge+P.creditYears}歳以降</b>に行うのが有利です。`
     ], ratio>30||shortCash>0);
-    [[P.repair1Year,P.repair1Cost,'水廻り修繕','🔧'],[P.repair2Year,P.repair2Cost,'大型リフォーム','🛠️']].forEach(([y,cost,lbl,ico])=>{
-      const age=P.buyAge+y;
-      if(age>now && age<=P.endAge && cost>0){
+    /* 水廻り修繕：周期ごとに繰り返し */
+    if(P.repair1Year>0 && P.repair1Cost>0){
+      const iv=P.repair1Year, cost=P.repair1Cost, occ=[];
+      for(let sb=iv; P.buyAge+sb<=P.endAge; sb+=iv){ const a=P.buyAge+sb; if(a>now) occ.push(a); }
+      if(occ.length){
+        const first=occ[0], total=occ.length*cost, r2=rowAt(first);
+        push(first,'🔧',`水廻り修繕（${iv}年ごと）`,[
+          `購入から<b>${iv}年ごと</b>に<b>${man(cost)}万円</b>が繰り返し発生します（次回は${first}歳／${P.endAge}歳までに残り<b>${occ.length}回・計${man(total)}万円</b>）。`,
+          `毎月<b>${yenMonthly(cost,iv*12)}</b>を修繕積立として住宅費と別に確保し続ければ、その都度の取り崩しは不要です。`,
+          r2&&r2.cash<r2.emergency?`次回（${first}歳）は現預金が生活防衛費を下回る試算（${man(r2.cash)}万円）。`:null
+        ], r2&&r2.cash<r2.emergency);
+      }
+    }
+    /* 大型リフォーム：1回 */
+    if(P.repair2Year>0 && P.repair2Cost>0){
+      const age=P.buyAge+P.repair2Year;
+      if(age>now && age<=P.endAge){
         const r2=rowAt(age);
-        push(age,ico,lbl,[
-          `購入${y}年目に<b>${man(cost)}万円</b>。修繕積立<b>${yenMonthly(cost,monthsTo(age))}</b>を住宅費と別に確保しておけば取り崩し不要です。`,
+        push(age,'🛠️','大型リフォーム',[
+          `購入${P.repair2Year}年目に<b>${man(P.repair2Cost)}万円</b>。修繕積立<b>${yenMonthly(P.repair2Cost,monthsTo(age))}</b>を住宅費と別に確保しておけば取り崩し不要です。`,
           r2&&r2.cash<r2.emergency?`この年は現預金が生活防衛費を下回る試算（${man(r2.cash)}万円）。時期を動かせる工事なら余裕のある年へずらしてください。`:null
         ], r2&&r2.cash<r2.emergency);
       }
-    });
+    }
   }
 
   /* --- 車 --- */
@@ -1269,7 +1292,7 @@ function render(){
   renderInflation(P,rows);
   SNAP_LAST={P,rows};
   renderSnapshot();
-
+  renderLoanNote(P,rows);
   /* --- タブのバッジ更新 --- */
   const bRank=document.getElementById('tabBadgeRank'); if(bRank){ bRank.textContent=rk.overall; bRank.className='tb-badge'+((rk.overall==='C'||rk.overall==='D')?' warn':''); }
   const bAdv=document.getElementById('tabBadgeAdvice'); if(bAdv){ bAdv.textContent=adviceMeta.count||''; bAdv.className='tb-badge'+(adviceMeta.warn?' warn':''); }
@@ -1365,6 +1388,26 @@ function render(){
   saveLocal();
 }
 
+/* ============ 戸建て金額欄の下：ローン返済額と家計比率の備考 ============ */
+function renderLoanNote(P,rows){
+  const el=document.getElementById('loanNote'); if(!el) return;
+  if(P.buyAge==null){ el.className='hint loannote'; el.innerHTML='賃貸のみの設定です（住宅ローンなし）。「購入する年齢」を設定すると、借入額・月々返済額・家計比率をここに表示します。'; return; }
+  const L=loanCalc(P);
+  if(L.borrow<=0){ el.className='hint loannote'; el.innerHTML=`頭金${man(P.downpay)}万円が物件価格${man(P.price)}万円以上のため、<b>現金購入（借入なし）</b>です。`; return; }
+  /* 返済比率の分母：購入年の世帯手取り（なければ現在年の手取り） */
+  const buyRow=rows.find(r=>r.age===P.buyAge)||rows[0];
+  const annualNet=buyRow?buyRow.net:0;
+  const ratio=annualNet>0?(L.annualPay/annualNet)*100:0;
+  const warn=ratio>25;
+  el.className='hint loannote'+(warn?' warn':'');
+  el.innerHTML=`借入額 <b>${man(L.borrow)}万円</b>（物件${man(P.price)}−頭金${man(P.downpay)}）／金利${(P.rate*100).toFixed(1)}%・${P.loanYears}年<br>`
+    +`月々返済 <b>${yen(L.monthlyPay)}</b>（年${man(L.annualPay)}万円）`
+    +`　家計比率 <span class="ln-ratio">${ratio.toFixed(1)}%</span>`
+    +`<span style="color:var(--slate-2);font-weight:400">（購入年${P.buyAge}歳・世帯手取り${man(annualNet)}万円に対して）</span>`
+    +(warn?`<br><span class="ln-warn">⚠️ 手取りの25%を超えています。</span>物件価格の引き下げ・頭金の増額・返済年数の延長で負担を下げられます（一般に手取りの20〜25%以内が安全圏）。`
+          :`<br>手取りの25%以内に収まっており、無理のない返済計画です。`);
+}
+
 /* ============ 初期化 ============ */
 const DEFAULTS={currentAge:26,currentAgeMonths:0,endAge:90,marriageAge:28,marriageAgeMonths:0,weddingCost:250,partnerCurrentAge:26,
   selfBaseMonthly:24,selfAllowance:4,famAllowSpouse:1,famAllowChild:0.5,selfRaise:0.7,selfCapMonthly:46,selfBonusMonths:4.2,selfBonusCount:2,selfRetire:65,
@@ -1380,6 +1423,7 @@ const DEFAULTS={currentAge:26,currentAgeMonths:0,endAge:90,marriageAge:28,marria
   withdrawOrder:'dc',dcTaxRate:15,dcLumpStrategy:true,eduReserve:true,
   hasCar:false,carFirstAge:30,carPrice:250,carCycle:8,carInflation:2.5,carTradeIn:20,carReturnAge:70};
 const STATIC_IDS=Object.keys(DEFAULTS);
+
 function setDefaults(){
   for(const k in DEFAULTS){ const el=document.getElementById(k); if(!el)continue; if(el.type==='checkbox')el.checked=DEFAULTS[k]; else el.value=DEFAULTS[k]; }
   segs=DEF_SEGS.map(s=>({...s})); kids=DEF_KIDS.map(k=>({...k}));
