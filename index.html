@@ -33,6 +33,13 @@
   .brand-logo .brand-t1,.brand-logo .brand-t2{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; font-size:285px; font-weight:700}
   .brand-logo .brand-t1{fill:#2E363B}
   .brand-logo .brand-t2{fill:#0CA795}
+  .dc-on{display:none}
+  body.dc-enabled .dc-on{display:block}
+  body.dc-enabled .dc-ideco,body.dc-enabled .dc-corp{display:none}
+  body.dc-mode-ideco .dc-ideco,body.dc-mode-both .dc-ideco{display:flex}
+  body.dc-mode-corp .dc-corp,body.dc-mode-both .dc-corp{display:flex}
+  body.dc-rate-fixed .dc-rate{display:none!important}
+  body.dc-rate-rate .dc-fixed{display:none!important}
   .statutory{display:none}
   body.show-statutory .statutory{display:block}
   .statutory-toggle{display:flex; align-items:center; justify-content:space-between; gap:10px; background:#F4F7FA; border:1px solid var(--line); border-radius:10px; padding:9px 12px; margin:0 0 10px}
@@ -451,13 +458,15 @@
       <summary><span class="tag">退職</span>確定拠出年金・退職金<span class="chev">▶</span></summary>
       <div class="body">
         <div class="field"><label>確定拠出年金（iDeCo/企業型DC）</label><input type="checkbox" id="hasDC"></div>
+        <div class="dc-on">
         <div class="field"><label>　└ 種別</label><select id="dcType"><option value="ideco">iDeCo（個人型・自己負担）</option><option value="corp">企業型DC（会社が掛金を拠出）</option><option value="both">企業型DC＋iDeCo併用</option></select></div>
-        <div class="field"><label>　└ iDeCo掛金（月・自己負担）</label><div class="ig"><input type="number" id="dcMonthly" value="2.0" step="0.5"><span class="unit">万/月</span></div></div>
-        <div class="field"><label>　└ 企業型DCの掛金方式</label><select id="corpDcMode"><option value="rate">基本給×比率</option><option value="fixed">定額</option></select></div>
-        <div class="field"><label>　　└ 比率（基本給×）</label><div class="ig"><input type="number" id="corpDcRate" value="2.5" step="0.1"><span class="unit">%</span></div></div>
-        <div class="field"><label>　　└ 定額（月）</label><div class="ig"><input type="number" id="corpDcFixed" value="1.0" step="0.5"><span class="unit">万/月</span></div></div>
+        <div class="field dc-ideco"><label>　└ iDeCo掛金（月・自己負担）</label><div class="ig"><input type="number" id="dcMonthly" value="2.0" step="0.5"><span class="unit">万/月</span></div></div>
+        <div class="field dc-corp"><label>　└ 企業型DCの掛金方式</label><select id="corpDcMode"><option value="rate">基本給×比率</option><option value="fixed">定額</option></select></div>
+        <div class="field dc-corp dc-rate"><label>　　└ 比率（基本給×）</label><div class="ig"><input type="number" id="corpDcRate" value="2.5" step="0.1"><span class="unit">%</span></div></div>
+        <div class="field dc-corp dc-fixed"><label>　　└ 定額（月）</label><div class="ig"><input type="number" id="corpDcFixed" value="1.0" step="0.5"><span class="unit">万/月</span></div></div>
         <div class="hint" style="margin-top:0">企業型DCの掛金は<b>会社が負担</b>するため、手取り・年収には影響しません（給与とは別に会社が積み立てます）。比率方式は「基本給×比率」で毎年自動計算され、昇給に応じて掛金も増えます。iDeCoは自己負担のため、掛金が現預金から出て所得控除の節税効果が生じます。</div>
         <div class="field"><label>　└ 受給開始年齢</label><div class="ig"><input type="number" id="dcReceiveAge" value="65"><span class="unit">歳</span></div></div>
+        </div>
         <div class="hint">掛金は全額所得控除（節税分を手取りに反映）。運用利回りはNISAと同じ想定。受給開始以降、現預金が不足する年に取り崩します。総資産に含めて表示します。</div>
         <div class="field"><label>退職所得控除の枠内で一時金受取（残りは運用継続）</label><input type="checkbox" id="dcLumpStrategy" checked></div>
         <div class="field"><label>老後の取り崩し順</label><select id="withdrawOrder"><option value="dc">確定拠出年金を優先（税効率・推奨）</option><option value="nisa">NISAを優先</option></select></div>
@@ -1780,10 +1789,12 @@ function flash(btn,msg){ const t=btn.textContent; btn.textContent=msg; setTimeou
 
 function init(){
   setDefaults();
+  syncDcFields();
   let loaded=false;
   const s=decodeShare(location.hash);
   if(s){ try{ applyState(s); loaded=true; }catch(e){} }
   if(!loaded){ try{ const ls=localStorage.getItem('lifeplan'); if(ls){ applyState(JSON.parse(ls)); } }catch(e){} }
+  syncDcFields();
   render();
 }
 document.getElementById('form').addEventListener('input',e=>{ if(e.target.matches('input,select')) render(); });
@@ -1804,6 +1815,21 @@ document.getElementById('shareBtn').addEventListener('click',(e)=>{
 });
 document.getElementById('pdfBtn').addEventListener('click',()=>window.print());
 document.getElementById('jobType').addEventListener('change',e=>{ const kosei=(e.target.value==='kaisha'||e.target.value==='komuin'); document.getElementById('pensionType').value=kosei?'kosei':'kokumin'; render(); });
+
+function syncDcFields(){
+  const on=document.getElementById('hasDC').checked;
+  const t=document.getElementById('dcType').value;
+  const m=document.getElementById('corpDcMode').value;
+  const b=document.body.classList;
+  b.toggle('dc-enabled',on);
+  b.remove('dc-mode-ideco','dc-mode-corp','dc-mode-both'); b.add('dc-mode-'+t);
+  b.remove('dc-rate-rate','dc-rate-fixed'); b.add('dc-rate-'+m);
+}
+['hasDC','dcType','corpDcMode'].forEach(id=>{
+  const el=document.getElementById(id);
+  el.addEventListener('change',syncDcFields);
+  el.addEventListener('input',syncDcFields);
+});
 
 document.getElementById('editStatutory').addEventListener('change',e=>{
   document.body.classList.toggle('show-statutory', e.target.checked);
