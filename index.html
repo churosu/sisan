@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ライフプラン資産形成シミュレーター</title>
+<title>MiraiLog｜ライフプラン資産形成シミュレーター</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
 <style>
@@ -28,6 +28,16 @@
     justify-content:space-between; gap:16px; flex-wrap:wrap;
   }
   header.top h1{margin:0; font-size:clamp(19px,2.6vw,25px); letter-spacing:-.02em; font-weight:800;}
+  .brand{line-height:0}
+  .brand-logo{height:clamp(38px,5.2vw,52px); width:auto; display:block}
+  .brand-logo .brand-t1,.brand-logo .brand-t2{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; font-size:285px; font-weight:700}
+  .brand-logo .brand-t1{fill:#2E363B}
+  .brand-logo .brand-t2{fill:#0CA795}
+  .statutory{display:none}
+  body.show-statutory .statutory{display:block}
+  .statutory-toggle{display:flex; align-items:center; justify-content:space-between; gap:10px; background:#F4F7FA; border:1px solid var(--line); border-radius:10px; padding:9px 12px; margin:0 0 10px}
+  .statutory-toggle label{font-size:12.5px; color:var(--slate); font-weight:600}
+  .sr-only{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0}
   header.top .lead{margin:4px 0 0; color:var(--slate); font-size:13px; max-width:54ch;}
   .reset{
     border:1px solid var(--line); background:#fff; color:var(--slate); padding:8px 14px;
@@ -151,6 +161,48 @@
   .snap-note{font-size:11.5px; color:var(--slate); line-height:1.7; margin-top:10px; background:#F7FAFC; border:1px solid var(--line); border-radius:10px; padding:11px 13px}
   .snap-ev{font-size:12px; color:var(--slate); margin-top:8px}
   .snap-ev b{color:var(--ink)}
+
+  .snap-swipe{margin:14px 0}
+  .snap-slide{min-width:0}
+  .snap-slide .bud-card{margin:0; height:100%}
+  .snap-dots{display:flex; justify-content:center; gap:6px; margin:-4px 0 4px}
+  .snap-dot{width:7px; height:7px; border-radius:50%; background:var(--line); transition:.2s}
+  .snap-dot.active{background:var(--teal); width:18px; border-radius:4px}
+  .snap-hint{text-align:center; font-size:11px; color:var(--slate-2); margin:2px 0 10px}
+  @media (max-width:719px){
+    .snap-swipe{display:flex; gap:12px; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; scrollbar-width:none}
+    .snap-swipe::-webkit-scrollbar{display:none}
+    .snap-slide{flex:0 0 100%; scroll-snap-align:center}
+  }
+  @media (min-width:720px){
+    .snap-swipe{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+    .snap-dots,.snap-hint{display:none}
+  }
+  .bud-card{margin:14px 0; background:#fff; border:1px solid var(--line); border-radius:16px; padding:16px 18px; box-shadow:0 1px 3px rgba(20,40,80,.04)}
+  .bud-title{font-size:15px; font-weight:800; color:var(--ink); margin-bottom:6px}
+  .bud-chart{position:relative; height:290px; margin:0 auto; max-width:440px}
+  .bud-figs{padding-top:12px; border-top:1px solid var(--line); margin-top:4px; display:flex; flex-direction:column; gap:8px}
+  .bud-row{display:flex; align-items:baseline; justify-content:space-between; gap:10px}
+  .bud-row .bud-k{font-size:13px; color:var(--slate); font-weight:600}
+  .bud-row .bud-v{font-size:16px; color:var(--ink); font-weight:700; font-variant-numeric:tabular-nums; text-align:right}
+  .bud-row .bud-v small{font-size:11px; color:var(--slate-2); font-weight:600; margin-left:4px}
+  .bud-div{height:1px; background:var(--line); margin:2px 0}
+  .bud-row.big .bud-k{font-size:14px; font-weight:800; color:var(--ink)}
+  .bud-row.big .bud-v{font-size:22px; font-weight:800}
+  .bud-row.big .bud-v small{font-size:12px; font-weight:700}
+  .bud-row.big.pos .bud-v{color:var(--teal)}
+  .bud-row.big.neg .bud-v{color:var(--rose)}
+  .bud-note{font-size:11px; color:var(--slate-2); line-height:1.6; margin-top:8px; background:#F7FAFC; border:1px solid var(--line); border-radius:8px; padding:8px 10px}
+  .bud-note b{color:var(--ink)}
+  .bud-legend{display:flex; flex-wrap:wrap; gap:6px 12px; margin-top:12px; padding-top:12px; border-top:1px solid var(--line)}
+  .bud-chip{display:inline-flex; align-items:center; gap:5px; font-size:11.5px; color:var(--slate)}
+  .bud-chip i{width:10px; height:10px; border-radius:3px; flex:none}
+  .bud-chip b{color:var(--ink); font-weight:700}
+  .bud-chip .chip-mo{color:var(--slate-2); font-weight:600; font-size:10.5px}
+  .bud-chip .chip-pct{color:var(--slate); font-weight:700}
+  .bud-v.col{display:flex; flex-direction:column; align-items:flex-end; gap:1px}
+  .bud-sub{color:var(--slate-2); font-weight:600; font-size:11px}
+  @media (max-width:560px){ .bud-chart{height:270px} }
   @media (max-width:560px){ .snap-hero{grid-template-columns:1fr} }
   @media print{ .tabs{display:none} .tab-panel{display:block!important} .tab-panel{margin-bottom:20px} }
 
@@ -225,8 +277,15 @@
 <body>
 <header class="top">
   <div>
-    <h1>ライフプラン資産形成シミュレーター</h1>
-    <p class="lead">基本情報を入力すると、結婚・出産・住宅購入・教育・退職といったライフイベントに沿って支出と資産を年ごとに計算します。すべて手取りベース・万円単位。入力はその場で反映されます。</p>
+    <h1 class="brand">
+      <svg class="brand-logo" viewBox="150 190 1670 400" role="img" aria-label="MiraiLog">
+        <path d="M578.0,423.0 C570.5,413.9 514.5,435.6 503.0,439.0 C491.4,442.4 498.9,443.0 501.0,446.0 C503.1,449.0 518.4,454.1 517.0,459.0 C515.6,463.9 504.6,471.1 492.0,479.0 C479.4,486.9 450.7,504.4 433.0,512.0 C415.3,519.6 388.2,526.4 374.0,530.0 C359.8,533.6 354.4,535.2 338.0,536.0 C321.6,536.8 291.4,539.2 265.0,535.0 C238.6,530.8 171.6,508.0 162.0,508.0 C152.4,508.0 185.4,527.2 201.0,535.0 C216.6,542.8 249.8,555.2 266.0,560.0 C282.2,564.8 291.6,566.7 309.0,567.0 C326.4,567.3 357.9,567.4 382.0,562.0 C406.1,556.6 446.8,543.0 470.0,531.0 C493.2,519.0 525.3,486.6 537.0,482.0 C548.7,477.4 545.6,497.3 548.0,500.0 C550.4,502.7 548.5,511.6 553.0,500.0 C557.5,488.4 585.5,432.1 578.0,423.0 Z" fill="#0CA795"/><path d="M226,372 A11,11 0 0 1 237,361 L284,361 A11,11 0 0 1 295,372 L295,492 L226,487 Z" fill="#0CA795"/><path d="M335,295 A11,11 0 0 1 346,284 L394,284 A11,11 0 0 1 405,295 L405,483 L335,491 Z" fill="#0CA795"/><path d="M444,221 A11,11 0 0 1 455,210 L503,210 A11,11 0 0 1 514,221 L514,415 L444,465 Z" fill="#0CA795"/>
+        <text x="685" y="509" class="brand-t1" textLength="632" lengthAdjust="spacingAndGlyphs">Mirai</text>
+        <text x="1369" y="509" class="brand-t2" textLength="436" lengthAdjust="spacingAndGlyphs">Log</text>
+      </svg>
+      <span class="sr-only">MiraiLog</span>
+    </h1>
+    <p class="lead">ライフプラン資産形成シミュレーター。基本情報を入力すると、結婚・出産・住宅購入・教育・退職といったライフイベントに沿って支出と資産を年ごとに計算します。給与は<b>額面で入力</b>し、税・社会保険料を差し引いた<b>手取りに換算して</b>収支・資産を算出します（金額は万円単位・入力はその場で反映）。</p>
   </div>
   <div class="btnrow">
     <button class="reset primary" id="shareBtn">共有リンクをコピー</button>
@@ -238,6 +297,10 @@
 <div class="wrap">
   <!-- ================= INPUTS ================= -->
   <div class="panel controls" id="form">
+    <div class="statutory-toggle">
+      <label for="editStatutory">公的制度の数値も編集する（住宅ローン減税・出産育児一時金・NISA枠など）</label>
+      <input type="checkbox" id="editStatutory">
+    </div>
 
     <details class="grp" open>
       <summary><span class="tag">基本</span>あなたと家族の前提<span class="chev">▶</span></summary>
@@ -255,25 +318,26 @@
     <details class="grp">
       <summary><span class="tag">収入 本人</span>あなたの給与・退職後<span class="chev">▶</span></summary>
       <div class="body">
-        <div class="field"><label>基本給（月）</label><div class="ig"><input type="number" id="selfBaseMonthly" value="24" step="0.5"><span class="unit">万/月</span></div></div>
-        <div class="field"><label>諸手当（月）</label><div class="ig"><input type="number" id="selfAllowance" value="4" step="0.5"><span class="unit">万/月</span></div></div>
+        <div class="hint" style="margin-top:0">給与は<b>額面（税・社会保険料を引く前）</b>で入力してください。手取りは額面から自動換算します（実効で概ね76〜82%）。<b>再雇用の年収と退職金は例外</b>で、再雇用は手取り額、退職金は額面での入力です（それぞれ欄に明記）。</div>
+        <div class="field"><label>基本給（月・額面）</label><div class="ig"><input type="number" id="selfBaseMonthly" value="24" step="0.5"><span class="unit">万/月</span></div></div>
+        <div class="field"><label>諸手当（月・額面）</label><div class="ig"><input type="number" id="selfAllowance" value="4" step="0.5"><span class="unit">万/月</span></div></div>
         <div class="field"><label>配偶者手当：福利厚生（月）</label><div class="ig"><input type="number" id="famAllowSpouse" value="1" step="0.1"><span class="unit">万/月</span></div></div>
         <div class="field"><label>子供手当：福利厚生（月・1人）</label><div class="ig"><input type="number" id="famAllowChild" value="0.5" step="0.1"><span class="unit">万/月</span></div></div>
         <div class="field"><label>　└ 子供手当の対象上限</label><div class="ig"><input type="number" id="famChildAge" value="18"><span class="unit">歳</span></div></div>
         <div class="hint" style="margin-top:0">勤務先が独自に支給する<b>福利厚生の手当</b>です。配偶者手当は結婚後、子供手当は各子がこの対象上限以下の間、本人の諸手当に加算されます（給与の一部＝額面・課税対象）。国の児童手当とは別枠で、両方が加算されます。手当がなければ0に。</div>
         <div class="hint">月収（額面）＝ 基本給＋諸手当＋福利厚生手当。昇給・ボーナスは基本給を基準に計算します（諸手当・福利厚生手当は固定）。</div>
         <div class="field"><label>昇給（基本給・年あたり）</label><div class="ig"><input type="number" id="selfRaise" value="0.7" step="0.1"><span class="unit">万/年</span></div></div>
-        <div class="field"><label>基本給の上限</label><div class="ig"><input type="number" id="selfCapMonthly" value="46" step="0.5"><span class="unit">万/月</span></div></div>
+        <div class="field"><label>基本給の上限（額面）</label><div class="ig"><input type="number" id="selfCapMonthly" value="46" step="0.5"><span class="unit">万/月</span></div></div>
         <div class="field"><label>ボーナス（基本給の）</label><div class="ig"><input type="number" id="selfBonusMonths" value="4.2" step="0.1"><span class="unit">ヶ月</span></div></div>
         <div class="field"><label>ボーナス回数</label><div class="ig"><input type="number" id="selfBonusCount" value="2"><span class="unit">回/年</span></div></div>
         <div class="field"><label>定年（給与収入の終わり）</label><div class="ig"><input type="number" id="selfRetire" value="65"><span class="unit">歳</span></div></div>
-        <div class="field"><label>再雇用 手取り（定年〜下記歳）</label><div class="ig"><input type="number" id="reemployIncome" value="260"><span class="unit">万/年</span></div></div>
+        <div class="field"><label>再雇用の年収（<b>手取り</b>・定年〜下記歳）</label><div class="ig"><input type="number" id="reemployIncome" value="260"><span class="unit">万/年</span></div></div>
         <div class="field"><label>再雇用の終了年齢</label><div class="ig"><input type="number" id="reemployTo" value="65"><span class="unit">歳</span></div></div>
         <div class="field"><label>職種（本人）</label><select id="jobType"><option value="kaisha">会社員（厚生年金）</option><option value="komuin">公務員（厚生年金）</option><option value="jieigyo">自営業・フリーランス（国民年金）</option><option value="part">パート・アルバイト（国民年金）</option><option value="sengyo">専業主婦(夫)・第3号（基礎のみ）</option></select></div>
         <div class="field"><label>年金制度（本人）</label><select id="pensionType"><option value="kosei">厚生年金</option><option value="kokumin">国民年金（基礎のみ）</option></select></div>
         <div class="field"><label>基礎年金 納付年数</label><div class="ig"><input type="number" id="pensionBasicYears" value="40" min="0" max="40"><span class="unit">年</span></div></div>
         <div class="field"><label>マクロ経済スライドを考慮</label><select id="macroSlide"><option value="1">考慮する</option><option value="0">考慮しない</option></select></div>
-        <div class="field"><label>　└ スライド調整率</label><div class="ig"><input type="number" id="macroSlideRate" value="0.4" step="0.1"><span class="unit">%/年</span></div></div>
+        <div class="statutory"><div class="hint" style="margin-top:0">マクロ経済スライドは<b>基礎年金にのみ</b>2057年度まで適用します（2024年財政検証・過去30年投影ケース。報酬比例部分は2026年度に調整終了済み）。調整率0.67%/年は、基礎年金の実質額が夫婦2人で約▲20%（2024→2057年度）となる財政検証の見通しに合わせた値です。</div><div class="field"><label>　└ 調整率（基礎年金・実質）</label><div class="ig"><input type="number" id="macroSlideRate" value="0.67" step="0.01"><span class="unit">%/年</span></div></div></div>
         <div class="hint" id="pensionInfo"></div>
         <div class="field"><label>配偶者・扶養控除を考慮</label><input type="checkbox" id="considerDeduction" checked></div>
         <div class="hint">オンで、配偶者控除（パートナーの収入で可否・額が変動：給与150万以下で満額、201万で消失）と扶養控除（子16〜18・19〜22歳）による減税を概算で手取りに反映します。</div>
@@ -283,7 +347,7 @@
     <details class="grp">
       <summary><span class="tag">収入 相手</span>パートナーの勤務（複数可）<span class="chev">▶</span></summary>
       <div class="body">
-        <div class="hint">産休・時短・復職などを「期間（本人年齢基準）」で何パターンでも追加できます。結婚前の期間は世帯収入に含めません。</div>
+        <div class="hint">産休・時短・復職などを「期間（本人年齢基準）」で何パターンでも追加できます。結婚前の期間は世帯収入に含めません。金額はいずれも<b>額面</b>で入力してください（手取りは自動換算）。</div>
         <div id="segList"></div>
         <button class="addbtn" id="addSeg">＋ 勤務パターンを追加</button>
       </div>
@@ -303,11 +367,9 @@
         <div class="field"><label>大学</label><select id="eduUniv"><option value="kokuritsu">国公立</option><option value="bunkei">私立文系</option><option value="rikei">私立理系</option></select></div>
         <div class="field"><label>大学は自宅外（仕送り）</label><select id="eduAway"><option value="no">いいえ</option><option value="yes">はい</option></select></div>
         <div class="field"><label>塾・習い事（小〜高・1人）</label><div class="ig"><input type="number" id="jukuMonthly" value="0" step="0.5"><span class="unit">万/月</span></div></div>
-        <div class="field"><label>児童手当：国の制度（〜下記歳・人）</label><div class="ig"><input type="number" id="childAllowance" value="12"><span class="unit">万/年</span></div></div>
-        <div class="field"><label>　└ 児童手当の対象上限</label><div class="ig"><input type="number" id="allowanceAge" value="18"><span class="unit">歳</span></div></div>
-        <div class="hint" style="margin-top:0">国の制度としての児童手当（非課税の給付）。対象上限以下の子1人あたり年額を、手取り現金に加算します。勤務先の「子供手当（福利厚生）」とは別枠で、両方が反映されます。</div>
-        <div class="field"><label>出産育児一時金（給付）</label><div class="ig"><input type="number" id="birthGrant" value="50"><span class="unit">万</span></div></div>
-        <div class="field"><label>教育費を現預金で積立（NISAスイープ対象外）</label><input type="checkbox" id="eduReserve" checked></div>
+        <div class="hint" style="margin-top:0"><b>児童手当（国の制度）は自動計算</b>されます（2024年10月の拡充準拠・非課税の給付として手取りに加算）。<br>・3歳未満：月15,000円／人　・3歳〜18歳：月10,000円／人<br>・22歳以下の子が3人以上いる間、第3子以降（18歳以下）は月+20,000円。<br>勤務先の「子供手当（福利厚生）」とは別枠で、両方が反映されます。</div>
+        <div class="statutory"><div class="hint" style="margin-top:0">出産育児一時金は法令で定められた給付額です（2023年4月以降 50万円）。</div><div class="field"><label>出産育児一時金（給付）</label><div class="ig"><input type="number" id="birthGrant" value="50"><span class="unit">万</span></div></div></div>
+        <div class="field"><label>教育費を別口座で積立（毎年振替・NISAスイープ対象外）</label><input type="checkbox" id="eduReserve" checked></div>
         <div class="hint" id="eduSaveInfo">選んだ進路の教育費を、出生から積み立てる月額を表示します。</div>
       </div>
     </details>
@@ -331,9 +393,12 @@
         <div class="hint" style="margin-top:0">給湯器・水栓・トイレ等の水廻りは、購入からこの周期で繰り返し発生します（例：10年おきなら10・20・30…年目）。0にすると計上しません。</div>
         <div class="field"><label>大型リフォーム（購入から）</label><div class="ig"><input type="number" id="repair2Year" value="35"><span class="unit">年目</span></div></div>
         <div class="field"><label>　└ 金額</label><div class="ig"><input type="number" id="repair2Cost" value="500"><span class="unit">万</span></div></div>
+        <div class="statutory">
+        <div class="hint" style="margin-top:0">住宅ローン減税は法令で定められた値です（2024年以降入居・省エネ基準適合の一般住宅：控除率0.7%・13年・借入限度3,000万円→上限21万円）。</div>
         <div class="field"><label>住宅ローン減税 期間</label><div class="ig"><input type="number" id="creditYears" value="13"><span class="unit">年</span></div></div>
-        <div class="field"><label>　└ 控除率（残高×）</label><div class="ig"><input type="number" id="creditRate" value="0.7" step="0.1"><span class="unit">%</span></div></div>
-        <div class="field"><label>　└ 年あたり上限</label><div class="ig"><input type="number" id="creditCap" value="21"><span class="unit">万</span></div></div>
+          <div class="field"><label>　└ 控除率（残高×）</label><div class="ig"><input type="number" id="creditRate" value="0.7" step="0.1"><span class="unit">%</span></div></div>
+          <div class="field"><label>　└ 年あたり上限</label><div class="ig"><input type="number" id="creditCap" value="21"><span class="unit">万</span></div></div>
+        </div>
       </div>
     </details>
 
@@ -374,7 +439,7 @@
         <div class="hint">すでに積立中の場合は開始時点の元本（と含み益込みの評価額）を入力。評価額が0なら元本と同額として扱い、生涯投資枠の残りも元本ぶん差し引きます。</div>
         <div class="field"><label>NISA 積立額</label><div class="ig"><input type="number" id="nisaMonthly" value="3" step="0.5"><span class="unit">万/月</span></div></div>
         <div class="field"><label>想定利回り（年）</label><div class="ig"><input type="number" id="nisaYield" value="4.0" step="0.1"><span class="unit">%</span></div></div>
-        <div class="field"><label>生涯投資枠</label><div class="ig"><input type="number" id="nisaCap" value="1800"><span class="unit">万</span></div></div>
+        <div class="statutory"><div class="hint" style="margin-top:0">新NISAの生涯投資枠は制度上1,800万円です。</div><div class="field"><label>生涯投資枠</label><div class="ig"><input type="number" id="nisaCap" value="1800"><span class="unit">万</span></div></div></div>
         <div class="field"><label>現預金の上限超過分をNISAへ</label><input type="checkbox" id="sweepNisa"></div>
         <div class="field"><label>　└ 現預金の上限</label><div class="ig"><input type="number" id="cashCap" value="500"><span class="unit">万</span></div></div>
         <div class="hint">オンにすると、生活防衛費とは別に設けた上限を超えた現預金を、年間枠（360万）・生涯投資枠の範囲でNISAに自動で回します。</div>
@@ -386,7 +451,12 @@
       <summary><span class="tag">退職</span>確定拠出年金・退職金<span class="chev">▶</span></summary>
       <div class="body">
         <div class="field"><label>確定拠出年金（iDeCo/企業型DC）</label><input type="checkbox" id="hasDC"></div>
-        <div class="field"><label>　└ 掛金（月）</label><div class="ig"><input type="number" id="dcMonthly" value="2.0" step="0.5"><span class="unit">万/月</span></div></div>
+        <div class="field"><label>　└ 種別</label><select id="dcType"><option value="ideco">iDeCo（個人型・自己負担）</option><option value="corp">企業型DC（会社が掛金を拠出）</option><option value="both">企業型DC＋iDeCo併用</option></select></div>
+        <div class="field"><label>　└ iDeCo掛金（月・自己負担）</label><div class="ig"><input type="number" id="dcMonthly" value="2.0" step="0.5"><span class="unit">万/月</span></div></div>
+        <div class="field"><label>　└ 企業型DCの掛金方式</label><select id="corpDcMode"><option value="rate">基本給×比率</option><option value="fixed">定額</option></select></div>
+        <div class="field"><label>　　└ 比率（基本給×）</label><div class="ig"><input type="number" id="corpDcRate" value="2.5" step="0.1"><span class="unit">%</span></div></div>
+        <div class="field"><label>　　└ 定額（月）</label><div class="ig"><input type="number" id="corpDcFixed" value="1.0" step="0.5"><span class="unit">万/月</span></div></div>
+        <div class="hint" style="margin-top:0">企業型DCの掛金は<b>会社が負担</b>するため、手取り・年収には影響しません（給与とは別に会社が積み立てます）。比率方式は「基本給×比率」で毎年自動計算され、昇給に応じて掛金も増えます。iDeCoは自己負担のため、掛金が現預金から出て所得控除の節税効果が生じます。</div>
         <div class="field"><label>　└ 受給開始年齢</label><div class="ig"><input type="number" id="dcReceiveAge" value="65"><span class="unit">歳</span></div></div>
         <div class="hint">掛金は全額所得控除（節税分を手取りに反映）。運用利回りはNISAと同じ想定。受給開始以降、現預金が不足する年に取り崩します。総資産に含めて表示します。</div>
         <div class="field"><label>退職所得控除の枠内で一時金受取（残りは運用継続）</label><input type="checkbox" id="dcLumpStrategy" checked></div>
@@ -500,7 +570,18 @@
         </tr></thead><tbody id="tbody"></tbody></table>
       </div>
       <p class="footnote" style="margin-top:10px">
-        ※ 金額は万円（一部は円表示）。手取りは概算（額面に対し収入帯で72〜82%を適用）。配偶者・扶養控除、確定拠出年金の節税、退職所得控除は税率を年収帯から推定する簡易計算で、実額とは差が出ます。学費は授業料無償化を反映し、公立小中高は授業料0で給食・教材・制服等の実費のみ（私立高校は就学支援金で授業料をほぼ相殺した実費目安、大学はMEXT等の平均）。塾・習い事は任意で別途加算。保険・固定資産税は自動概算です。生活費は「現在の世帯人数・月額」を基準に等価尺度（本人1.0／配偶者0.5／子0.3・14歳以上0.5）で世帯人数に応じて自動算出（家賃・教育・保険・旅行は別項目）。総資産は現預金＋NISA評価額＋確定拠出年金（DCは「枠内一時金」をオンにすると受給時に退職所得控除の枠まで非課税で受取り超過分は運用継続、退職金との控除枠重複は10年／19年ルールを簡易調整した概算。DC残りは将来課税のため実効税率を引いた税引後で計上）。NISAは引き出しても運用益が非課税。NISA積立は生活防衛費を超える余剰現預金の範囲でのみ行い、取り崩す年は入金しません（入金と取り崩しの往復を回避）。なお、挙式・新生活の特別費（結婚年）と住宅購入諸費用（物件価格に対する率で購入年に一括）は、いずれも現金支出として資産推移に反映しています。月住宅費は、購入前は家賃、購入後はローンの月々返済（元利）＋固定資産税・管理費の月割で、ローン完済後は固定資産税・管理費のみになります（頭金・諸費用・修繕はイベント費用の列に別途計上）。傾向把握用としてご利用ください。
+        ※ 金額は万円（一部は円表示）。<b>給与の入力は額面</b>（税・社会保険料を引く前）で、手取りは額面から自動換算した概算です（所得帯ごとに82%→79%→75%→72%の率を累進的に適用。世帯年収500万で実効82%、1,200万で約79%程度）。ただし<b>再雇用の年収は手取り</b>、<b>退職金は額面</b>での入力です。年次明細の「額面年収」は額面、「月手取り」以降の収支・資産はすべて手取りベースで表示しています。配偶者・扶養控除、確定拠出年金の節税、退職所得控除は税率を年収帯から推定する簡易計算で、実額とは差が出ます。学費は授業料無償化を反映し、公立小中高は授業料0で給食・教材・制服等の実費のみ（私立高校は就学支援金で授業料をほぼ相殺した実費目安、大学はMEXT等の平均）。多子世帯の大学無償化として、扶養中の子が3人以上いる間は第3子以降（扶養中）の大学授業料相当を免除（仕送りは対象外）。兄姉が独立年齢に達して扶養数が3人未満になると適用は外れます。塾・習い事は任意で別途加算。保険・固定資産税は自動概算です。生活費は「現在の世帯人数・月額」を基準に等価尺度（本人1.0／配偶者0.5／子0.3・14歳以上0.5）で世帯人数に応じて自動算出（家賃・教育・保険・旅行は別項目）。総資産は現預金＋教育積立（別口座）＋NISA評価額＋確定拠出年金（DCは「枠内一時金」をオンにすると受給時に退職所得控除の枠まで非課税で受取り超過分は運用継続、退職金との控除枠重複は10年／19年ルールを簡易調整した概算。DC残りは将来課税のため実効税率を引いた税引後で計上）。教育費を別口座で積立をオンにすると、毎年「教育積立費」を現預金から別口座へ振替（＝現預金の支出として計上）し、学費はその別口座から支払います（不足分のみ現預金から）。別口座は安全資産（利回りなし）として扱うため、その分をNISA等で運用する場合に比べ最終資産はやや低めに出ます。NISAは引き出しても運用益が非課税。NISA積立は生活防衛費を超える余剰現預金の範囲でのみ行い、取り崩す年は入金しません（入金と取り崩しの往復を回避）。なお、挙式・新生活の特別費（結婚年）と住宅購入諸費用（物件価格に対する率で購入年に一括）は、いずれも現金支出として資産推移に反映しています。月住宅費は、購入前は家賃、購入後はローンの月々返済（元利）＋固定資産税・管理費の月割で、ローン完済後は固定資産税・管理費のみになります（頭金・諸費用・修繕はイベント費用の列に別途計上）。<br><br><b>■ 初期値の根拠</b>（すべて公的統計の最新値・2026年7月時点。ご自身の数字に置き換えてお使いください）<br>
+・<b>年齢設定</b>：本人24歳（単身男性）。結婚31歳＝男性の平均初婚年齢31.1歳（厚労省「令和6年人口動態統計」）。パートナーは同い年。<br>
+・<b>子ども</b>：2人（夫婦の完結出生児数1.9人）。第1子は本人33歳＝結婚から平均結婚期間1.9年後、第2子はその2.1年後の35歳（第1子・第2子出生時の母の平均年齢差31.0歳→33.1歳による）。<br>
+・<b>給与</b>：厚労省「令和7年賃金構造基本統計調査」の男性・所定内給与額。20〜24歳24.6万円/月を基本給21.5万＋諸手当3.0万に分解し、55〜59歳のピーク44.6万円/月に達するよう昇給0.57万円/年・基本給上限41.5万円を設定。<br>
+・<b>パートナーの就業</b>：結婚から第1子出産前年まで就業（女性20〜24歳24.0万円/月基準）、第2子の小学校入学（本人41歳）から復職。<br>
+・<b>住居</b>：家賃7.5万円（東京都の単身向け相場）。購入物件3,830万円＝住宅金融支援機構「2024年度フラット35利用者調査」の建売住宅の所要資金全国平均3,826万円（郊外・土地込み想定）。購入41歳は建売購入者の年齢層とパートナー復職後の時期を踏まえた設定。<br>
+・<b>生活費</b>：総務省「家計調査2024」の単身世帯（34歳以下）の消費支出から住居費を除いた月12.0万円。世帯人数の増加は等価尺度で自動換算。<br>
+・<b>インフレ率</b>：1.5%（日銀の物価安定目標2%と過去実績の中間的な水準）。<br>
+・<b>公的制度</b>：児童手当・出産育児一時金50万円・住宅ローン減税（0.7%×13年・上限21万円）・NISA生涯枠1,800万円は法令どおり。編集する場合は入力欄上部のチェックボックスをオンにしてください。<br>
+・<b>公的年金</b>：厚労省「令和6年（2024年）財政検証」の過去30年投影ケースに準拠。年金額は物価スライドで<b>名目額が改定される</b>ため、生活費と同じインフレ率で名目化しています。そのうえでマクロ経済スライドを<b>基礎年金にのみ2057年度まで</b>適用し（報酬比例部分は2026年度に調整終了）、実質価値が基礎年金で約▲20%目減りする姿を再現しています。報酬比例部分は実質横ばいとして扱い、財政検証が織り込む実質賃金上昇による増加分は見込まない保守的な設定です。<br>
+・<span style="color:var(--slate-2)">なお、賞与3.5ヶ月・頭金400万円・初期現預金50万円・退職金1,500万円・家族手当の額などは、統計が一意に定まらないため一般的な水準を仮置きしたものです。</span><br><br>
+傾向把握用としてご利用ください。
       </p>
     </div>
   </div>
@@ -526,15 +607,29 @@ const EDU_SAVE_END=22;
 function eduTotalPerChild(P){ let t=0; for(let a=3;a<=21;a++) t+=eduAnnual(a,P); return t; }
 function insurance(age){ if(age<30)return 8; if(age<40)return 14; if(age<50)return 22; if(age<60)return 28; if(age<70)return 22; return 14; }
 /* 公的年金（令和7年度基準・概算）: 老齢基礎満額83.17万/年、報酬比例乗率5.481/1000（2003年4月〜）、標準報酬の年間上限概算1230万 */
+const CURRENT_YEAR=new Date().getFullYear();
 const PENSION_FULL=83.17, PENSION_RATE=5.481/1000, PENSION_CAP=1230, PENSION_NET=0.90;
-function computePension(P,pcSelf,pcSpouse,married){
-  let selfBasic=PENSION_FULL*Math.min(1,(P.pensionBasicYears||40)/40);
-  let selfKosei=(P.pensionType==='kokumin')?0:pcSelf*PENSION_RATE;
-  let spouse=married?(PENSION_FULL+pcSpouse*PENSION_RATE):0;
-  let f=1;
-  if(P.macroSlide){ const n=Math.max(0,P.reemployTo-P.currentAge); f=Math.pow(1-(P.macroSlideRate||0)/100,n); }
-  selfBasic*=f; selfKosei*=f; spouse*=f;
+/* マクロ経済スライドの調整期間（2024年財政検証・過去30年投影ケース）
+   ・報酬比例部分（厚生年金2階）：2026年度に調整終了 → 以後は実質維持
+   ・基礎年金（1階）：2057年度まで調整継続 → 実質で目減り（夫婦2人分で2024→2057に約▲20%） */
+const PENSION_BASE_YEAR=2026, BASIC_ADJ_END_YEAR=2057;
+function computePension(P,pcSelf,pcSpouse,married,calYear){
+  const selfBasicRaw=PENSION_FULL*Math.min(1,(P.pensionBasicYears||40)/40);
+  const selfKoseiRaw=(P.pensionType==='kokumin')?0:pcSelf*PENSION_RATE;
+  const spBasicRaw=married?PENSION_FULL:0;
+  const spKoseiRaw=married?pcSpouse*PENSION_RATE:0;
+  /* 基礎年金にのみ調整終了年度までスライドを適用（報酬比例は調整終了済み） */
+  let fb=1;
+  if(P.macroSlide){
+    const y=(calYear!=null?calYear:PENSION_BASE_YEAR);
+    const n=Math.max(0, Math.min(y,BASIC_ADJ_END_YEAR)-PENSION_BASE_YEAR);
+    fb=Math.pow(1-(P.macroSlideRate||0)/100, n);
+  }
+  const selfBasic=selfBasicRaw*fb, selfKosei=selfKoseiRaw;
+  const spouse=spBasicRaw*fb+spKoseiRaw;
   const gross=selfBasic+selfKosei+spouse;
+  /* 戻り値は「現在の物価水準（今日の円）」ベース。実際の給付は物価スライドで名目額が増えるため、
+     利用側で (1+インフレ率)^経過年 を掛けて名目化する。 */
   return {gross, net:gross*PENSION_NET, selfBasic, selfKosei, spouse};
 }
 function takeHome(g){
@@ -616,6 +711,21 @@ function eventsFor(P,age,childAges,L){
   return e;
 }
 
+/* 児童手当（国の制度・2024年10月拡充準拠）: 各年の子の年齢配列から年間給付総額（万円）を返す
+   ・3歳未満: 月15,000円 ／ 3歳〜18歳: 月10,000円
+   ・22歳以下の子が3人以上いる間、第3子以降（出生順）で18歳以下の子に月+20,000円 */
+function childBenefit(childAges){
+  const kids=childAges.filter(a=>a!=null && a<=22).sort((x,y)=>y-x); /* 年長＝第1子として並べる */
+  const n22=kids.length;
+  let monthlyYen=0;
+  kids.forEach((a,idx)=>{
+    const base = a<3?15000 : (a<=18?10000:0);
+    const bonus = (n22>=3 && idx>=2 && a<=18)?20000:0; /* idx>=2 = 第3子以降 */
+    monthlyYen += base+bonus;
+  });
+  return monthlyYen*12/10000; /* 円/月 → 万円/年 */
+}
+
 function simulate(P){
   /* 月単位フィールドの安全な補完（patch適用時やテスト時にも整合させる） */
   if(P.currentAgeFrac==null) P.currentAgeFrac=P.currentAge+((P.currentAgeMonths||0)/12);
@@ -623,7 +733,7 @@ function simulate(P){
   if(P.marriageRow==null) P.marriageRow=(P.marriageAgeFrac>P.currentAgeFrac)?Math.floor(P.marriageAgeFrac-P.currentAgeFrac):((P.marriageAgeFrac<=P.currentAgeFrac&&P.marriageAge>0)?0:-1);
   if(P.marriageAgeEff==null) P.marriageAgeEff=(P.marriageRow>=0)?P.currentAge+P.marriageRow:P.marriageAge;
   const L=loanCalc(P); const rows=[]; let cash=P.initCash, nisaP=P.initNisaP, nisaV=(P.initNisaV>0?P.initNisaV:P.initNisaP), dcValue=0;
-  const eduTotalEach=eduTotalPerChild(P); const eduMonthlyEach=eduTotalEach/(EDU_SAVE_END*12); const totalEduAll=eduTotalEach*P.children.length; let eduFund=0, eduPaid=0; let lastCarPrice=0;
+  const eduTotalEach=eduTotalPerChild(P); const eduMonthlyEach=eduTotalEach/(EDU_SAVE_END*12); const totalEduAll=eduTotalEach*P.children.length; let eduFund=0, eduPaid=0, eduAccount=0; let lastCarPrice=0;
   let pcSelf=0, pcSpouse=0, pensionCalc=null;
   const nY=Math.max(1,P.endAge-P.currentAge+1);
   for(let i=0;i<nY;i++){
@@ -641,11 +751,19 @@ function simulate(P){
     /* 厚生年金の標準報酬を積み立て（就労中・上限あり） */
     if(age<P.selfRetire && P.pensionType!=='kokumin' && age>=P.joinAge) pcSelf+=Math.min(selfGross,PENSION_CAP);
     if(married && pGross>0) pcSpouse+=Math.min(pGross,PENSION_CAP);
-    let net;
+    let net, pensionNom=null;
     if(age<P.selfRetire) net=takeHome(selfGross)+(married?takeHome(pGross):0);
     else if(age<P.reemployTo) net=P.reemployIncome;
-    else { if(pensionCalc==null) pensionCalc=computePension(P,pcSelf,pcSpouse,married); net=pensionCalc.net; }
-    const allowance=dep.reduce((s,a)=>s+(a<=P.allowanceAge?P.childAllowance:0),0);
+    else {
+      /* 受給開始後もスライド調整が続くため毎年再計算する（現役中の加入実績は退職時点で確定） */
+      pensionCalc=computePension(P,pcSelf,pcSpouse,married, CURRENT_YEAR+(age-P.currentAge));
+      /* 公的年金は物価スライドで名目額が改定されるため、生活費と同じインフレ係数で名目化する
+         （マクロ経済スライドによる実質目減りは computePension 側で調整済み） */
+      const pf=Math.pow(1+P.inflation,i);
+      pensionNom={gross:pensionCalc.gross*pf, net:pensionCalc.net*pf, selfBasic:pensionCalc.selfBasic*pf, selfKosei:pensionCalc.selfKosei*pf, spouse:pensionCalc.spouse*pf};
+      net=pensionNom.net;
+    }
+    const allowance=childBenefit(childAges);
     const grant=P.children.filter(c=>c.birthAge===age).length*P.birthGrant;
     let credit=0;
     if(P.buyAge!=null&&age>=P.buyAge&&age<P.buyAge+P.creditYears){ const k=age-P.buyAge; credit=Math.min(balAfter(L,k)*P.creditRate,P.creditCap); }
@@ -654,9 +772,11 @@ function simulate(P){
     const perEq=(P.curMonthlyLiving*12)/eqNow;
     let eq=1+0.5*marriedFrac;
     dep.forEach(a=>{ eq+=(a<14?0.3:0.5); });
-    let living=perEq*eq;
-    living+=insurance(age)+P.travelCount*P.travelCost;
-    living*=Math.pow(1+P.inflation,i);
+    const inflF=Math.pow(1+P.inflation,i);
+    const livingBase=perEq*eq*inflF;
+    const ins=insurance(age)*inflF;
+    const trav=P.travelCount*P.travelCost*inflF;
+    let living=livingBase+ins+trav;
     let earners=(age<P.selfRetire?1:0);
     if(married && P.partnerSegs.some(s=>age>=s.from&&age<=s.to)) earners++;
     const retired = age>=P.reemployTo;
@@ -666,7 +786,20 @@ function simulate(P){
     if(P.marriageAgeFrac>P.currentAgeFrac && i===P.marriageRow && (P.weddingCost||0)>0){ oneoff+=P.weddingCost; oneoffLbl.push('挙式・新生活 '+man(P.weddingCost)+'万'); }
     if(P.buyAge==null||age<P.buyAge){ housing=P.rentMonthly*12; }
     else { const sb=age-P.buyAge; if(age===P.buyAge){ oneoff+=P.downpay; oneoffLbl.push('頭金 '+man(P.downpay)+'万'); const closing=P.price*(P.closingRate||0); if(closing>0){ oneoff+=closing; oneoffLbl.push('購入諸費用 '+man(closing)+'万'); } } if(sb<P.loanYears)housing+=L.annualPay; housing+=P.propertyTax; if(P.repair1Year>0 && sb>0 && sb%P.repair1Year===0){oneoff+=P.repair1Cost;oneoffLbl.push('水廻り修繕 '+man(P.repair1Cost)+'万');} if(sb===P.repair2Year){oneoff+=P.repair2Cost;oneoffLbl.push('リフォーム '+man(P.repair2Cost)+'万');} }
-    const edu=P.children.reduce((s,c)=>s+eduAnnual(age-c.birthAge,P),0);
+    /* 多子世帯の大学無償化：扶養中の子が3人以上いる間、第3子以降（扶養中）の大学授業料相当を免除。
+       兄姉が扶養（childIndependAge）を外れて扶養数が3人未満になると適用されなくなる。仕送りは対象外で残る。 */
+    const edu=P.children.reduce((s,c)=>{
+      const a=age-c.birthAge;
+      let cost=eduAnnual(a,P);
+      if(a!=null && a>=18 && a<=21 && a<P.childIndependAge){
+        const deps=childAges.filter(x=>x!=null && x>=0 && x<P.childIndependAge);
+        if(deps.length>=3){
+          const rank=1+deps.filter(x=>x>a).length; /* 年長順の順位（第何子か） */
+          if(rank>=3) cost=Math.max(0, cost-EDU.univ[P.eduUniv]); /* 大学授業料相当を免除 */
+        }
+      }
+      return s+cost;
+    },0);
     if(P.hasCar && age>=P.carFirstAge && age<P.carReturnAge && (age-P.carFirstAge)%Math.max(1,P.carCycle)===0){
       const price=P.carPrice*Math.pow(1+P.carInflation,i);
       const isFirst=(age===P.carFirstAge);
@@ -676,32 +809,53 @@ function simulate(P){
       lastCarPrice=price;
     }
     let dcContrib=0, dcDed=0;
-    if(P.hasDC && age<P.dcReceiveAge && age<65){ dcContrib=P.dcMonthly*12; if(age<P.selfRetire) dcDed=dcContrib*(marginalRate(selfGross)+0.10); }
+    let dcCorp=0;
+    if(P.hasDC && age<P.dcReceiveAge && age<65){
+      const t=P.dcType||'ideco';
+      /* iDeCo（自己負担・所得控除あり）：現預金から拠出 */
+      if(t==='ideco'||t==='both'){ dcContrib=P.dcMonthly*12; if(age<P.selfRetire) dcDed=dcContrib*(marginalRate(selfGross)+0.10); }
+      /* 企業型DC（会社負担）：在職中のみ。手取り・現預金に影響せず、資産だけ増える */
+      if((t==='corp'||t==='both') && age<P.selfRetire){
+        dcCorp=(P.corpDcMode==='fixed') ? P.corpDcFixed*12 : selfBase*12*(P.corpDcRate/100);
+      }
+    }
     const incomeCash=net+allowance+grant+credit+ded+dcDed;
+    // 表示用：世帯の支出・純貯蓄（教育費も支出に含む）
     const expense=living+housing+edu+oneoff;
     const saving=incomeCash-expense-dcContrib;
-    cash+=saving;
+    // 現預金の増減：教育は別途処理するため、まず教育以外で主口座を回す
+    cash+=incomeCash-(living+housing+oneoff)-dcContrib;
     nisaV=nisaV*(1+P.nisaYield);
-    dcValue=dcValue*(1+P.nisaYield)+dcContrib;
+    dcValue=dcValue*(1+P.nisaYield)+dcContrib+dcCorp;
     let retireNet=0;
     if(P.hasRetireBonus && age===P.selfRetire){ retireNet=retireBonusNet(P); cash+=retireNet; }
     let dcLumpFree=0;
     if(P.hasDC && P.dcLumpStrategy && age===P.dcReceiveAge && dcValue>0){ dcLumpFree=Math.min(dcValue, Math.max(0,dcRscEffective(P))); dcValue-=dcLumpFree; cash+=dcLumpFree; }
-    // NISA積立：生活防衛費を超える余剰現預金の範囲でのみ実行（取り崩す年は入金しない）
-    let contrib=0;
-    { const annualNisa=P.nisaMonthly*12; const room=Math.min(Math.max(0,P.nisaCap-nisaP),360);
-      contrib=Math.min(annualNisa, room, Math.max(0, cash-emergency));
-      if(contrib>0){ cash-=contrib; nisaV+=contrib; nisaP+=contrib; } }
-    // 教育予約（現預金内の確保額）
+    // 教育：積立（別口座へ振替）→ 別口座から学費支払い（不足は現預金から）
     let eduSaveAnnual=0;
     P.children.forEach(c=>{ const ca=age-c.birthAge; if(ca>=0 && ca<EDU_SAVE_END) eduSaveAnnual+=eduMonthlyEach*12; });
+    let eduTransfer=0, eduPayCash=0;
+    if(P.eduReserve){
+      eduTransfer=Math.max(0, Math.min(eduSaveAnnual, cash));     // 主口座→教育口座へ振替（現預金をマイナスにしない）
+      cash-=eduTransfer; eduAccount+=eduTransfer;
+      const fromAcct=Math.min(eduAccount, edu); eduAccount-=fromAcct;
+      eduPayCash=edu-fromAcct; cash-=eduPayCash;                  // 別口座で不足する分は現預金から
+    } else {
+      eduPayCash=edu; cash-=edu;                                  // 別口座を使わず現預金から直接支払い
+    }
     eduPaid+=edu;
-    eduFund=Math.max(0, eduFund+eduSaveAnnual-edu);
-    eduFund=Math.min(eduFund, Math.max(0,totalEduAll-eduPaid), Math.max(0,cash));
-    // スイープ：上限超過分をNISAへ（教育予約分を除く）
+    eduFund=eduAccount;                                           // 表示・アドバイス用：教育口座の残高
+    // NISA積立：その年の黒字（saving>0）かつ生活防衛費を超える余剰のみ（教育の振替・支払い後の現預金で判定）。
+    // 収支が赤字＝取り崩しが必要な年は積立しない。
+    let contrib=0;
+    { const annualNisa=P.nisaMonthly*12; const room=Math.min(Math.max(0,P.nisaCap-nisaP),360);
+      const affordable=Math.min(Math.max(0, cash-emergency), Math.max(0, saving)); /* その年の黒字かつ防衛費超過分 */
+      contrib=Math.min(annualNisa, room, affordable);
+      if(contrib>0){ cash-=contrib; nisaV+=contrib; nisaP+=contrib; } }
+    // スイープ：上限超過分をNISAへ（教育口座は別勘定なので主口座のみが対象）
     let sweep=0;
-    if(P.sweepNisa){ const floor=Math.max(P.cashCap,emergency); const reserve=P.eduReserve?eduFund:0;
-      const sweepable=cash-floor-reserve;
+    if(P.sweepNisa){ const floor=Math.max(P.cashCap,emergency);
+      const sweepable=cash-floor;
       if(sweepable>0){ const annualRoom=Math.max(0,360-contrib), lifeRoom=Math.max(0,P.nisaCap-nisaP);
         sweep=Math.min(sweepable,annualRoom,lifeRoom); if(sweep>0){ cash-=sweep; nisaV+=sweep; nisaP+=sweep; } } }
     // 取り崩し：現預金が生活防衛費を下回る年のみ（この年は上のとおり入金していない）
@@ -713,10 +867,10 @@ function simulate(P){
       else { takeNisa(target-cash); if(cash<target) takeDc(target-cash); }
     }
     const drawdown=drawNisa+drawDc;
-    const netWorth=cash+nisaV+dcValue*(1-P.dcTaxRate);
+    const netWorth=cash+eduAccount+nisaV+dcValue*(1-P.dcTaxRate);
     const defl=Math.pow(1+P.inflation,i);
     const events=eventsFor(P,age,childAges,L);
-    rows.push({i,age,pAge,married,childAges,dep:dep.length,earners,emgMonths,emergency,pension:(age>=P.reemployTo?pensionCalc:null),gross,bonus,net,living,housing,edu,oneoff,oneoffLbl,saving,contrib,sweep,ded,dcContrib,dcDed,retireNet,dcLumpFree,dcValue,eduFund,drawNisa,drawDc,dcTaxPaid,drawdown,nisaV,nisaP,cash,netWorth,defl,incomeCash,expense,events});
+    rows.push({i,age,pAge,married,childAges,dep:dep.length,earners,emgMonths,emergency,pension:(age>=P.reemployTo?pensionNom:null),gross,bonus,net,living,housing,edu,oneoff,oneoffLbl,saving,contrib,sweep,ded,dcContrib,dcCorp,dcDed,retireNet,dcLumpFree,dcValue,eduFund,drawNisa,drawDc,dcTaxPaid,drawdown,nisaV,nisaP,cash,netWorth,defl,livingBase,ins,trav,eduSave:eduSaveAnnual,eduTransfer,eduPayCash,eduAccount,incomeCash,expense,events});
   }
   return rows;
 }
@@ -739,7 +893,7 @@ function readParams(){
     children:kids.map(k=>({birthAge:k.birthAge})), childIndependAge:num('childIndependAge'),
     eduKinder:val('eduKinder'),eduElem:val('eduElem'),eduJunior:val('eduJunior'),eduHigh:val('eduHigh'),
     eduUniv:val('eduUniv'),eduAway:val('eduAway')==='yes', jukuMonthly:num('jukuMonthly'),
-    childAllowance:num('childAllowance'), allowanceAge:num('allowanceAge'), birthGrant:num('birthGrant'),
+    birthGrant:num('birthGrant'),
     buyAge:num('buyAge'), price:num('price'), downpay:num('downpay'), closingRate:num('closingRate')/100, rate:num('rate')/100, loanYears:num('loanYears'),
     rentMonthly:num('rentMonthly'), propertyTax:num('propertyTax'),
     repair1Year:num('repair1Year'), repair1Cost:num('repair1Cost'), repair2Year:num('repair2Year'), repair2Cost:num('repair2Cost'),
@@ -751,7 +905,7 @@ function readParams(){
     nisaYield:num('nisaYield')/100, nisaCap:num('nisaCap'),
     considerDeduction:document.getElementById('considerDeduction').checked,
     sweepNisa:document.getElementById('sweepNisa').checked, cashCap:num('cashCap'),
-    hasDC:document.getElementById('hasDC').checked, dcMonthly:num('dcMonthly'), dcReceiveAge:num('dcReceiveAge'),
+    hasDC:document.getElementById('hasDC').checked, dcType:val('dcType'), dcMonthly:num('dcMonthly'), corpDcMode:val('corpDcMode'), corpDcRate:num('corpDcRate'), corpDcFixed:num('corpDcFixed'), dcReceiveAge:num('dcReceiveAge'),
     hasRetireBonus:document.getElementById('hasRetireBonus').checked, retireBonus:num('retireBonus'), joinAge:num('joinAge'),
     withdrawOrder:val('withdrawOrder'), dcTaxRate:num('dcTaxRate')/100,
     dcLumpStrategy:document.getElementById('dcLumpStrategy').checked,
@@ -774,10 +928,10 @@ function readParams(){
 
 /* ============ 動的リスト（勤務パターン・子ども） ============ */
 const DEF_SEGS=[
-  {from:26,to:31,base:18,allow:3,raise:0.3,cap:25,bonusMonths:3.0},
-  {from:37,to:64,base:12,allow:2,raise:0.2,cap:22,bonusMonths:2.0}
+  {from:24,to:32,base:21.0,allow:3.0,raise:0.45,cap:28.0,bonusMonths:3.5},
+  {from:41,to:64,base:16.0,allow:2.0,raise:0.2,cap:22.0,bonusMonths:2.5}
 ];
-const DEF_KIDS=[{birthAge:30},{birthAge:33}];
+const DEF_KIDS=[{birthAge:33},{birthAge:35}];
 
 function renderSegs(){
   const c=document.getElementById('segList'); c.innerHTML='';
@@ -788,10 +942,10 @@ function renderSegs(){
       <div class="row">
         <div class="field"><label>開始(本人歳)</label><input type="number" data-k="from" value="${s.from}"></div>
         <div class="field"><label>終了(本人歳)</label><input type="number" data-k="to" value="${s.to}"></div>
-        <div class="field"><label>基本給(万)</label><input type="number" step="0.5" data-k="base" value="${s.base}"></div>
-        <div class="field"><label>諸手当(万)</label><input type="number" step="0.5" data-k="allow" value="${s.allow}"></div>
+        <div class="field"><label>基本給(万・額面)</label><input type="number" step="0.5" data-k="base" value="${s.base}"></div>
+        <div class="field"><label>諸手当(万・額面)</label><input type="number" step="0.5" data-k="allow" value="${s.allow}"></div>
         <div class="field"><label>昇給(万/年)</label><input type="number" step="0.1" data-k="raise" value="${s.raise}"></div>
-        <div class="field"><label>基本給上限(万)</label><input type="number" step="0.5" data-k="cap" value="${s.cap}"></div>
+        <div class="field"><label>基本給上限(万・額面)</label><input type="number" step="0.5" data-k="cap" value="${s.cap}"></div>
         <div class="field"><label>賞与(基本給ヶ月)</label><input type="number" step="0.1" data-k="bonusMonths" value="${s.bonusMonths}"></div>
       </div>`;
     d.querySelectorAll('input').forEach(inp=>inp.addEventListener('input',()=>{ s[inp.dataset.k]=parseFloat(inp.value)||0; render(); }));
@@ -815,6 +969,7 @@ function renderKids(){
 function man(v){ v=Math.round(v); if(Math.abs(v)>=10000) return (v/10000).toLocaleString('ja-JP',{maximumFractionDigits:2})+'億'; return v.toLocaleString('ja-JP'); }
 function manY(v){ return man(v)+(Math.abs(Math.round(v))>=10000?'円':'万円'); }
 function yen(manVal){ const y=Math.round(manVal*10000/1000)*1000; return y.toLocaleString('ja-JP')+'円'; }
+function yenFull(manVal){ const y=Math.round(manVal*10000/100)*100; return '¥'+y.toLocaleString('ja-JP'); }
 
 function stageOf(P,r){
   if(r.age>=P.selfRetire) return {key:'old',label:'老後',color:'var(--st-old)'};
@@ -827,7 +982,7 @@ function stageOf(P,r){
 const ROWBG={single:'#F4F8FC',couple:'#F1F8F6',kids:'#FEF8EE',edu:'#FBF1F4',old:'#F6F2FA'};
 
 /* ============ メイン描画 ============ */
-let assetChart, flowChart, inflChart;
+let assetChart, flowChart, inflChart, snapPieChart, snapAssetChart;
 let SNAP_LAST=null;
 const RANK_TH={
   '20代':{SS:5,S:3.5,A:2.2,B:1.2,C:0.5},
@@ -1170,6 +1325,7 @@ function renderSnapshot(){
   const dcNet=r.dcValue*(1-P.dcTaxRate);
   const rowsTbl=[
     ['現預金', r.cash, true],
+    ['教育積立（別口座）', (r.eduAccount||0), false],
     ['NISA 評価額', r.nisaV, false],
     ['DC 税引後評価額', dcNet, false],
     ['― 総資産（合計）', r.netWorth, true],
@@ -1182,6 +1338,43 @@ function renderSnapshot(){
   const nomVal=r.netWorth, nomCash=r.cash;
   const cashWarn=r.cash<r.emergency-0.5;
   const nwWarn=r.netWorth<0;
+
+  /* --- その年の「現預金の使いみち」（年額）。収支＝前年比の現預金増減 --- */
+  const idx=rows.indexOf(r);
+  const prevCash=idx>0?rows[idx-1].cash:(P.initCash||0);
+  const drawDcNet=(r.drawDc||0)-(r.dcTaxPaid||0);
+  const inflowExtra=(r.retireNet||0)+(r.dcLumpFree||0)+(r.drawNisa||0)+drawDcNet; /* 給与以外の現預金流入 */
+  const incomeY=(r.incomeCash||0)+inflowExtra;   /* 年間の現預金流入（収入） */
+  /* 支出内訳（年額）＝この年に現預金から出て行ったお金 */
+  const cat=[
+    ['生活費',      (r.livingBase!=null?r.livingBase:0), '#8CC152'],
+    ['住居費',      r.housing,                            '#4FC1C9'],
+    ['保険費',      (r.ins!=null?r.ins:0),               '#8E7CC3'],
+    ['旅行費',      (r.trav!=null?r.trav:0),             '#F6BB42'],
+    ['教育費',      (r.eduPayCash!=null?r.eduPayCash:r.edu), '#E9833A'],
+    ['教育積立費',  (r.eduTransfer||0),                   '#A0D468'],
+    ['一時費',      (r.oneoff||0),                        '#EC6B56'],
+    ['iDeCo拠出',   (r.dcContrib||0),                     '#AC92EC'],   /* 自己負担分のみ（企業型DCは会社負担のため現預金を通らない） */
+    ['NISA積立',    (r.contrib||0),                       '#5D9CEC'],
+    ['NISAスイープ',(r.sweep||0),                         '#3B7DD8'],
+  ];
+  const slices=cat.filter(c=>c[1]>0.5).map(c=>({label:c[0],val:c[1],color:c[2]}));
+  const expenseY=slices.reduce((s,c)=>s+c.val,0);        /* 年間の現預金流出（支出） */
+  const pieTotal=expenseY;
+  const balanceY=r.cash-prevCash;                        /* 収支＝前年比の現預金増減 */
+  const incomeStr=man(incomeY)+'万', expStr=man(expenseY)+'万';
+
+  /* --- 資産比率（評価額、金額の大きい順） --- */
+  const assetCat=[
+    ['現預金',    r.cash,                       '#B7C3D0'],
+    ['NISA',      r.nisaV,                      '#5D9CEC'],
+    ['DC・iDeCo', r.dcValue*(1-P.dcTaxRate),    '#AC92EC'],
+    ['教育積立',  (r.eduAccount||0),            '#A0D468'],
+  ];
+  const assetSlices=assetCat.filter(c=>c[1]>0.5).map(c=>({label:c[0],val:c[1],color:c[2]})).sort((a,b)=>b.val-a.val);
+  const assetTotal=assetSlices.reduce((s,c)=>s+c.val,0);
+  const assetStr=man(assetTotal)+'万';
+  const assetFull={'現預金':'現預金','NISA':'NISA評価額','DC・iDeCo':'確定拠出年金(DC・iDeCo)税引後','教育積立':'教育積立(別口座)'};
 
   body.innerHTML=`
     <div class="snap-hero">
@@ -1197,6 +1390,38 @@ function renderSnapshot(){
       </div>
     </div>
 
+    <div class="snap-swipe">
+     <div class="snap-slide">
+      <div class="bud-card">
+        <div class="bud-title">この年の現預金の使いみち（${r.age}歳）</div>
+        <div class="bud-chart"><canvas id="snapPie"></canvas></div>
+        <div class="bud-figs">
+          <div class="bud-row"><span class="bud-k">収入</span><span class="bud-v col"><span>${yenFull(incomeY)}<small>（月 ${yenFull(incomeY/12)}）</small></span>${(r.drawNisa||0)>0.5?`<small class="bud-sub">うちNISA取り崩し ${yenFull(r.drawNisa)}</small>`:''}</span></div>
+          <div class="bud-row"><span class="bud-k">支出</span><span class="bud-v">${yenFull(expenseY)}<small>（月 ${yenFull(expenseY/12)}）</small></span></div>
+          <div class="bud-div"></div>
+          <div class="bud-row big ${balanceY<0?'neg':'pos'}"><span class="bud-k">収支（現預金の前年比）</span><span class="bud-v">${balanceY<0?'−':'+'}${yenFull(Math.abs(balanceY))}<small>（月 ${balanceY<0?'−':'+'}${yenFull(Math.abs(balanceY)/12)}）</small></span></div>
+        </div>
+        ${inflowExtra>0.5?`<div class="bud-note">＊収入には給与以外の現預金流入（資産取り崩し・退職金・DC一時金など）${yenFull(inflowExtra)}を含みます。</div>`:''}
+        ${(r.sweep||0)>0.5?`<div class="bud-note">＊「NISAスイープ」は現預金の上限超過分をNISAへ移した額です。現預金からNISAへ<b>お金の置き場所が移った</b>だけで資産は減っていませんが、現預金そのものは減るため収支はマイナス側に出ます。</div>`:''}
+        ${(r.dcCorp||0)>0.5?`<div class="bud-note">＊企業型DCの会社掛金 <b>${yenFull(r.dcCorp)}</b>（月 ${yenFull(r.dcCorp/12)}）は<b>会社負担</b>のため、この収支には含まれません（手取りを減らさずに資産が増えます）。資産の内訳では「DC・iDeCo」に反映されています。</div>`:''}
+        <div class="bud-legend" id="budLegend"></div>
+      </div>
+     </div>
+     <div class="snap-slide">
+      <div class="bud-card">
+        <div class="bud-title">資産の内訳（${r.age}歳・評価額）</div>
+        <div class="bud-chart"><canvas id="assetPie"></canvas></div>
+        <div class="bud-figs">
+          <div class="bud-row big ${nwWarn?'neg':'pos'}"><span class="bud-k">総資産</span><span class="bud-v">${manY(assetTotal)}<small>（実質 ${manY(real(assetTotal))}）</small></span></div>
+        </div>
+        <div class="bud-note">NISA・確定拠出年金は評価額（DC・iDeCoは将来課税を引いた税引後）。金額の大きい順に表示しています。</div>
+        <div class="bud-legend" id="assetLegend"></div>
+      </div>
+     </div>
+    </div>
+    <div class="snap-dots"><span class="snap-dot active"></span><span class="snap-dot"></span></div>
+    <div class="snap-hint">← スワイプで「資産の内訳」も見られます →</div>
+
     <table class="snap-tbl">
       <thead><tr><td>項目</td><td>名目（その年の額）</td><td>実質（今の価値）</td></tr></thead>
       <tbody>
@@ -1211,6 +1436,94 @@ function renderSnapshot(){
       つまり名目総資産${manY(nomVal)}は、<b>今のお金に換算すると${manY(real(nomVal))}の購買力</b>しかありません。老後の必要額を「今の感覚の金額」で考えると不足しやすいため、実質額での確認が重要です。
       ${P.inflation<=0?'<br><span style="color:var(--slate-2)">※インフレ率が0のため、名目と実質は一致します。</span>':''}
     </div>`;
+
+  /* ドーナツ描画（中央に収入・支出、円グラフ上に費目テキスト） */
+  if(snapPieChart){ snapPieChart.destroy(); snapPieChart=null; }
+  const pieCtx=document.getElementById('snapPie');
+  if(pieCtx && slices.length && pieTotal>0){
+    const centerPlugin={ id:'centerAndLabels', afterDraw(chart){
+      const ctx=chart.ctx, meta=chart.getDatasetMeta(0); if(!meta.data.length) return;
+      const cx=meta.data[0].x, cy=meta.data[0].y;
+      ctx.save();
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillStyle='#8A98AB'; ctx.font='700 11px system-ui,sans-serif';
+      ctx.fillText('収入 '+incomeStr, cx, cy-17);
+      ctx.fillStyle='#243244'; ctx.font='800 13px system-ui,sans-serif';
+      ctx.fillText('支出', cx, cy+2);
+      ctx.font='800 16px system-ui,sans-serif';
+      ctx.fillText(expStr, cx, cy+19);
+      meta.data.forEach((arc,idx)=>{
+        const v=chart.data.datasets[0].data[idx]; const pct=v/pieTotal*100; if(pct<6) return;
+        const ang=(arc.startAngle+arc.endAngle)/2;
+        const rr=(arc.outerRadius||0)+13;
+        const x=cx+Math.cos(ang)*rr, y=cy+Math.sin(ang)*rr;
+        ctx.fillStyle=chart.data.datasets[0].backgroundColor[idx];
+        ctx.font='800 11.5px system-ui,sans-serif';
+        ctx.textAlign=Math.cos(ang)>=0?'left':'right';
+        ctx.textBaseline='middle';
+        ctx.fillText(chart.data.labels[idx], x, y);
+      });
+      ctx.restore();
+    }};
+    snapPieChart=new Chart(pieCtx,{
+      type:'doughnut',
+      data:{ labels:slices.map(s=>s.label), datasets:[{ data:slices.map(s=>+s.val.toFixed(3)), backgroundColor:slices.map(s=>s.color), borderColor:'#fff', borderWidth:2 }] },
+      options:{ responsive:true, maintainAspectRatio:false, cutout:'66%',
+        layout:{ padding:{top:22,bottom:22,left:58,right:58} },
+        plugins:{ legend:{display:false},
+          tooltip:{ callbacks:{ label:c=>{ const v=c.parsed, pct=pieTotal>0?(v/pieTotal*100):0; return `${c.label}: ${yenFull(v)}（${pct.toFixed(1)}%）`; } } } } },
+      plugins:[centerPlugin]
+    });
+    const lg=document.getElementById('budLegend');
+    if(lg) lg.innerHTML=slices.map(s=>{
+      let sub='';
+      if(s.label==='NISAスイープ') sub='';
+      else if(s.label==='旅行費') sub=(P.travelCount>0)?`<small class="chip-mo">（${yenFull(s.val/P.travelCount)}/回 × ${P.travelCount}回）</small>`:'';
+      else sub=`<small class="chip-mo">（月 ${yenFull(s.val/12)}）</small>`;
+      return `<span class="bud-chip"><i style="background:${s.color}"></i>${s.label} <b>${yenFull(s.val)}</b>${sub}<b class="chip-pct">・${(s.val/pieTotal*100).toFixed(0)}%</b></span>`;
+    }).join('');
+  }
+
+  /* 資産比率ドーナツ */
+  if(snapAssetChart){ snapAssetChart.destroy(); snapAssetChart=null; }
+  const assetCtx=document.getElementById('assetPie');
+  if(assetCtx && assetSlices.length && assetTotal>0){
+    const assetCenter={ id:'assetCenter', afterDraw(chart){
+      const ctx=chart.ctx, meta=chart.getDatasetMeta(0); if(!meta.data.length) return;
+      const cx=meta.data[0].x, cy=meta.data[0].y;
+      ctx.save();
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillStyle='#8A98AB'; ctx.font='700 12px system-ui,sans-serif';
+      ctx.fillText('総資産', cx, cy-9);
+      ctx.fillStyle='#243244'; ctx.font='800 17px system-ui,sans-serif';
+      ctx.fillText(assetStr, cx, cy+11);
+      meta.data.forEach((arc,idx)=>{
+        const v=chart.data.datasets[0].data[idx]; const pct=v/assetTotal*100; if(pct<6) return;
+        const ang=(arc.startAngle+arc.endAngle)/2, rr=(arc.outerRadius||0)+13;
+        const x=cx+Math.cos(ang)*rr, y=cy+Math.sin(ang)*rr;
+        ctx.fillStyle=chart.data.datasets[0].backgroundColor[idx];
+        ctx.font='800 11.5px system-ui,sans-serif';
+        ctx.textAlign=Math.cos(ang)>=0?'left':'right'; ctx.textBaseline='middle';
+        ctx.fillText(chart.data.labels[idx], x, y);
+      });
+      ctx.restore();
+    }};
+    snapAssetChart=new Chart(assetCtx,{
+      type:'doughnut',
+      data:{ labels:assetSlices.map(s=>s.label), datasets:[{ data:assetSlices.map(s=>+s.val.toFixed(3)), backgroundColor:assetSlices.map(s=>s.color), borderColor:'#fff', borderWidth:2 }] },
+      options:{ responsive:true, maintainAspectRatio:false, cutout:'66%',
+        layout:{ padding:{top:22,bottom:22,left:58,right:58} },
+        plugins:{ legend:{display:false},
+          tooltip:{ callbacks:{ label:c=>{ const v=c.parsed, pct=assetTotal>0?(v/assetTotal*100):0; return `${assetFull[c.label]||c.label}: ${manY(v)}（${pct.toFixed(1)}%）`; } } } } },
+      plugins:[assetCenter]
+    });
+    const alg=document.getElementById('assetLegend');
+    if(alg) alg.innerHTML=assetSlices.map(s=>`<span class="bud-chip"><i style="background:${s.color}"></i>${assetFull[s.label]||s.label} <b>${manY(s.val)}</b><b class="chip-pct">・${(s.val/assetTotal*100).toFixed(0)}%</b></span>`).join('');
+  }
+
+  /* スワイプのドット表示（スマホ） */
+  const sw=document.querySelector('#snapBody .snap-swipe'), dots=document.querySelectorAll('#snapBody .snap-dot');
+  if(sw && dots.length){ sw.addEventListener('scroll',()=>{ const k=Math.round(sw.scrollLeft/Math.max(1,sw.clientWidth)); dots.forEach((d,i)=>d.classList.toggle('active',i===k)); }); }
 }
 
 function render(){
@@ -1411,17 +1724,17 @@ function renderLoanNote(P,rows){
 }
 
 /* ============ 初期化 ============ */
-const DEFAULTS={currentAge:26,currentAgeMonths:0,endAge:90,marriageAge:28,marriageAgeMonths:0,weddingCost:250,partnerCurrentAge:26,
-  selfBaseMonthly:24,selfAllowance:4,famAllowSpouse:1,famAllowChild:0.5,famChildAge:18,selfRaise:0.7,selfCapMonthly:46,selfBonusMonths:4.2,selfBonusCount:2,selfRetire:65,
-  reemployIncome:260,reemployTo:65,jobType:'kaisha',pensionType:'kosei',pensionBasicYears:40,macroSlide:'1',macroSlideRate:0.4,childIndependAge:22,
+const DEFAULTS={currentAge:24,currentAgeMonths:0,endAge:90,marriageAge:31,marriageAgeMonths:0,weddingCost:150,partnerCurrentAge:24,
+  selfBaseMonthly:21.5,selfAllowance:3.0,famAllowSpouse:1.0,famAllowChild:0.5,famChildAge:18,selfRaise:0.57,selfCapMonthly:41.5,selfBonusMonths:3.5,selfBonusCount:2,selfRetire:65,
+  reemployIncome:260,reemployTo:65,jobType:'kaisha',pensionType:'kosei',pensionBasicYears:40,macroSlide:'1',macroSlideRate:0.67,childIndependAge:22,
   eduKinder:'pub',eduElem:'pub',eduJunior:'pub',eduHigh:'pub',eduUniv:'kokuritsu',eduAway:'no',jukuMonthly:0,
-  childAllowance:12,allowanceAge:18,birthGrant:50,
-  buyAge:36,rentMonthly:9,price:3800,downpay:700,closingRate:7,rate:1.2,loanYears:35,propertyTax:18,
+  birthGrant:50,
+  buyAge:41,rentMonthly:7.5,price:3830,downpay:400,closingRate:7,rate:1.5,loanYears:35,propertyTax:15,
   repair1Year:10,repair1Cost:120,repair2Year:35,repair2Cost:500,creditYears:13,creditRate:0.7,creditCap:21,
-  curHouseholdSize:2,curMonthlyLiving:20,inflation:1.0,travelCount:1,travelCost:20,
-  initCash:250,nisaMonthly:3,nisaYield:4.0,nisaCap:1800,initNisaP:0,initNisaV:0,
-  considerDeduction:true,sweepNisa:false,cashCap:500,
-  hasDC:false,dcMonthly:2.0,dcReceiveAge:65,hasRetireBonus:false,retireBonus:1500,joinAge:22,
+  curHouseholdSize:1,curMonthlyLiving:12.0,inflation:1.5,travelCount:1,travelCost:12,
+  initCash:50,nisaMonthly:2,nisaYield:4.0,nisaCap:1800,initNisaP:0,initNisaV:0,
+  considerDeduction:true,sweepNisa:false,cashCap:300,
+  hasDC:false,dcType:'ideco',dcMonthly:2.0,corpDcMode:'rate',corpDcRate:2.5,corpDcFixed:1.0,dcReceiveAge:65,hasRetireBonus:true,retireBonus:1500,joinAge:22,
   withdrawOrder:'dc',dcTaxRate:15,dcLumpStrategy:true,eduReserve:true,
   hasCar:false,carFirstAge:30,carPrice:250,carCycle:8,carInflation:2.5,carTradeIn:20,carReturnAge:70};
 const STATIC_IDS=Object.keys(DEFAULTS);
@@ -1491,6 +1804,10 @@ document.getElementById('shareBtn').addEventListener('click',(e)=>{
 });
 document.getElementById('pdfBtn').addEventListener('click',()=>window.print());
 document.getElementById('jobType').addEventListener('change',e=>{ const kosei=(e.target.value==='kaisha'||e.target.value==='komuin'); document.getElementById('pensionType').value=kosei?'kosei':'kokumin'; render(); });
+
+document.getElementById('editStatutory').addEventListener('change',e=>{
+  document.body.classList.toggle('show-statutory', e.target.checked);
+});
 
 document.getElementById('resultTabs').addEventListener('click',e=>{
   const btn=e.target.closest('.tab-btn'); if(!btn)return;
