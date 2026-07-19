@@ -329,7 +329,7 @@
       <summary><span class="tag">基本</span>あなたと家族の前提<span class="chev">▶</span></summary>
       <div class="body">
         <div class="field"><label>現在の年齢（本人）</label><div class="ig"><input type="number" id="currentAge" value="26"><span class="unit mo">歳</span><input type="number" class="mo" id="currentAgeMonths" value="0" min="0" max="11" step="1"><span class="unit mo">ヶ月</span></div></div>
-        <div class="field"><label>シミュレーション最終年齢</label><div class="ig"><input type="number" id="endAge" value="90"><span class="unit">歳</span></div></div>
+        <div class="hint" style="margin-top:0">試算は<b>生活資金が尽きた時点で自動的に終了</b>します（現預金・NISA・教育積立を使い切り、受給開始前の確定拠出年金しか残らない状態）。資金が尽きなければ最長120歳まで試算します。</div>
         <div class="field"><label>結婚する年齢（本人）</label><div class="ig"><input type="number" id="marriageAge" value="28"><span class="unit mo">歳</span><input type="number" class="mo" id="marriageAgeMonths" value="0" min="0" max="11" step="1"><span class="unit mo">ヶ月</span></div></div>
         <div class="field"><label>挙式・新生活の特別費</label><div class="ig"><input type="number" id="weddingCost" value="250"><span class="unit">万</span></div></div>
         <div class="hint" style="margin-top:0">挙式・披露宴・指輪・新居の初期費用など。結婚する年に現金で支払います（ご祝儀等で相殺後の自己負担額の目安を入力。0にすれば計上しません）。</div>
@@ -360,6 +360,12 @@
         <div class="field"><label>年金制度（本人）</label><select id="pensionType"><option value="kosei">厚生年金</option><option value="kokumin">国民年金（基礎のみ）</option></select></div>
         <div class="field"><label>基礎年金 納付年数</label><div class="ig"><input type="number" id="pensionBasicYears" value="40" min="0" max="40"><span class="unit">年</span></div></div>
         <div class="field"><label>マクロ経済スライドを考慮</label><select id="macroSlide"><option value="1">考慮する</option><option value="0">考慮しない</option></select></div>
+        <div class="field"><label>年金の見通し（2024年財政検証）</label><select id="pensionCase">
+          <option value="past30">標準：過去30年投影（代替率50.4%）</option>
+          <option value="growth">楽観：成長型経済移行・継続（57.6%）</option>
+          <option value="zero">保守：1人当たりゼロ成長（37〜33%）</option>
+        </select></div>
+        <div class="hint" style="margin-top:0">厚労省の財政検証で示された4ケースのうち3つに対応。<b>標準</b>は経済成長ほぼゼロを前提とした中心ケースです。<b>保守</b>は2059年度に国民年金の積立金が枯渇し完全賦課方式へ移行する想定で、基礎年金だけでなく報酬比例部分も削減対象となり、実質的な給付は現在の約6割になります。出生数が推計を下回って推移している現状を踏まえ、<b>下振れリスクの確認には「保守」での試算をおすすめします</b>。</div>
         <div class="statutory"><div class="hint" style="margin-top:0">マクロ経済スライドは<b>基礎年金にのみ</b>2057年度まで適用します（2024年財政検証・過去30年投影ケース。報酬比例部分は2026年度に調整終了済み）。調整率0.67%/年は、基礎年金の実質額が夫婦2人で約▲20%（2024→2057年度）となる財政検証の見通しに合わせた値です。</div><div class="field"><label>　└ 調整率（基礎年金・実質）</label><div class="ig"><input type="number" id="macroSlideRate" value="0.67" step="0.01"><span class="unit">%/年</span></div></div></div>
         <div class="hint" id="pensionInfo"></div>
         <div class="field"><label>配偶者・扶養控除を考慮</label><input type="checkbox" id="considerDeduction" checked></div>
@@ -604,7 +610,8 @@
 ・<b>生活費</b>：総務省「家計調査2024」の単身世帯（34歳以下）の消費支出から住居費を除いた月12.0万円。世帯人数の増加は等価尺度で自動換算。<br>
 ・<b>インフレ率</b>：1.5%（日銀の物価安定目標2%と過去実績の中間的な水準）。<br>
 ・<b>公的制度</b>：児童手当・出産育児一時金50万円・住宅ローン減税（0.7%×13年・上限21万円）・NISA生涯枠1,800万円は法令どおり。編集する場合は入力欄上部のチェックボックスをオンにしてください。<br>
-・<b>公的年金</b>：厚労省「令和6年（2024年）財政検証」の過去30年投影ケースに準拠。年金額は物価スライドで<b>名目額が改定される</b>ため、生活費と同じインフレ率で名目化しています。そのうえでマクロ経済スライドを<b>基礎年金にのみ2057年度まで</b>適用し（報酬比例部分は2026年度に調整終了）、実質価値が基礎年金で約▲20%目減りする姿を再現しています。報酬比例部分は実質横ばいとして扱い、財政検証が織り込む実質賃金上昇による増加分は見込まない保守的な設定です。<br>
+・<b>公的年金</b>：厚労省「令和6年（2024年）財政検証」の過去30年投影ケースに準拠。年金額は物価スライドで<b>名目額が改定される</b>ため、生活費と同じインフレ率で名目化しています。そのうえで財政検証の3ケースを選べます。<b>標準（過去30年投影）</b>は基礎年金にのみ2057年度までスライドを適用（報酬比例は2026年度に調整終了）、<b>楽観（成長型経済移行・継続）</b>は2037年度で調整終了、<b>保守（1人当たりゼロ成長）</b>は2059年度に国民年金の積立金が枯渇して完全賦課方式へ移行する想定で、報酬比例部分も含めて実質給付が現在の約6割（所得代替率37〜33%）まで下がる姿を再現します。いずれも報酬比例部分について財政検証が織り込む実質賃金上昇による増加分は見込まず、安全側に寄せています。<br>
+・<b>年金見通しの注意</b>：財政検証は人口の中位推計を前提としていますが、実際の出生数は推計を下回って推移しています。またマクロ経済スライドには名目下限措置があり、物価上昇が小さい年は調整が発動されず、調整期間はこれまで繰り返し後ろ倒しされてきました。標準ケースでも下振れの可能性があるため、<b>「保守」ケースでも家計が成り立つかを必ず確認してください</b>。<br>
 ・<span style="color:var(--slate-2)">なお、賞与3.5ヶ月・頭金400万円・初期現預金50万円・退職金1,500万円・家族手当の額などは、統計が一意に定まらないため一般的な水準を仮置きしたものです。</span><br><br>
 なお、資産を使い切った後は<b>現預金をゼロで下げ止め</b>、まかなえなかった支出を「不足額」として累計します（マイナス残高を許すと、無利息の借金で赤字を埋め続けたうえ後年の黒字で資産が自然回復してしまうため）。不足が発生した後は新規の積立・投資も行いません。傾向把握用としてご利用ください。
       </p>
@@ -633,25 +640,40 @@ function eduTotalPerChild(P){ let t=0; for(let a=3;a<=21;a++) t+=eduAnnual(a,P);
 function insurance(age){ if(age<30)return 8; if(age<40)return 14; if(age<50)return 22; if(age<60)return 28; if(age<70)return 22; return 14; }
 /* 公的年金（令和7年度基準・概算）: 老齢基礎満額83.17万/年、報酬比例乗率5.481/1000（2003年4月〜）、標準報酬の年間上限概算1230万 */
 const CURRENT_YEAR=new Date().getFullYear();
+const MAX_AGE=120;  /* 生活資金が尽きなかった場合の試算上限 */
 const PENSION_FULL=83.17, PENSION_RATE=5.481/1000, PENSION_CAP=1230, PENSION_NET=0.90;
 /* マクロ経済スライドの調整期間（2024年財政検証・過去30年投影ケース）
    ・報酬比例部分（厚生年金2階）：2026年度に調整終了 → 以後は実質維持
    ・基礎年金（1階）：2057年度まで調整継続 → 実質で目減り（夫婦2人分で2024→2057に約▲20%） */
-const PENSION_BASE_YEAR=2026, BASIC_ADJ_END_YEAR=2057;
+const PENSION_BASE_YEAR=2026;
+/* 2024年財政検証の各ケースに対応する給付水準調整の設定
+   growth : 成長型経済移行・継続（2037年度に調整終了／所得代替率57.6%）
+   past30 : 過去30年投影（2057年度に調整終了／50.4%）＝標準
+   zero   : 1人当たりゼロ成長（2059年度に国民年金の積立金が枯渇し完全賦課方式へ。
+            保険料と国庫負担で賄える水準は所得代替率37〜33%程度＝現在の約6割）
+            この場合は基礎年金だけでなく報酬比例部分も削減対象になるとみなす */
+const PENSION_CASES={
+  growth:{end:2037, rate:0.67, both:false},
+  past30:{end:2057, rate:0.67, both:false},
+  zero  :{end:2059, rate:1.68, both:true }
+};
 function computePension(P,pcSelf,pcSpouse,married,calYear){
   const selfBasicRaw=PENSION_FULL*Math.min(1,(P.pensionBasicYears||40)/40);
   const selfKoseiRaw=(P.pensionType==='kokumin')?0:pcSelf*PENSION_RATE;
   const spBasicRaw=married?PENSION_FULL:0;
   const spKoseiRaw=married?pcSpouse*PENSION_RATE:0;
   /* 基礎年金にのみ調整終了年度までスライドを適用（報酬比例は調整終了済み） */
-  let fb=1;
+  const cs=PENSION_CASES[P.pensionCase]||PENSION_CASES.past30;
+  let fb=1, fk=1;
   if(P.macroSlide){
     const y=(calYear!=null?calYear:PENSION_BASE_YEAR);
-    const n=Math.max(0, Math.min(y,BASIC_ADJ_END_YEAR)-PENSION_BASE_YEAR);
-    fb=Math.pow(1-(P.macroSlideRate||0)/100, n);
+    const n=Math.max(0, Math.min(y,cs.end)-PENSION_BASE_YEAR);
+    const rate=(P.macroSlideRate!=null?P.macroSlideRate:cs.rate);
+    fb=Math.pow(1-rate/100, n);
+    if(cs.both) fk=fb;   /* ゼロ成長ケースでは報酬比例部分も調整対象 */
   }
-  const selfBasic=selfBasicRaw*fb, selfKosei=selfKoseiRaw;
-  const spouse=spBasicRaw*fb+spKoseiRaw;
+  const selfBasic=selfBasicRaw*fb, selfKosei=selfKoseiRaw*fk;
+  const spouse=spBasicRaw*fb+spKoseiRaw*fk;
   const gross=selfBasic+selfKosei+spouse;
   /* 戻り値は「現在の物価水準（今日の円）」ベース。実際の給付は物価スライドで名目額が増えるため、
      利用側で (1+インフレ率)^経過年 を掛けて名目化する。 */
@@ -760,7 +782,7 @@ function simulate(P){
   const L=loanCalc(P); const rows=[]; let cash=P.initCash, nisaP=P.initNisaP, nisaV=(P.initNisaV>0?P.initNisaV:P.initNisaP), dcValue=0;
   const eduTotalEach=eduTotalPerChild(P); const eduMonthlyEach=eduTotalEach/(EDU_SAVE_END*12); const totalEduAll=eduTotalEach*P.children.length; let eduFund=0, eduPaid=0, eduAccount=0; let lastCarPrice=0;
   let pcSelf=0, pcSpouse=0, pensionCalc=null, shortfallCum=0;
-  const nY=Math.max(1,P.endAge-P.currentAge+1);
+  const nY=Math.max(1,MAX_AGE-P.currentAge+1);
   for(let i=0;i<nY;i++){
     const age=P.currentAge+i, pAge=P.partnerCurrentAge+i;
     /* 結婚の月単位対応：結婚が発生する行だけ在婚期間を按分（0〜1）。以降は1、以前は0 */
@@ -903,9 +925,13 @@ function simulate(P){
     if(cash<0){ shortfall=-cash; cash=0; }
     shortfallCum+=shortfall;
     const netWorth=cash+eduAccount+nisaV+dcValue*(1-P.dcTaxRate);
+    /* 生活に使える資産（受給開始前の確定拠出年金は引き出せないため除外） */
+    const liquid=cash+eduAccount+nisaV+((P.hasDC&&age>=P.dcReceiveAge)?dcValue*(1-P.dcTaxRate):0);
     const defl=Math.pow(1+P.inflation,i);
     const events=eventsFor(P,age,childAges,L);
-    rows.push({i,age,pAge,married,childAges,dep:dep.length,earners,emgMonths,emergency,pension:(age>=P.reemployTo?pensionNom:null),gross,bonus,net,living,housing,edu,oneoff,oneoffLbl,saving,contrib,sweep,ded,dcContrib,dcCorp,dcDed,retireNet,dcLumpFree,dcValue,eduFund,drawNisa,drawDc,dcTaxPaid,drawdown,shortfall,shortfallCum,nisaV,nisaP,cash,netWorth,defl,livingBase,ins,trav,eduSave:eduSaveAnnual,eduTransfer,eduPayCash,eduAccount,incomeCash,expense,events});
+    rows.push({i,age,pAge,married,childAges,dep:dep.length,earners,emgMonths,emergency,pension:(age>=P.reemployTo?pensionNom:null),gross,bonus,net,living,housing,edu,oneoff,oneoffLbl,saving,contrib,sweep,ded,dcContrib,dcCorp,dcDed,retireNet,dcLumpFree,dcValue,eduFund,drawNisa,drawDc,dcTaxPaid,drawdown,shortfall,shortfallCum,liquid,nisaV,nisaP,cash,netWorth,defl,livingBase,ins,trav,eduSave:eduSaveAnnual,eduTransfer,eduPayCash,eduAccount,incomeCash,expense,events});
+    /* 生活資金が尽きた（＝支出をまかなえなくなった）時点で試算を終了する */
+    if(shortfall>0 || liquid<=0) break;
   }
   return rows;
 }
@@ -916,14 +942,14 @@ function num(id){ const el=document.getElementById(id); const v=parseFloat(el.va
 function val(id){ return document.getElementById(id).value; }
 function readParams(){
   const P = {
-    currentAge:num('currentAge'), endAge:num('endAge'), marriageAge:num('marriageAge'), partnerCurrentAge:num('partnerCurrentAge'),
+    currentAge:num('currentAge'), endAge:MAX_AGE, marriageAge:num('marriageAge'), partnerCurrentAge:num('partnerCurrentAge'),
     currentAgeMonths:num('currentAgeMonths'), marriageAgeMonths:num('marriageAgeMonths'),
     weddingCost:num('weddingCost'),
     selfBaseMonthly:num('selfBaseMonthly'), selfAllowance:num('selfAllowance'), famAllowSpouse:num('famAllowSpouse'), famAllowChild:num('famAllowChild'), famChildAge:num('famChildAge'), selfRaise:num('selfRaise'), selfCapMonthly:num('selfCapMonthly'),
     selfBonusMonths:num('selfBonusMonths'), selfRetire:num('selfRetire'),
     reemployIncome:num('reemployIncome'), reemployTo:num('reemployTo'),
-    jobType:val('jobType'), pensionType:val('pensionType'), pensionBasicYears:num('pensionBasicYears'),
-    macroSlide:val('macroSlide')==='1', macroSlideRate:num('macroSlideRate'),
+    jobType:val('jobType'), pensionType:val('pensionType'), pensionBasicYears:num('pensionBasicYears'), pensionCase:val('pensionCase'),
+    macroSlide:val('macroSlide')==='1', macroSlideRate:(document.getElementById('editStatutory').checked?num('macroSlideRate'):null),
     partnerSegs:segs.map(s=>({from:s.from,to:s.to,base:s.base,allow:s.allow,raise:s.raise,cap:s.cap,bonusMonths:s.bonusMonths})),
     children:kids.map(k=>({birthAge:k.birthAge})), childIndependAge:num('childIndependAge'),
     eduKinder:val('eduKinder'),eduElem:val('eduElem'),eduJunior:val('eduJunior'),eduHigh:val('eduHigh'),
@@ -1204,7 +1230,7 @@ function metricsOf(rows){
   const last=rows[rows.length-1];
   let minGap=Infinity, minGapAge=0, bust=null;
   rows.forEach(r=>{ const g=r.cash-r.emergency; if(g<minGap){minGap=g;minGapAge=r.age;} if(!bust&&r.shortfall>0)bust=r.age; });
-  return {final:last.netWorth, minGap, minGapAge, bust, shortfall:last.shortfallCum||0};
+  return {final:last.netWorth, minGap, minGapAge, bust, endAge:last.age, survived:last.age>=MAX_AGE, shortfall:last.shortfallCum||0};
 }
 function renderProposals(P, rows){
   const el=document.getElementById('proposalList'), dg=document.getElementById('planDiag');
@@ -1213,8 +1239,8 @@ function renderProposals(P, rows){
 
   /* --- 診断（このプラン固有の弱点を特定） --- */
   let diag, diagWarn=false;
-  if(base.bust){
-    diag=`<b>最優先の課題：${base.bust}歳ごろに資産が尽きる試算です。</b>以降は想定した生活費をまかなえず、${P.endAge}歳までの不足額は累計で約<b>${manY(base.shortfall)}</b>にのぼります。下の提案から効果の大きいものを組み合わせてください。`; diagWarn=true;
+  if(!base.survived){
+    diag=`<b>最優先の課題：${base.endAge}歳で生活資金が尽きる試算です。</b>この時点で現預金・NISA・教育積立をすべて使い切り、想定した生活を続けられなくなります。下の提案から効果の大きいものを組み合わせてください。`; diagWarn=true;
   } else if(base.minGap<-0.5){
     const near=[...new Set(rows.filter(r=>Math.abs(r.age-base.minGapAge)<=2).flatMap(r=>r.events))];
     diag=`資産は${P.endAge}歳まで持ちますが、<b>${base.minGapAge}歳ごろに現預金が生活防衛費を約${man(-base.minGap)}万円下回ります</b>${near.length?`（この前後のイベント：${near.join('・')}）`:''}。まずこの谷を埋めるのが優先です。`; diagWarn=true;
@@ -1248,11 +1274,11 @@ function renderProposals(P, rows){
 
   const scored=cands.map(c=>({...c,
       dFinal:c.m.final-base.final,
-      bustFix:!!(base.bust&&!c.m.bust),
-      bustDelay:(base.bust&&c.m.bust)?(c.m.bust-base.bust):0,
+      dLast:c.m.endAge-base.endAge,                    /* 資産が持続する年齢の延長 */
+      bustFix:!!(!base.survived && c.m.survived),      /* 破綻の解消 */
       dGap:c.m.minGap-base.minGap}))
-    .filter(c=>c.dFinal>5||c.bustFix||c.bustDelay>0||(base.minGap<-0.5&&c.dGap>5))
-    .sort((a,b)=>((b.bustFix?1:0)-(a.bustFix?1:0))||(b.dFinal-a.dFinal))
+    .filter(c=>c.dLast>0||c.bustFix||(base.survived&&c.dFinal>5)||(base.minGap<-0.5&&c.dGap>5))
+    .sort((a,b)=>((b.bustFix?1:0)-(a.bustFix?1:0))||(b.dLast-a.dLast)||(b.dFinal-a.dFinal))
     .slice(0,6);
 
   if(!scored.length){
@@ -1261,9 +1287,9 @@ function renderProposals(P, rows){
   }
   el.innerHTML=scored.map((c,i)=>{
     const eff=[];
-    if(c.bustFix) eff.push(`<b style="color:var(--teal)">資金ショート解消</b>（${base.bust}歳枯渇 → ${P.endAge}歳まで維持／不足${manY(base.shortfall)}を解消）`);
-    else if(c.bustDelay>0) eff.push(`枯渇を${c.bustDelay}年先送り（${base.bust} → ${c.m.bust}歳）`);
-    eff.push(`最終総資産 ${man(base.final)} → <b>${man(c.m.final)}万円</b>（<b style="color:${c.dFinal>=0?'var(--teal)':'var(--rose)'}">${c.dFinal>=0?'+':''}${man(c.dFinal)}万円</b>）`);
+    if(c.bustFix) eff.push(`<b style="color:var(--teal)">破綻を解消</b>（${base.endAge}歳で資金枯渇 → ${MAX_AGE}歳まで維持）`);
+    else if(c.dLast>0) eff.push(`資産の持続を<b style="color:var(--teal)">${c.dLast}年延長</b>（${base.endAge}歳 → ${c.m.endAge}歳）`);
+    if(base.survived&&c.m.survived) eff.push(`最終総資産 ${man(base.final)} → <b>${man(c.m.final)}万円</b>（<b style="color:${c.dFinal>=0?'var(--teal)':'var(--rose)'}">${c.dFinal>=0?'+':''}${man(c.dFinal)}万円</b>）`);
     if(base.minGap<-0.5&&c.dGap>5) eff.push(`現預金の谷が${man(c.dGap)}万円改善`);
     return `<div class="proposal"><div class="p-rank">${i+1}</div><div class="p-body">
       <div class="p-title">${c.icon} ${c.label}</div>
@@ -1563,8 +1589,12 @@ function renderSnapshot(){
 
 function render(){
   const P=readParams();
-  if(P.endAge<=P.currentAge){ return; }
   const rows=simulate(P);
+  if(!rows.length) return;
+  /* 表示用に「実際に試算できた最終年齢」を反映する（資金が尽きた年 or 140歳） */
+  P.endAge=rows[rows.length-1].age;
+  const survivedToMax = P.endAge>=MAX_AGE;
+  const bustAge = survivedToMax ? null : P.endAge;
 
   /* --- KPI --- */
   const last=rows[rows.length-1];
@@ -1759,9 +1789,9 @@ function renderLoanNote(P,rows){
 }
 
 /* ============ 初期化 ============ */
-const DEFAULTS={currentAge:24,currentAgeMonths:0,endAge:90,marriageAge:31,marriageAgeMonths:0,weddingCost:150,partnerCurrentAge:24,
+const DEFAULTS={currentAge:24,currentAgeMonths:0,marriageAge:31,marriageAgeMonths:0,weddingCost:150,partnerCurrentAge:24,
   selfBaseMonthly:21.5,selfAllowance:3.0,famAllowSpouse:1.0,famAllowChild:0.5,famChildAge:18,selfRaise:0.57,selfCapMonthly:41.5,selfBonusMonths:3.5,selfBonusCount:2,selfRetire:65,
-  reemployIncome:260,reemployTo:65,jobType:'kaisha',pensionType:'kosei',pensionBasicYears:40,macroSlide:'1',macroSlideRate:0.67,childIndependAge:22,
+  reemployIncome:260,reemployTo:65,jobType:'kaisha',pensionType:'kosei',pensionBasicYears:40,macroSlide:'1',pensionCase:'past30',childIndependAge:22,
   eduKinder:'pub',eduElem:'pub',eduJunior:'pub',eduHigh:'pub',eduUniv:'kokuritsu',eduAway:'no',jukuMonthly:0,
   birthGrant:50,
   buyAge:41,rentMonthly:7.5,price:3830,downpay:400,closingRate:7,rate:1.5,loanYears:35,propertyTax:15,
