@@ -1036,19 +1036,34 @@ function simulate(P){
       net = netIncome(selfGross, age, {pref:P.pref, deps:taxDeps, spouseDeduction:spDed, otherDeduction:(P.hasDC&&(P.dcType==='ideco'||P.dcType==='both')?P.dcMonthly*12:0)}).net
           + (married?netIncome(pGross, pAge, {pref:P.pref}).net:0);
     }
-    else if(age<Math.max(P.reemployTo,P.pensionStartAge||65)) net=(age<P.reemployTo?P.reemployIncome:0);
     else {
-      /* 受給開始後もスライド調整が続くため毎年再計算する（現役中の加入実績は退職時点で確定） */
-      pensionCalc=computePension(P,pcSelf,pcSpouse,married, CURRENT_YEAR+(age-P.currentAge));
-      /* 繰上げ −0.4%/月、繰下げ +0.7%/月（生涯継続） */
+      /* 定年後：再雇用収入と公的年金は併給できる（受給開始年齢に達していれば同時に受け取る） */
+      const reemp=(age<P.reemployTo)?P.reemployIncome:0;
       const ps=Math.min(75,Math.max(60,P.pensionStartAge||65));
-      const adj=(ps<65)?(1-0.004*(65-ps)*12):(1+0.007*(ps-65)*12);
-      pensionCalc={gross:pensionCalc.gross*adj,net:pensionCalc.net*adj,selfBasic:pensionCalc.selfBasic*adj,selfKosei:pensionCalc.selfKosei*adj,spouse:pensionCalc.spouse*adj};
-      /* 公的年金は物価スライドで名目額が改定されるため、生活費と同じインフレ係数で名目化する
-         （マクロ経済スライドによる実質目減りは computePension 側で調整済み） */
-      const pf=Math.pow(1+P.inflation,i);
-      pensionNom={gross:pensionCalc.gross*pf, net:pensionCalc.net*pf, selfBasic:pensionCalc.selfBasic*pf, selfKosei:pensionCalc.selfKosei*pf, spouse:pensionCalc.spouse*pf};
-      net=pensionNom.net;
+      if(age>=ps){
+        /* 受給開始後もスライド調整が続くため毎年再計算する（現役中の加入実績は退職時点で確定） */
+        let pc=computePension(P,pcSelf,pcSpouse,married, CURRENT_YEAR+(age-P.currentAge));
+        /* 繰上げ −0.4%/月、繰下げ +0.7%/月（生涯継続） */
+        const adj=(ps<65)?(1-0.004*(65-ps)*12):(1+0.007*(ps-65)*12);
+        pc={gross:pc.gross*adj,net:pc.net*adj,selfBasic:pc.selfBasic*adj,selfKosei:pc.selfKosei*adj,spouse:pc.spouse*adj};
+        /* 在職老齢年金：働きながら受給する場合、報酬比例部分の月額と総報酬月額相当額の合計が
+           支給停止基準額（2025年度 51万円/月）を超えると、超過分の半額が報酬比例から支給停止される。
+           基礎年金は停止されない。 */
+        if(reemp>0 && age<70){
+          const kosei_m=pc.selfKosei/12, wage_m=reemp/12;
+          const over=kosei_m+wage_m-51;
+          if(over>0){
+            const cut=Math.min(kosei_m, over/2)*12;
+            pc={...pc, selfKosei:pc.selfKosei-cut, gross:pc.gross-cut, net:(pc.gross-cut)*PENSION_NET};
+          }
+        }
+        /* 公的年金は物価スライドで名目額が改定されるため、生活費と同じインフレ係数で名目化する
+           （マクロ経済スライドによる実質目減りは computePension 側で調整済み） */
+        const pf=Math.pow(1+P.inflation,i);
+        pensionCalc=pc;
+        pensionNom={gross:pc.gross*pf, net:pc.net*pf, selfBasic:pc.selfBasic*pf, selfKosei:pc.selfKosei*pf, spouse:pc.spouse*pf};
+      }
+      net=reemp+(pensionNom?pensionNom.net:0);
     }
     const allowance=childBenefit(childAges);
     const grant=P.children.filter(c=>c.birthAge===age).length*P.birthGrant;
@@ -1186,7 +1201,7 @@ function simulate(P){
     const netWorth=busted?0:(cash+eduAccount+nisaV+dcValue*(1-P.dcTaxRate));
     const defl=Math.pow(1+P.inflation,i);
     const events=eventsFor(P,age,childAges,L);
-    rows.push({i,age,pAge,married,childAges,dep:dep.length,earners,emgMonths,emergency,pension:(age>=Math.max(P.reemployTo,P.pensionStartAge||65)?pensionNom:null),gross,bonus,net,living,housing,edu,oneoff,oneoffLbl,saving,contrib,sweep,ded,dcContrib,dcCorp,dcDed,retireNet,dcLumpFree,dcValue,eduFund,sideInc,drawNisa,drawDc,drawEdu,dcTaxPaid,drawdown,shortfall,shortfallCum,liquid,busted,nisaV,nisaP,cash,netWorth,defl,livingBase,ins,trav,care,med,eduSave:eduSaveAnnual,eduTransfer,eduPayCash,eduAccount,incomeCash,expense,events});
+    rows.push({i,age,pAge,married,childAges,dep:dep.length,earners,emgMonths,emergency,pension:pensionNom,gross,bonus,net,living,housing,edu,oneoff,oneoffLbl,saving,contrib,sweep,ded,dcContrib,dcCorp,dcDed,retireNet,dcLumpFree,dcValue,eduFund,sideInc,drawNisa,drawDc,drawEdu,dcTaxPaid,drawdown,shortfall,shortfallCum,liquid,busted,nisaV,nisaP,cash,netWorth,defl,livingBase,ins,trav,care,med,eduSave:eduSaveAnnual,eduTransfer,eduPayCash,eduAccount,incomeCash,expense,events});
     /* 生活資金が尽きた（＝支出をまかなえなくなった）時点で試算を終了する */
     if(busted) break;
   }
