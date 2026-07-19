@@ -606,7 +606,7 @@
 ・<b>公的制度</b>：児童手当・出産育児一時金50万円・住宅ローン減税（0.7%×13年・上限21万円）・NISA生涯枠1,800万円は法令どおり。編集する場合は入力欄上部のチェックボックスをオンにしてください。<br>
 ・<b>公的年金</b>：厚労省「令和6年（2024年）財政検証」の過去30年投影ケースに準拠。年金額は物価スライドで<b>名目額が改定される</b>ため、生活費と同じインフレ率で名目化しています。そのうえでマクロ経済スライドを<b>基礎年金にのみ2057年度まで</b>適用し（報酬比例部分は2026年度に調整終了）、実質価値が基礎年金で約▲20%目減りする姿を再現しています。報酬比例部分は実質横ばいとして扱い、財政検証が織り込む実質賃金上昇による増加分は見込まない保守的な設定です。<br>
 ・<span style="color:var(--slate-2)">なお、賞与3.5ヶ月・頭金400万円・初期現預金50万円・退職金1,500万円・家族手当の額などは、統計が一意に定まらないため一般的な水準を仮置きしたものです。</span><br><br>
-傾向把握用としてご利用ください。
+なお、資産を使い切った後は<b>現預金をゼロで下げ止め</b>、まかなえなかった支出を「不足額」として累計します（マイナス残高を許すと、無利息の借金で赤字を埋め続けたうえ後年の黒字で資産が自然回復してしまうため）。不足が発生した後は新規の積立・投資も行いません。傾向把握用としてご利用ください。
       </p>
     </div>
   </div>
@@ -759,7 +759,7 @@ function simulate(P){
   if(P.marriageAgeEff==null) P.marriageAgeEff=(P.marriageRow>=0)?P.currentAge+P.marriageRow:P.marriageAge;
   const L=loanCalc(P); const rows=[]; let cash=P.initCash, nisaP=P.initNisaP, nisaV=(P.initNisaV>0?P.initNisaV:P.initNisaP), dcValue=0;
   const eduTotalEach=eduTotalPerChild(P); const eduMonthlyEach=eduTotalEach/(EDU_SAVE_END*12); const totalEduAll=eduTotalEach*P.children.length; let eduFund=0, eduPaid=0, eduAccount=0; let lastCarPrice=0;
-  let pcSelf=0, pcSpouse=0, pensionCalc=null;
+  let pcSelf=0, pcSpouse=0, pensionCalc=null, shortfallCum=0;
   const nY=Math.max(1,P.endAge-P.currentAge+1);
   for(let i=0;i<nY;i++){
     const age=P.currentAge+i, pAge=P.partnerCurrentAge+i;
@@ -874,12 +874,13 @@ function simulate(P){
     // 収支が赤字＝取り崩しが必要な年は積立しない。
     let contrib=0;
     { const annualNisa=P.nisaMonthly*12; const room=Math.min(Math.max(0,P.nisaCap-nisaP),360);
-      const affordable=Math.min(Math.max(0, cash-emergency), Math.max(0, saving)); /* その年の黒字かつ防衛費超過分 */
+      /* 一度でも資金不足に陥った後は、生活費すらまかなえていないため新規投資は行わない */
+      const affordable=(shortfallCum>0)?0:Math.min(Math.max(0, cash-emergency), Math.max(0, saving));
       contrib=Math.min(annualNisa, room, affordable);
       if(contrib>0){ cash-=contrib; nisaV+=contrib; nisaP+=contrib; } }
     // スイープ：上限超過分をNISAへ（教育口座は別勘定なので主口座のみが対象）
     let sweep=0;
-    if(P.sweepNisa){ const floor=Math.max(P.cashCap,emergency);
+    if(P.sweepNisa && shortfallCum<=0){ const floor=Math.max(P.cashCap,emergency);
       const sweepable=cash-floor;
       if(sweepable>0){ const annualRoom=Math.max(0,360-contrib), lifeRoom=Math.max(0,P.nisaCap-nisaP);
         sweep=Math.min(sweepable,annualRoom,lifeRoom); if(sweep>0){ cash-=sweep; nisaV+=sweep; nisaP+=sweep; } } }
@@ -892,10 +893,19 @@ function simulate(P){
       else { takeNisa(target-cash); if(cash<target) takeDc(target-cash); }
     }
     const drawdown=drawNisa+drawDc;
+    /* 資産を取り崩してもなお不足する場合は借入とみなし利息を課す。
+       これを行わないと「無利息の借金」で赤字を埋め続けられ、後年に黒字化すると
+       資産が自然回復してしまうため（現実には起こり得ない）。 */
+    /* 資産を取り崩してもなお不足する分は「まかなえない支出」として記録し、現預金はゼロで下げ止める。
+       マイナス残高を許すと、無利息の借金で赤字を埋め続けたうえ後年の黒字で資産が自然回復するという
+       現実には起こり得ない挙動になるため。 */
+    let shortfall=0;
+    if(cash<0){ shortfall=-cash; cash=0; }
+    shortfallCum+=shortfall;
     const netWorth=cash+eduAccount+nisaV+dcValue*(1-P.dcTaxRate);
     const defl=Math.pow(1+P.inflation,i);
     const events=eventsFor(P,age,childAges,L);
-    rows.push({i,age,pAge,married,childAges,dep:dep.length,earners,emgMonths,emergency,pension:(age>=P.reemployTo?pensionNom:null),gross,bonus,net,living,housing,edu,oneoff,oneoffLbl,saving,contrib,sweep,ded,dcContrib,dcCorp,dcDed,retireNet,dcLumpFree,dcValue,eduFund,drawNisa,drawDc,dcTaxPaid,drawdown,nisaV,nisaP,cash,netWorth,defl,livingBase,ins,trav,eduSave:eduSaveAnnual,eduTransfer,eduPayCash,eduAccount,incomeCash,expense,events});
+    rows.push({i,age,pAge,married,childAges,dep:dep.length,earners,emgMonths,emergency,pension:(age>=P.reemployTo?pensionNom:null),gross,bonus,net,living,housing,edu,oneoff,oneoffLbl,saving,contrib,sweep,ded,dcContrib,dcCorp,dcDed,retireNet,dcLumpFree,dcValue,eduFund,drawNisa,drawDc,dcTaxPaid,drawdown,shortfall,shortfallCum,nisaV,nisaP,cash,netWorth,defl,livingBase,ins,trav,eduSave:eduSaveAnnual,eduTransfer,eduPayCash,eduAccount,incomeCash,expense,events});
   }
   return rows;
 }
@@ -1029,7 +1039,7 @@ function computeRanks(rows){
     const rep=inBand[inBand.length-1];
     const years=rep.netWorth/Math.max(1,rep.living);
     let rank;
-    if(key==='70代〜'){ const bust=inBand.some(r=>r.netWorth<0); rank=bust?'D':rankFor(key,years); }
+    if(key==='70代〜'){ const bust=inBand.some(r=>r.shortfall>0); rank=bust?'D':rankFor(key,years); }
     else rank=rankFor(key,years);
     out.push({key,age:rep.age,years,rank,net:rep.netWorth});
   });
@@ -1165,13 +1175,13 @@ function renderAdvice(P, rows){
     const post=rows.filter(x=>x.age>=pStart);
     const totalGap=post.reduce((s,x)=>s+Math.max(0,x.expense-x.incomeCash),0);
     const startAssets=r?r.netWorth:0;
-    const bust=rows.find(x=>x.netWorth<0);
+    const bust=rows.find(x=>x.shortfall>0);
     push(pStart,'🌅','年金生活スタート',[
       pc?`年金は世帯手取り<b>約${man(pc.net)}万円/年</b>。${P.endAge}歳までの生活費不足の累計は<b>約${man(totalGap)}万円</b>で、開始時点の総資産<b>${man(startAssets)}万円</b>で${startAssets>=totalGap
         ?`まかなえる試算です（余裕 約${man(startAssets-totalGap)}万円）。`
         :`は<b>約${man(totalGap-startAssets)}万円不足</b>します。`}`:null,
       bust
-        ?`<b>⚠️ ${bust.age}歳ごろに資産が尽きる試算です。</b>下の「改善提案」に、効果を実測した具体策を影響の大きい順に挙げています。`
+        ?`<b>⚠️ ${bust.age}歳ごろに資産が尽きる試算です。</b>以降は想定の生活費をまかなえず、${P.endAge}歳までの不足累計は約${manY(rows[rows.length-1].shortfallCum||0)}です。下の「改善提案」に、効果を実測した具体策を挙げています。`
         :`資産は${P.endAge}歳まで持つ試算です（最終 ${manY(rows[rows.length-1].netWorth)}）。${(startAssets-totalGap)>1000?'余裕が大きいため、年金の繰下げ受給（最大75歳・+0.7%/月）や資産の「使い方」の設計も選択肢になります。':''}`
     ], !!bust||startAssets<totalGap);
   }
@@ -1193,8 +1203,8 @@ function renderAdvice(P, rows){
 function metricsOf(rows){
   const last=rows[rows.length-1];
   let minGap=Infinity, minGapAge=0, bust=null;
-  rows.forEach(r=>{ const g=r.cash-r.emergency; if(g<minGap){minGap=g;minGapAge=r.age;} if(!bust&&r.netWorth<0)bust=r.age; });
-  return {final:last.netWorth, minGap, minGapAge, bust};
+  rows.forEach(r=>{ const g=r.cash-r.emergency; if(g<minGap){minGap=g;minGapAge=r.age;} if(!bust&&r.shortfall>0)bust=r.age; });
+  return {final:last.netWorth, minGap, minGapAge, bust, shortfall:last.shortfallCum||0};
 }
 function renderProposals(P, rows){
   const el=document.getElementById('proposalList'), dg=document.getElementById('planDiag');
@@ -1204,7 +1214,7 @@ function renderProposals(P, rows){
   /* --- 診断（このプラン固有の弱点を特定） --- */
   let diag, diagWarn=false;
   if(base.bust){
-    diag=`<b>最優先の課題：${base.bust}歳ごろに資産が尽きる試算です。</b>${P.endAge}歳まで持たせるには最終時点換算で約<b>${manY(-base.final)}</b>の上積みが必要です。下の提案から効果の大きいものを組み合わせてください。`; diagWarn=true;
+    diag=`<b>最優先の課題：${base.bust}歳ごろに資産が尽きる試算です。</b>以降は想定した生活費をまかなえず、${P.endAge}歳までの不足額は累計で約<b>${manY(base.shortfall)}</b>にのぼります。下の提案から効果の大きいものを組み合わせてください。`; diagWarn=true;
   } else if(base.minGap<-0.5){
     const near=[...new Set(rows.filter(r=>Math.abs(r.age-base.minGapAge)<=2).flatMap(r=>r.events))];
     diag=`資産は${P.endAge}歳まで持ちますが、<b>${base.minGapAge}歳ごろに現預金が生活防衛費を約${man(-base.minGap)}万円下回ります</b>${near.length?`（この前後のイベント：${near.join('・')}）`:''}。まずこの谷を埋めるのが優先です。`; diagWarn=true;
@@ -1251,7 +1261,7 @@ function renderProposals(P, rows){
   }
   el.innerHTML=scored.map((c,i)=>{
     const eff=[];
-    if(c.bustFix) eff.push(`<b style="color:var(--teal)">資金ショート解消</b>（${base.bust}歳枯渇 → ${P.endAge}歳まで維持）`);
+    if(c.bustFix) eff.push(`<b style="color:var(--teal)">資金ショート解消</b>（${base.bust}歳枯渇 → ${P.endAge}歳まで維持／不足${manY(base.shortfall)}を解消）`);
     else if(c.bustDelay>0) eff.push(`枯渇を${c.bustDelay}年先送り（${base.bust} → ${c.m.bust}歳）`);
     eff.push(`最終総資産 ${man(base.final)} → <b>${man(c.m.final)}万円</b>（<b style="color:${c.dFinal>=0?'var(--teal)':'var(--rose)'}">${c.dFinal>=0?'+':''}${man(c.dFinal)}万円</b>）`);
     if(base.minGap<-0.5&&c.dGap>5) eff.push(`現預金の谷が${man(c.dGap)}万円改善`);
@@ -1277,7 +1287,7 @@ function renderInflation(P, baseRows){
     const rows=isBase?baseRows:simulate({...P,inflation:pct/100});
     const last=rows[rows.length-1];
     let minC={cash:Infinity,age:0}; rows.forEach(r=>{ if(r.cash<minC.cash)minC={cash:r.cash,age:r.age}; });
-    const bust=rows.find(r=>r.netWorth<0);
+    const bust=rows.find(r=>r.shortfall>0);
     const real=last.netWorth/Math.pow(1+pct/100,nY);
     return {pct,isBase,rows,last,minC,bust,real};
   });
@@ -1362,7 +1372,7 @@ function renderSnapshot(){
 
   const nomVal=r.netWorth, nomCash=r.cash;
   const cashWarn=r.cash<r.emergency-0.5;
-  const nwWarn=r.netWorth<0;
+  const nwWarn=(r.shortfallCum||0)>0;
 
   /* --- その年の「現預金の使いみち」（年額）。収支＝前年比の現預金増減 --- */
   const idx=rows.indexOf(r);
