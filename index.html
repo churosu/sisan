@@ -561,7 +561,7 @@
       <div class="chartbox short"><canvas id="inflChart"></canvas></div>
       <div class="tablescroll" style="max-height:none; margin-top:12px">
         <table id="inflTbl"><thead><tr>
-          <th class="l">インフレ率</th><th>最終総資産（名目）</th><th>現在価値換算（実質）</th><th>設定値との差（名目）</th><th>最低現預金</th><th class="l">資金ショート</th>
+          <th class="l">インフレ率</th><th>試算終了年齢</th><th>最終総資産（名目）</th><th>現在価値換算（実質）</th><th>設定値との差（名目）</th><th>最低現預金</th><th class="l">資金ショート</th>
         </tr></thead><tbody id="inflBody"></tbody></table>
       </div>
       <div class="hint" id="inflAdvice" style="margin-top:10px"></div>
@@ -615,7 +615,7 @@
 ・<b>公的年金</b>：厚労省「令和6年（2024年）財政検証」に準拠（既定は中心ケースの「過去30年投影」）。年金額は物価スライドで<b>名目額が改定される</b>ため、生活費と同じインフレ率で名目化しています。そのうえで財政検証の3ケースを選べます。<b>標準（過去30年投影）</b>は基礎年金にのみ2057年度までスライドを適用（報酬比例は2026年度に調整終了）、<b>楽観（成長型経済移行・継続）</b>は2037年度で調整終了、<b>保守（1人当たりゼロ成長）</b>は2059年度に国民年金の積立金が枯渇して完全賦課方式へ移行する想定で、報酬比例部分も含めて実質給付が現在の約6割（所得代替率37〜33%）まで下がる姿を再現します。いずれも報酬比例部分について財政検証が織り込む実質賃金上昇による増加分は見込まず、安全側に寄せています。<br>
 ・<b>年金見通しの注意</b>：財政検証は人口の中位推計を前提としていますが、実際の出生数は推計を下回って推移しています。またマクロ経済スライドには名目下限措置があり、物価上昇が小さい年は調整が発動されず、調整期間はこれまで繰り返し後ろ倒しされてきました。標準ケースでも下振れの可能性があるため、<b>「保守」ケースでも家計が成り立つかを必ず確認してください</b>。<br>
 ・<span style="color:var(--slate-2)">なお、賞与3.5ヶ月・頭金400万円・初期現預金50万円・退職金1,500万円・福利厚生の手当額などは、統計が一意に定まらないため一般的な水準を仮置きしたものです。</span><br><br>
-なお、現預金・NISA・教育積立をすべて使い切って支出をまかなえなくなった時点で<b>試算を終了</b>します（受給開始前の確定拠出年金は引き出せないため資金とみなしません）。マイナス残高を許すと、無利息の借金で赤字を埋め続けたうえ後年の黒字で資産が回復するという現実には起こり得ない結果になるためです。傾向把握用としてご利用ください。
+なお、教育積立（別口座）は支払いが不足する年に限り最終手段として取り崩します。現預金・NISA・教育積立をすべて使い切って支出をまかなえなくなった時点で<b>試算を終了</b>し、その年の総資産は0と表示します（受給開始前の確定拠出年金が残っていても引き出せず、生活は成り立たないため）（受給開始前の確定拠出年金は引き出せないため資金とみなしません）。マイナス残高を許すと、無利息の借金で赤字を埋め続けたうえ後年の黒字で資産が回復するという現実には起こり得ない結果になるためです。傾向把握用としてご利用ください。
       </p>
     </div>
   </div>
@@ -916,7 +916,11 @@ function simulate(P){
       if(P.withdrawOrder==='dc'){ takeDc(target-cash); if(cash<target) takeNisa(target-cash); }
       else { takeNisa(target-cash); if(cash<target) takeDc(target-cash); }
     }
-    const drawdown=drawNisa+drawDc;
+    /* 最終手段：支払いに足りない場合のみ教育積立（別口座）を取り崩す。
+       生活防衛費を積むためには使わず、現預金がマイナスになるときだけ充当する。 */
+    let drawEdu=0;
+    if(cash<0 && eduAccount>0){ drawEdu=Math.min(eduAccount,-cash); eduAccount-=drawEdu; cash+=drawEdu; }
+    const drawdown=drawNisa+drawDc+drawEdu;
     /* 資産を取り崩してもなお不足する場合は借入とみなし利息を課す。
        これを行わないと「無利息の借金」で赤字を埋め続けられ、後年に黒字化すると
        資産が自然回復してしまうため（現実には起こり得ない）。 */
@@ -926,14 +930,17 @@ function simulate(P){
     let shortfall=0;
     if(cash<0){ shortfall=-cash; cash=0; }
     shortfallCum+=shortfall;
-    const netWorth=cash+eduAccount+nisaV+dcValue*(1-P.dcTaxRate);
     /* 生活に使える資産（受給開始前の確定拠出年金は引き出せないため除外） */
     const liquid=cash+eduAccount+nisaV+((P.hasDC&&age>=P.dcReceiveAge)?dcValue*(1-P.dcTaxRate):0);
+    const busted=(shortfall>0 || liquid<=0);
+    /* 生活が破綻した年は、引き出せない確定拠出年金が残っていても総資産は0として扱う
+       （生活費をまかなえない以上、資産として機能していないため） */
+    const netWorth=busted?0:(cash+eduAccount+nisaV+dcValue*(1-P.dcTaxRate));
     const defl=Math.pow(1+P.inflation,i);
     const events=eventsFor(P,age,childAges,L);
-    rows.push({i,age,pAge,married,childAges,dep:dep.length,earners,emgMonths,emergency,pension:(age>=P.reemployTo?pensionNom:null),gross,bonus,net,living,housing,edu,oneoff,oneoffLbl,saving,contrib,sweep,ded,dcContrib,dcCorp,dcDed,retireNet,dcLumpFree,dcValue,eduFund,drawNisa,drawDc,dcTaxPaid,drawdown,shortfall,shortfallCum,liquid,nisaV,nisaP,cash,netWorth,defl,livingBase,ins,trav,eduSave:eduSaveAnnual,eduTransfer,eduPayCash,eduAccount,incomeCash,expense,events});
+    rows.push({i,age,pAge,married,childAges,dep:dep.length,earners,emgMonths,emergency,pension:(age>=P.reemployTo?pensionNom:null),gross,bonus,net,living,housing,edu,oneoff,oneoffLbl,saving,contrib,sweep,ded,dcContrib,dcCorp,dcDed,retireNet,dcLumpFree,dcValue,eduFund,drawNisa,drawDc,drawEdu,dcTaxPaid,drawdown,shortfall,shortfallCum,liquid,busted,nisaV,nisaP,cash,netWorth,defl,livingBase,ins,trav,eduSave:eduSaveAnnual,eduTransfer,eduPayCash,eduAccount,incomeCash,expense,events});
     /* 生活資金が尽きた（＝支出をまかなえなくなった）時点で試算を終了する */
-    if(shortfall>0 || liquid<=0) break;
+    if(busted) break;
   }
   return rows;
 }
@@ -1345,8 +1352,10 @@ function renderInflation(P, baseRows){
     const diff=s.last.netWorth-base.last.netWorth;
     const diffTxt=s.isBase?'—':(diff>=0?'+':'')+man(diff)+'万円';
     const bustTxt=s.bust?`<span style="color:var(--rose);font-weight:700">${s.bust.age}歳ごろ枯渇</span>`:'なし';
+    const endA=s.last.age, ok=!s.last.busted;
     return `<tr>
       <td class="l ${s.isBase?'base-row':''}">${s.pct}%${s.isBase?'<span class="scn-base">設定値</span>':''}${Math.abs(s.pct-2.0)<0.001?' <span style="font-size:10px;color:var(--slate-2)">日銀目標</span>':''}</td>
+      <td class="${ok?'':'neg'}">${endA}歳${ok?'':'<span style="font-size:10px"> 枯渇</span>'}</td>
       <td class="${s.isBase?'base-row':''}">${man(s.last.netWorth)}万円</td>
       <td>${man(s.real)}万円</td>
       <td class="${diff<0?'neg':''}">${diffTxt}</td>
