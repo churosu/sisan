@@ -7,7 +7,6 @@
 <link rel="apple-touch-icon" href="./apple-touch-icon.png?v=3">
 <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png?v=3">
 <link rel="apple-touch-icon-precomposed" href="./apple-touch-icon.png?v=3">
-<link rel="manifest" href="./manifest.webmanifest?v=3">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0CA795">
 <meta name="apple-mobile-web-app-title" content="MiraiLog">
@@ -95,8 +94,6 @@
   .wz-sum{background:#F7FAFC; border:1px solid var(--line); border-radius:12px; padding:14px 16px; margin-bottom:16px}
   .wz-sum div{display:flex; justify-content:space-between; font-size:13px; padding:5px 0; color:var(--slate)}
   .wz-sum div b{color:var(--ink)}
-  #reopenWiz{position:fixed; right:16px; bottom:16px; z-index:80; background:var(--teal); color:#fff; border:none; border-radius:99px; padding:12px 18px; font-size:13px; font-weight:800; box-shadow:0 4px 14px rgba(14,124,115,.32); cursor:pointer; display:none}
-  body.wiz-done #reopenWiz{display:block}
   /* ===== 保存・追加モーダル ===== */
   .mdl{position:fixed; inset:0; background:rgba(20,32,48,.55); z-index:9998; display:none; align-items:center; justify-content:center; padding:20px}
   .mdl.on{display:flex}
@@ -182,6 +179,30 @@
   .mininav .mn{flex:0 0 auto; font-size:13px; font-weight:700; color:var(--slate); background:#fff; border:1px solid var(--line); border-radius:99px; padding:6px 15px; cursor:pointer; white-space:nowrap; transition:background .12s,color .12s,border-color .12s}
   .mininav .mn:hover{border-color:var(--teal); color:var(--teal)}
   .mininav .mn.active{background:var(--teal); color:#fff; border-color:var(--teal)}
+  /* 「カンタン入力を再開する」はスクロール用の目次ではなく操作ボタンなので見た目を分ける */
+  .mininav .mn-act{margin-left:auto; background:var(--teal); color:#fff; border-color:var(--teal)}
+  .mininav .mn-act:hover{color:#fff; filter:brightness(1.06)}
+  .mininav .mn-act.active{background:var(--teal)}
+  /* ミニナビ／下部バーの開閉ハンドル */
+  .bar-toggle{display:flex; align-items:center; justify-content:center; gap:6px; width:100%; border:none; background:#F2F6FA; color:var(--slate); font-size:10.5px; font-weight:800; letter-spacing:.04em; padding:3px 0 4px; cursor:pointer; line-height:1}
+  .bar-toggle:hover{background:#E8F1F6; color:var(--teal)}
+  .bar-toggle .bt-c{font-size:9px; transition:transform .18s}
+  .mininav .bar-toggle{border-top:1px solid var(--line)}
+  .dockbar .bar-toggle{border-bottom:1px solid var(--line)}
+  .mininav.collapsed .mininav-inner, .dockbar.collapsed .dock-inner{display:none}
+  .mininav.collapsed .bar-toggle{border-top:none}
+  .dockbar.collapsed .bar-toggle{border-bottom:none}
+  .mininav.collapsed .bar-toggle .bt-c, .dockbar.collapsed .bar-toggle .bt-c{transform:rotate(180deg)}
+  @media print{ .bar-toggle{display:none} }
+  .dockbar{position:fixed; left:0; right:0; bottom:0; z-index:45; display:none; background:var(--card); border-top:1px solid var(--line); box-shadow:0 -2px 10px rgba(15,42,60,.08); padding-bottom:env(safe-area-inset-bottom)}
+  body.wiz-done:not(.wiz-on) .dockbar{display:block}
+  body.wiz-done{padding-bottom:var(--dockh,64px)}
+  .dock-inner{max-width:1180px; margin:0 auto; display:flex; flex-wrap:wrap; gap:7px; padding:9px 12px}
+  .dock-b{flex:1 1 auto; min-width:104px; font-size:12.5px; font-weight:800; color:var(--slate); background:#fff; border:1px solid var(--line); border-radius:10px; padding:11px 6px; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:background .12s,color .12s,border-color .12s}
+  .dock-b:hover{border-color:var(--teal); color:var(--teal)}
+  .dock-b.primary{background:var(--teal); color:#fff; border-color:var(--teal)}
+  .dock-b.primary:hover{filter:brightness(1.06)}
+  .dock-b.done{background:var(--teal); color:#fff; border-color:var(--teal)}
   .mini{border:none; background:none; color:var(--rose); cursor:pointer; font-size:12px; font-weight:700}
   .addbtn{border:1px dashed var(--slate-2); background:#fff; color:var(--slate); width:100%; padding:9px;
     border-radius:9px; cursor:pointer; font-size:12.5px; font-weight:600; margin-top:4px}
@@ -208,6 +229,33 @@
   .kpi.bustk{background:#FDECF1; border-color:#F1A9BC}
   .kpi.bustk .k-val{color:#C2183C; font-weight:900}
   .kpi.bustk .k-label,.kpi.bustk .k-sub{color:#C2526B}
+  .lk-opts{display:flex; flex-direction:column; gap:9px; margin:4px 0 2px}
+  .lk-opt{text-align:left; background:#F7FAFC; border:1px solid var(--line); border-radius:12px; padding:12px 14px; cursor:pointer; transition:border-color .12s,background .12s}
+  .lk-opt:hover{border-color:var(--teal); background:#fff}
+  .lk-opt.on{border-color:var(--teal); background:#EAF7F2}
+  .lk-opt b{display:block; font-size:13px; color:var(--ink); font-weight:800; margin-bottom:3px}
+  .lk-opt span{font-size:11.5px; color:var(--slate); line-height:1.6}
+  .lk-pin{display:flex; justify-content:center; margin:14px 0 4px}
+  .lk-pin input{width:260px; max-width:100%; text-align:center; font-size:24px; font-weight:800; letter-spacing:6px; text-indent:6px; padding:11px 8px; border:1.5px solid var(--line); border-radius:12px; color:var(--ink); font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .lk-pin input::placeholder{font-size:15px; letter-spacing:0; text-indent:0; font-weight:700; color:var(--slate-2); font-family:inherit}
+  .lk-hint{margin:6px 0 0; font-size:11.5px; color:var(--slate-2); text-align:center}
+  .lk-pin input:focus{outline:2px solid var(--teal); outline-offset:1px; border-color:var(--teal)}
+  .lk-skip{width:100%; margin-top:9px; background:none; border:none; color:var(--slate); font-size:12px; font-weight:700; text-decoration:underline; cursor:pointer; padding:6px}
+  .lk-err{min-height:17px; margin:4px 0 0; font-size:12px; font-weight:700; color:#C2183C; text-align:center}
+  .kabe{margin:8px 0 2px; border:1px solid var(--line); border-radius:10px; background:#F7FAFC}
+  .kabe>summary{cursor:pointer; list-style:none; padding:8px 12px; font-size:12px; font-weight:800; color:var(--teal)}
+  .kabe>summary::-webkit-details-marker{display:none}
+  .kabe>summary::before{content:"？ "; }
+  .kabe[open]>summary{border-bottom:1px solid var(--line)}
+  .kabe-b{padding:10px 12px; font-size:11.5px; line-height:1.85; color:var(--slate)}
+  .kabe-b b{color:var(--ink)}
+  .kf-box{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:12px}
+  .kf-h{font-size:12.5px; font-weight:800; color:var(--ink); margin-bottom:9px}
+  .kf-row{display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding:6px 0; border-top:1px solid var(--line); font-size:12.5px; color:var(--slate)}
+  .kf-row:first-of-type{border-top:none}
+  .kf-row b{font-size:15px; color:var(--teal); font-weight:800; margin-left:auto}
+  .kf-row small{font-size:11px; color:var(--slate-2); min-width:96px; text-align:right}
+  .kf-note{font-size:11px; color:var(--slate-2); margin-top:9px; line-height:1.7}
   .rank-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(96px,1fr)); gap:10px; margin-top:4px}
   .rank-cell{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:11px 8px; text-align:center;}
   .rank-cell .rc-dec{font-size:11px; color:var(--slate); font-weight:700; margin-bottom:5px}
@@ -470,6 +518,10 @@
   .foot-link{background:none; border:none; color:var(--teal); font-size:13px; font-weight:700; cursor:pointer; padding:4px 8px; font-family:inherit}
   .foot-link:hover{text-decoration:underline}
   .foot-sep{color:var(--slate-2)}
+  .lead-note{margin-top:8px; padding-left:11px; border-left:3px solid var(--line); color:var(--slate-2)}
+  .lead-note b{color:var(--slate)}
+  .foot-danger{color:#C2183C}
+  .foot-danger:hover{color:#8E1029}
   .foot-copy{font-size:11px; color:var(--slate-2); margin-top:9px; line-height:1.6}
 
   #printPlanCard{display:none}
@@ -498,13 +550,7 @@
   <div class="wz-card" id="wzCard"></div>
   <button class="wz-skip" id="wzSkip">かんたん入力をとばして、すべての項目を自分で設定する</button>
 </div></div>
-<button id="reopenWiz">かんたん入力をやり直す</button>
-<div class="mdl" id="homeMdl"><div class="mdl-box">
-  <p class="mdl-t">ホーム画面に追加</p>
-  <p class="mdl-p">アプリのように、ホーム画面のアイコンから直接開けるようになります。入力内容は端末に保存されるので、次回もそのまま続きから確認できます。</p>
-  <div id="homeSteps"></div>
-  <button class="mdl-close" data-close>閉じる</button>
-</div></div>
+
 <div class="mdl" id="imgMdl"><div class="mdl-box">
   <p class="mdl-t">画像を保存しました</p>
   <p class="mdl-p">結果を1枚の画像（JPG）にまとめました。ダウンロードが始まらない場合は、下の画像を長押し（PCは右クリック）して保存してください。</p>
@@ -528,6 +574,30 @@
   </ul>
   <label class="disc-agree"><input type="checkbox" id="discChk"><span>上記の内容を理解し、これらを前提として試算結果を参考にすることに同意します。</span></label>
   <button class="disc-btn" id="discGo" disabled>同意して試算をはじめる</button>
+</div></div>
+<div class="mdl" id="lockMdl"><div class="mdl-box">
+  <p class="mdl-t">個人結果URLを共有</p>
+  <p class="mdl-p">いま入力している内容をURLに載せて共有します。パスコードを設定すると、それを知っている人だけが復元できます。<br>入力内容を含まない<b>ツールだけのURL</b>を渡したいときは「MiraiLogを共有」をお使いください。</p>
+  <div class="lk-opts">
+    <button type="button" class="lk-opt" id="lkPlain"><b>そのまま共有</b><span>リンクを開けば誰でも内容を見られます</span></button>
+    <button type="button" class="lk-opt" id="lkLock"><b>パスコードを設定して共有</b><span>英数字のパスコードを知っている人だけが復元できます</span></button>
+  </div>
+  <div id="lkPinWrap" style="display:none">
+    <div class="lk-pin"><input type="text" maxlength="16" id="lkPin" placeholder="パスコード" autocomplete="off" spellcheck="false"></div>
+    <p class="lk-hint" id="lkStr">英数字で4〜16文字（大文字・小文字は区別します）</p>
+    <p class="lk-err" id="lkErr"></p>
+    <p class="mdl-sub">数字だけの4文字は1万通りしかなく、時間をかければ突破されえます。<b>英字を混ぜて6文字以上</b>にすると桁違いに強くなります。パスコードはリンクとは別の手段（口頭やメッセージなど）で相手に伝えてください。忘れると復元できません。</p>
+    <button class="disc-btn" id="lkGo">このパスコードでリンクを作る</button>
+  </div>
+  <button class="mdl-close" data-close>閉じる</button>
+</div></div>
+<div class="mdl" id="unlockMdl"><div class="mdl-box">
+  <p class="mdl-t">パスコードを入力</p>
+  <p class="mdl-p">このリンクはパスコードで保護されています。共有した人から聞いたパスコードを入力してください（大文字・小文字は区別します）。</p>
+  <div class="lk-pin"><input type="text" maxlength="16" id="ulPin" placeholder="パスコード" autocomplete="off" spellcheck="false"></div>
+  <p class="lk-err" id="ulErr"></p>
+  <button class="disc-btn" id="ulGo">開く</button>
+  <button class="lk-skip" id="ulSkip">パスコードなしで自分の入力を使う</button>
 </div></div>
 <div class="mdl" id="profMdl"><div class="mdl-box wide">
   <div class="prof-hero">
@@ -561,26 +631,22 @@
     </h1>
     <p class="tagline">インフレに負けない資産形成</p>
     <p class="lead">結婚・出産・住宅購入・教育・退職といったライフイベントに沿って、収支と資産を年ごとに試算します。給与は額面で入力し、手取りに換算して計算します。</p>
-  </div>
-  <div class="btnrow">
-    <button class="reset primary" id="shareBtn">共有リンクをコピー</button>
-    <button class="reset" id="imgBtn">画像で保存</button>
-    <button class="reset" id="homeBtn">ホーム画面に追加</button>
-    <button class="reset" id="pdfBtn">PDFで保存</button>
-    <button class="reset" id="resetBtn">初期値に戻す</button>
+    <p class="lead lead-note">試算は<b>生活資金が尽きた時点で自動的に終了</b>します（現預金・NISA・教育積立を使い切り、受給開始前の確定拠出年金しか残らない状態）。資金が尽きなければ最長120歳まで試算します。</p>
   </div>
 </header>
 
 <nav class="mininav" id="miniNav" aria-label="セクションの目次">
   <div class="mininav-inner">
-    <button type="button" class="mn" data-target="sec-income">収入</button>
     <button type="button" class="mn" data-target="sec-spend">支出</button>
-    <button type="button" class="mn" data-target="sec-invest">投資</button>
-    <button type="button" class="mn" data-target="sec-pension">年金</button>
-    <button type="button" class="mn" data-target="sec-house">住宅</button>
+    <button type="button" class="mn" data-target="sec-income">収入</button>
     <button type="button" class="mn" data-target="sec-edu">教育</button>
+    <button type="button" class="mn" data-target="sec-invest">投資</button>
+    <button type="button" class="mn" data-target="sec-house">住宅</button>
+    <button type="button" class="mn" data-target="sec-pension">年金</button>
     <button type="button" class="mn" data-target="sec-death">死亡・遺族</button>
+    <button type="button" class="mn mn-act" id="reopenWiz" title="いまの入力を引き継いで、かんたん入力をやり直します">カンタン入力を再開する</button>
   </div>
+  <button type="button" class="bar-toggle" id="navToggle" aria-controls="miniNav" aria-expanded="true"><span class="bt-l">目次</span><span class="bt-c">▲</span></button>
 </nav>
 
 <div class="wrap">
@@ -599,12 +665,24 @@
         <div class="hint" style="margin-top:0">遺族年金の「中高齢寡婦加算」は妻のみが対象のため、死亡の試算で使います。「回答しない」の場合は加算なしで試算します。</div>
         <div class="field"><label>都道府県（勤務先）</label><select id="pref"><option value="全国平均">全国平均</option><option value="北海道">北海道</option><option value="青森">青森</option><option value="岩手">岩手</option><option value="宮城">宮城</option><option value="秋田">秋田</option><option value="山形">山形</option><option value="福島">福島</option><option value="茨城">茨城</option><option value="栃木">栃木</option><option value="群馬">群馬</option><option value="埼玉">埼玉</option><option value="千葉">千葉</option><option value="東京">東京</option><option value="神奈川">神奈川</option><option value="新潟">新潟</option><option value="富山">富山</option><option value="石川">石川</option><option value="福井">福井</option><option value="山梨">山梨</option><option value="長野">長野</option><option value="岐阜">岐阜</option><option value="静岡">静岡</option><option value="愛知">愛知</option><option value="三重">三重</option><option value="滋賀">滋賀</option><option value="京都">京都</option><option value="大阪">大阪</option><option value="兵庫">兵庫</option><option value="奈良">奈良</option><option value="和歌山">和歌山</option><option value="鳥取">鳥取</option><option value="島根">島根</option><option value="岡山">岡山</option><option value="広島">広島</option><option value="山口">山口</option><option value="徳島">徳島</option><option value="香川">香川</option><option value="愛媛">愛媛</option><option value="高知">高知</option><option value="福岡">福岡</option><option value="佐賀">佐賀</option><option value="長崎">長崎</option><option value="熊本">熊本</option><option value="大分">大分</option><option value="宮崎">宮崎</option><option value="鹿児島">鹿児島</option><option value="沖縄">沖縄</option></select></div>
         <div class="hint" id="prefHint" style="margin-top:0">健康保険料率は勤務先（事業所）の所在都道府県で決まります。</div>
-        <div class="hint" style="margin-top:0">試算は<b>生活資金が尽きた時点で自動的に終了</b>します（現預金・NISA・教育積立を使い切り、受給開始前の確定拠出年金しか残らない状態）。資金が尽きなければ最長120歳まで試算します。</div>
         <div class="field"><label>結婚する年齢（本人）</label><div class="ig"><input type="number" id="marriageAge" value="28"><span class="unit mo">歳</span><input type="number" class="mo" id="marriageAgeMonths" value="0" min="0" max="11" step="1"><span class="unit mo">ヶ月</span></div></div>
         <div class="field"><label>挙式・新生活の特別費</label><div class="ig"><input type="number" id="weddingCost" value="250"><span class="unit">万</span></div></div>
         <div class="hint" style="margin-top:0">挙式・披露宴・指輪・新居の初期費用など。結婚する年に現金で支払います（ご祝儀等で相殺後の自己負担額の目安を入力。0にすれば計上しません）。</div>
         <div class="field"><label>パートナーの現在年齢</label><div class="ig"><input type="number" id="partnerCurrentAge" value="26"><span class="unit">歳</span></div></div>
         <div class="hint">結婚前は単身、結婚後は二人、子どもの人数に応じて生活費が自動で増減します。</div>
+      </div>
+    </details>
+
+    <details class="grp" id="sec-spend">
+      <summary><span class="tag">生活費</span>支出目安・保険・旅行<span class="chev">▶</span></summary>
+      <div class="body">
+        <div class="field"><label>現在の世帯人数</label><div class="ig"><input type="number" id="curHouseholdSize" value="2" step="1"><span class="unit">人</span></div></div>
+        <div class="field"><label>現在の月々の生活費（家賃・特別費除く）</label><div class="ig"><input type="number" id="curMonthlyLiving" value="20" step="0.5"><span class="unit">万/月</span></div></div>
+        <div class="hint" id="livingInfo">今の世帯人数と生活費から1人あたりの生活水準を割り出し、世帯人数が変わっても同水準を保つ生活費を自動算出します（等価尺度：本人1.0／配偶者0.5／子0.3・14歳以上0.5）。住居・教育・保険・旅行は別項目。</div>
+        <div class="field"><label>インフレ率（年）</label><div class="ig"><input type="number" id="inflation" value="1.0" step="0.1"><span class="unit">%</span></div></div>
+        <div class="field"><label>旅行の回数</label><div class="ig"><input type="number" id="travelCount" value="1"><span class="unit">回/年</span></div></div>
+        <div class="field"><label>　└ 1回あたり費用</label><div class="ig"><input type="number" id="travelCost" value="20"><span class="unit">万</span></div></div>
+        <div class="hint">保険は年齢に応じて自動計上（20代8→30代14→40代22→50代28→60代22→70代〜14 万/年）。</div>
       </div>
     </details>
 
@@ -619,9 +697,9 @@
         <div class="field"><label>基本給（月・額面）</label><div class="ig"><input type="number" id="selfBaseMonthly" value="24" step="0.5"><span class="unit">万/月</span></div></div>
         <div class="field"><label>諸手当（月・額面）</label><div class="ig"><input type="number" id="selfAllowance" value="4" step="0.5"><span class="unit">万/月</span></div></div>
         <div class="field"><label>配偶者手当：福利厚生（月）</label><div class="ig"><input type="number" id="famAllowSpouse" value="1" step="0.1"><span class="unit">万/月</span></div></div>
-        <div class="field"><label>子供手当：福利厚生（月・1人）</label><div class="ig"><input type="number" id="famAllowChild" value="0.5" step="0.1"><span class="unit">万/月</span></div></div>
-        <div class="field"><label>　└ 子供手当の対象上限</label><div class="ig"><input type="number" id="famChildAge" value="18"><span class="unit">歳</span></div></div>
-        <div class="hint" style="margin-top:0">勤務先が独自に支給する<b>福利厚生の手当</b>です。配偶者手当は結婚後、子供手当は各子がこの対象上限以下の間、本人の諸手当に加算されます（給与の一部＝額面・課税対象）。国の児童手当とは別枠で、両方が加算されます。手当がなければ0に。</div>
+        <div class="field"><label>子ども手当：福利厚生（月・1人）</label><div class="ig"><input type="number" id="famAllowChild" value="0.5" step="0.1"><span class="unit">万/月</span></div></div>
+        <div class="field"><label>　└ 子ども手当の対象上限</label><div class="ig"><input type="number" id="famChildAge" value="18"><span class="unit">歳</span></div></div>
+        <div class="hint" style="margin-top:0">勤務先が独自に支給する<b>福利厚生の手当</b>です。配偶者手当は結婚後、子ども手当は各子がこの対象上限以下の間、本人の諸手当に加算されます（給与の一部＝額面・課税対象）。国の児童手当とは別枠で、両方が加算されます。手当がなければ0に。</div>
         <div class="hint">月収（額面）＝ 基本給＋諸手当＋福利厚生手当。昇給・ボーナスは基本給を基準に計算します（諸手当・福利厚生手当は固定）。</div>
         <div class="field"><label>昇給（基本給・年あたり）</label><div class="ig"><input type="number" id="selfRaise" value="0.7" step="0.1"><span class="unit">万/年</span></div></div>
         <div class="field"><label>基本給の上限（額面）</label><div class="ig"><input type="number" id="selfCapMonthly" value="46" step="0.5"><span class="unit">万/月</span></div></div>
@@ -649,6 +727,7 @@
       <div class="body">
         <div class="field"><label>パートナーの働き方</label><select id="partnerWorkMode"><option value="segments">区間で指定（就職・転職・育休・産休）</option><option value="single">基本の給与カーブ（通常勤務）</option><option value="none">専業主婦(夫)・収入なし</option></select></div>
         <div class="hint" id="partnerWorkModeHint" style="margin-top:0">産休・復職などを区間で指定します（既定）。</div>
+        <details class="kabe"><summary>「年収の壁」の扱い</summary><div class="kabe-b">本ツールは壁の前後を<b>自動で判定</b>します。金額はすべて額面年収です。<br><b>・106万円の壁（社会保険）</b>…配偶者に扶養されうる側（世帯で収入の少ない側）の年収が106万円未満なら第3号被保険者とみなし、<b>本人負担の社会保険料は0</b>で試算します。106万円以上になると健康保険・厚生年金の本人負担が発生し、手取りが一時的に下がります（いわゆる働き損）。なお2025年の年金制度改正で、この賃金要件は2026年10月に撤廃される予定です。<br><b>・130万円の壁</b>…上記の106万円で社会保険に加入する前提のため、本ツールでは別途の判定は行いません。<br><b>・160万円の壁（所得税）</b>…給与所得控除（最低保障74万円）と基礎控除（104万円）で、年収178万円までは<b>本人の所得税は0</b>になります（令和8年分）。かつて103万円だった壁は、令和7年・8年の改正で大きく上がりました。<br><b>・110万円台の壁（住民税）</b>…住民税の基礎控除は43万円のままなので、所得税より早く（おおむね年収117万円ごろから）住民税がかかりはじめます。<br><b>・150万円／201万円の壁（配偶者控除）</b>…配偶者の年収が150万円を超えると配偶者特別控除が段階的に減り、201万円で0になります。本ツールは法定の逓減表どおりに計算し、<b>控除は収入の多い側</b>に適用します。</div></details>
         <div id="partnerSingleFields" style="display:none">
           <div class="hint" style="margin-top:0">本人と同じくひとつの給与カーブで試算します（通常勤務）。金額は<b>額面</b>。結婚前の期間は世帯収入に含みません。</div>
           <div class="field"><label>基本給（月・額面）</label><div class="ig"><input type="number" id="partnerBaseMonthly" value="21" step="0.5"><span class="unit">万/月</span></div></div>
@@ -681,10 +760,35 @@
         <div class="field"><label>大学</label><select id="eduUniv"><option value="kokuritsu">国公立</option><option value="bunkei">私立文系</option><option value="rikei">私立理系</option><option value="none">進学しない</option></select></div>
         <div class="field"><label>大学は自宅外（仕送り）</label><select id="eduAway"><option value="no">いいえ</option><option value="yes">はい</option></select></div>
         <div class="field"><label>塾・習い事（小〜高・1人）</label><div class="ig"><input type="number" id="jukuMonthly" value="0" step="0.5"><span class="unit">万/月</span></div></div>
-        <div class="hint" style="margin-top:0"><b>児童手当（国の制度）は自動計算</b>されます（2024年10月の拡充準拠・非課税の給付として手取りに加算）。<br>・3歳未満：月15,000円／人　・3歳〜18歳：月10,000円／人<br>・22歳以下の子が3人以上いる間、第3子以降（18歳以下）は月+20,000円。<br>勤務先の「子供手当（福利厚生）」とは別枠で、両方が反映されます。</div>
+        <div class="hint" style="margin-top:0"><b>児童手当（国の制度）は自動計算</b>されます（2024年10月の拡充準拠・非課税の給付として手取りに加算）。<br>・3歳未満：月15,000円／人　・3歳〜18歳：月10,000円／人<br>・22歳以下の子が3人以上いる間、第3子以降（18歳以下）は月+20,000円。<br>勤務先の「子ども手当（福利厚生）」とは別枠で、両方が反映されます。</div>
         <div class="statutory"><div class="hint" style="margin-top:0">出産育児一時金は法令で定められた給付額です（2023年4月以降 50万円）。</div><div class="field"><label>出産育児一時金（給付）</label><div class="ig"><input type="number" id="birthGrant" value="50"><span class="unit">万</span></div></div></div>
         <div class="field"><label>教育費を別口座で積立（毎年振替・NISAスイープ対象外）</label><input type="checkbox" id="eduReserve" checked></div>
         <div class="hint" id="eduSaveInfo">選んだ進路の教育費を、出生から積み立てる月額を表示します。</div>
+      </div>
+    </details>
+
+    <details class="grp" id="sec-invest">
+      <summary><span class="tag">資産</span>現預金・NISA<span class="chev">▶</span></summary>
+      <div class="body">
+        <div class="field"><label>現在の現預金</label><div class="ig"><input type="number" id="initCash" value="250"><span class="unit">万</span></div></div>
+        <div class="hint">生活防衛費は毎年自動算出：稼ぎ手が1人以下なら生活費の10ヶ月分、2人なら6ヶ月分、子どもがいる期間は（稼ぎ手数に関わらず）12ヶ月分。老後（年金生活・就労なし）は現金保有なし＝0（不足分はNISA/DCから取り崩し）。現預金はこの水準を保つよう調整します。</div>
+        <div class="field"><label>現在のNISA元本</label><div class="ig"><input type="number" id="initNisaP" value="0"><span class="unit">万</span></div></div>
+        <div class="field"><label>現在のNISA評価額</label><div class="ig"><input type="number" id="initNisaV" value="0"><span class="unit">万</span></div></div>
+        <div class="hint">すでに積立中の場合は開始時点の元本（と含み益込みの評価額）を入力。評価額が0なら元本と同額として扱い、生涯投資枠の残りも元本ぶん差し引きます。</div>
+        <div class="field"><label>NISA 積立額</label><div class="ig"><input type="number" id="nisaMonthly" value="3" step="0.5"><span class="unit">万/月</span></div></div>
+        <div class="field"><label>想定利回り（年）</label><div class="ig"><input type="number" id="nisaYield" value="4.0" step="0.1"><span class="unit">%</span></div></div>
+        <div class="statutory"><div class="hint" style="margin-top:0">新NISAの生涯投資枠は制度上1,800万円です。</div><div class="field"><label>生涯投資枠</label><div class="ig"><input type="number" id="nisaCap" value="1800"><span class="unit">万</span></div></div></div>
+        <div class="field"><label>パートナーもNISA口座を持つ</label><input type="checkbox" id="hasPartnerNisa"></div>
+        <div class="field"><label>　└ パートナーの積立額</label><div class="ig"><input type="number" id="pNisaMonthly" value="3" step="0.5"><span class="unit">万/月</span></div></div>
+        <div class="hint" style="margin-top:0">オンにすると、年間投資枠（360万×2＝720万）と生涯投資枠（1,800万×2＝3,600万）が2人分になります。運用利回りは共通で、評価額は世帯の総資産に合算します。</div>
+        <div class="field"><label>こどもNISAを使う</label><input type="checkbox" id="hasKidNisa"></div>
+        <div class="field"><label>　└ 積立額（子1人あたり）</label><div class="ig"><input type="number" id="kidNisaMonthly" value="1" step="0.5" max="5"><span class="unit">万/月</span></div></div>
+        <div class="field"><label>　└ 受け渡す年齢</label><div class="ig"><input type="number" id="kidNisaTo" value="22"><span class="unit">歳</span></div></div>
+        <div class="hint" style="margin-top:0"><b>こどもNISA</b>は、令和8年度税制改正大綱で創設が決まった<b>2027年1月開始予定</b>の新制度です（0〜17歳の子ども名義でNISA口座を開設でき、運用益は<b>非課税</b>）。2023年末に終了したジュニアNISA以降、18歳未満が使える非課税制度がなかった空白を埋めるものです。<br>・年間投資枠は<b>60万円（月5万円）</b>まで。入力がこれを超えても60万円で頭打ちにします。<br>・非課税保有限度額は<b>600万円</b>（元本ベース）。上限に達したら積立を止めます。<br>・非課税保有期間は無期限で、18歳になると成人のNISAへ引き継がれます。本ツールでは17歳まで積み立て、その後も非課税のまま運用を続ける前提です。<br>・払出しができるのは原則<b>12歳以降</b>（本人のための資金であることなどの要件あり）です。<br>この資産は<b>世帯の総資産には含めず</b>、指定した年齢時点の金額を結果に表示します（生活防衛費を下回らない範囲で毎年拠出し、2027年より前の年は積み立てません）。制度の詳細は2026年中に公表される予定のため、変更される可能性があります。</div>
+        <div class="field"><label>現預金の上限超過分をNISAへ</label><input type="checkbox" id="sweepNisa"></div>
+        <div class="field"><label>　└ 現預金の上限</label><div class="ig"><input type="number" id="cashCap" value="500"><span class="unit">万</span></div></div>
+        <div class="hint">オンにすると、生活防衛費とは別に設けた上限を超えた現預金を、年間枠（360万）・生涯投資枠の範囲でNISAに自動で回します。</div>
+        <div class="hint">現預金が不足する年は、NISAを自動で取り崩して充当します（元本・評価額に反映）。</div>
       </div>
     </details>
 
@@ -731,55 +835,6 @@
           <div class="field"><label>免許返納年齢</label><div class="ig"><input type="number" id="carReturnAge" value="70"><span class="unit">歳</span></div></div>
         </div></details>
         <div class="hint" id="carInfo">初回購入後は買い替え周期ごとに買い替え。車体価格は毎年上昇率で上がり、買い替え時は前の車の購入価格の下取り率分が戻ります（現預金から支出）。免許返納年齢以降は買い替えを行いません。</div>
-      </div>
-    </details>
-
-    <details class="grp" id="sec-spend">
-      <summary><span class="tag">生活費</span>支出目安・保険・旅行<span class="chev">▶</span></summary>
-      <div class="body">
-        <div class="field"><label>現在の世帯人数</label><div class="ig"><input type="number" id="curHouseholdSize" value="2" step="1"><span class="unit">人</span></div></div>
-        <div class="field"><label>現在の月々の生活費（家賃・特別費除く）</label><div class="ig"><input type="number" id="curMonthlyLiving" value="20" step="0.5"><span class="unit">万/月</span></div></div>
-        <div class="hint" id="livingInfo">今の世帯人数と生活費から1人あたりの生活水準を割り出し、世帯人数が変わっても同水準を保つ生活費を自動算出します（等価尺度：本人1.0／配偶者0.5／子0.3・14歳以上0.5）。住居・教育・保険・旅行は別項目。</div>
-        <div class="field"><label>インフレ率（年）</label><div class="ig"><input type="number" id="inflation" value="1.0" step="0.1"><span class="unit">%</span></div></div>
-        <div class="field"><label>旅行の回数</label><div class="ig"><input type="number" id="travelCount" value="1"><span class="unit">回/年</span></div></div>
-        <div class="field"><label>　└ 1回あたり費用</label><div class="ig"><input type="number" id="travelCost" value="20"><span class="unit">万</span></div></div>
-        <div class="hint">保険は年齢に応じて自動計上（20代8→30代14→40代22→50代28→60代22→70代〜14 万/年）。</div>
-      </div>
-    </details>
-
-    <details class="grp" id="sec-death">
-      <summary><span class="tag">死亡・遺族</span>万が一のときの備え<span class="chev">▶</span></summary>
-      <div class="body">
-        <div class="hint" style="margin-top:0">死亡年齢を入れると、その年以降の<b>収入の停止・世帯人数の減少による生活費の変化</b>と、<b>遺族基礎年金・遺族厚生年金・中高齢寡婦加算・埋葬料・死亡一時金・死亡保険金・葬儀費用</b>を自動で反映します。その年の年初めに亡くなったものとして試算します。</div>
-        <div class="field"><label>本人の死亡を見込む</label><input type="checkbox" id="hasSelfDeath"></div>
-        <div class="field"><label>　└ 時期（本人年齢）</label><div class="ig"><input type="number" id="selfDeathAge" value="55"><span class="unit">歳</span></div></div>
-        <div class="field"><label>　└ 死亡保険金（本人）</label><div class="ig"><input type="number" id="lifeInsSelf" value="0" step="100"><span class="unit">万</span></div></div>
-        <div class="field"><label>パートナーの死亡を見込む</label><input type="checkbox" id="hasPartnerDeath"></div>
-        <div class="field"><label>　└ 時期（<b>本人</b>年齢基準）</label><div class="ig"><input type="number" id="partnerDeathAge" value="55"><span class="unit">歳</span></div></div>
-        <div class="field"><label>　└ 死亡保険金（パートナー）</label><div class="ig"><input type="number" id="lifeInsPartner" value="0" step="100"><span class="unit">万</span></div></div>
-        <div class="field"><label>葬儀費用（1件あたり）</label><div class="ig"><input type="number" id="funeralCost" value="96"><span class="unit">万</span></div></div>
-        <div class="hint" style="margin-top:0">初期値は<b>家族葬の全国平均 96.4万円</b>（鎌倉新書「第7回お葬式に関する全国調査」2026年）。一般葬は約122万円、一日葬約74万円、直葬・火葬式約50万円が目安です（お布施平均約23万円は別途）。埋葬料（健保）・葬祭費（国保）の5万円は自動で受取りに計上します。</div>
-        <div class="field"><label>住宅ローンの団信に加入（本人）</label><input type="checkbox" id="hasDanshin" checked></div>
-        <div class="hint" style="margin-top:0">オンで、本人の死亡時に住宅ローンの残債がなくなり、以降の返済が止まります（住宅ローン控除も終了。固定資産税・管理費は継続）。</div>
-        <div class="hint" style="margin-top:0">遺族年金は<b>非課税</b>です。遺族厚生年金は報酬比例部分の3/4（加入300月未満は300月みなし）、遺族基礎年金は18歳到達年度末までの子がいる間、中高齢寡婦加算は妻が40〜65歳の間です。<b>2028年4月の改正</b>（子のなっ60歳未満の配偶者は原則５年の有期給付、有期給付加算で約1.3倍）も反映しています。</div>
-      </div>
-    </details>
-
-    <details class="grp" id="sec-invest">
-      <summary><span class="tag">資産</span>現預金・NISA<span class="chev">▶</span></summary>
-      <div class="body">
-        <div class="field"><label>現在の現預金</label><div class="ig"><input type="number" id="initCash" value="250"><span class="unit">万</span></div></div>
-        <div class="hint">生活防衛費は毎年自動算出：稼ぎ手が1人以下なら生活費の10ヶ月分、2人なら6ヶ月分、子どもがいる期間は（稼ぎ手数に関わらず）12ヶ月分。老後（年金生活・就労なし）は現金保有なし＝0（不足分はNISA/DCから取り崩し）。現預金はこの水準を保つよう調整します。</div>
-        <div class="field"><label>現在のNISA元本</label><div class="ig"><input type="number" id="initNisaP" value="0"><span class="unit">万</span></div></div>
-        <div class="field"><label>現在のNISA評価額</label><div class="ig"><input type="number" id="initNisaV" value="0"><span class="unit">万</span></div></div>
-        <div class="hint">すでに積立中の場合は開始時点の元本（と含み益込みの評価額）を入力。評価額が0なら元本と同額として扱い、生涯投資枠の残りも元本ぶん差し引きます。</div>
-        <div class="field"><label>NISA 積立額</label><div class="ig"><input type="number" id="nisaMonthly" value="3" step="0.5"><span class="unit">万/月</span></div></div>
-        <div class="field"><label>想定利回り（年）</label><div class="ig"><input type="number" id="nisaYield" value="4.0" step="0.1"><span class="unit">%</span></div></div>
-        <div class="statutory"><div class="hint" style="margin-top:0">新NISAの生涯投資枠は制度上1,800万円です。</div><div class="field"><label>生涯投資枠</label><div class="ig"><input type="number" id="nisaCap" value="1800"><span class="unit">万</span></div></div></div>
-        <div class="field"><label>現預金の上限超過分をNISAへ</label><input type="checkbox" id="sweepNisa"></div>
-        <div class="field"><label>　└ 現預金の上限</label><div class="ig"><input type="number" id="cashCap" value="500"><span class="unit">万</span></div></div>
-        <div class="hint">オンにすると、生活防衛費とは別に設けた上限を超えた現預金を、年間枠（360万）・生涯投資枠の範囲でNISAに自動で回します。</div>
-        <div class="hint">現預金が不足する年は、NISAを自動で取り崩して充当します（元本・評価額に反映）。</div>
       </div>
     </details>
 
@@ -852,11 +907,11 @@
       <summary><span class="tag">その他収入</span>副業・不動産など<span class="chev">▶</span></summary>
       <div class="body">
         <div class="field"><label>その他収入を見込む</label><input type="checkbox" id="hasSideIncome"></div>
-        <div class="field"><label>　└ 手取り年収</label><div class="ig"><input type="number" id="sideIncome" value="60"><span class="unit">万/年</span></div></div>
+        <div class="field"><label>　└ 年間の所得（額面）</label><div class="ig"><input type="number" id="sideIncome" value="60"><span class="unit">万/年</span></div></div>
         <div class="field"><label>　└ 開始年齢</label><div class="ig"><input type="number" id="sideFrom" value="30"><span class="unit">歳</span></div></div>
         <div class="field"><label>　└ 終了年齢</label><div class="ig"><input type="number" id="sideTo" value="70"><span class="unit">歳</span></div></div>
         <div class="field"><label>　└ 年あたり増減</label><div class="ig"><input type="number" id="sideGrowth" value="0" step="0.5"><span class="unit">%/年</span></div></div>
-        <div class="hint" style="margin-top:0">副業・不動産賃料・配当などの<b>手取り（経費・税引後）</b>を入力してください。給与と合算した累進課税は考慮しないため、金額は控えめに見積もると安全です。不動産の場合は修繕・空室分を差し引いた実質収入を想定してください。</div>
+        <div class="hint" style="margin-top:0">副業・不動産などの<b>所得（収入から必要経費を引いたあと・税引き前の額面）</b>を入力してください。不動産なら管理費・修繕費・空室損・ローン利息・減価償却を差し引いた額、副業なら経費を引いた額です。<br>この所得は<b>給与と合算して総合課税</b>されます（所得税は超過累進税率＋復興特別所得税2.1%、住民税は所得割10%）。給与所得控除は給与にのみ適用されるため、副業・不動産の所得には控除がかからず、そのぶん税負担は重くなります。<b>社会保険料は給与にのみかかる</b>ため、この所得には健康保険料・厚生年金保険料は発生しません。<br>なお、給与以外の所得が年20万円以下なら所得税の確定申告は不要ですが、<b>住民税の申告は必要</b>です（本ツールはどちらも課税されるものとして試算します）。</div>
       </div>
     </details>
 
@@ -872,6 +927,24 @@
         <div class="field"><label>　└ 時期（本人年齢）</label><div class="ig"><input type="number" id="divorceAge" value="50"><span class="unit">歳</span></div></div>
         <div class="field"><label>　└ 財産分与（支払い）</label><div class="ig"><input type="number" id="divorceCost" value="500"><span class="unit">万</span></div></div>
         <div class="hint" style="margin-top:0">その年にパートナーの収入と年金加算がなくなり、生活費は単身相当に戻ります。財産分与は一時支出として計上します（受け取る側なら負の値を入力）。</div>
+      </div>
+    </details>
+
+    <details class="grp" id="sec-death">
+      <summary><span class="tag">死亡・遺族</span>万が一のときの備え<span class="chev">▶</span></summary>
+      <div class="body">
+        <div class="hint" style="margin-top:0">死亡年齢を入れると、その年以降の<b>収入の停止・世帯人数の減少による生活費の変化</b>と、<b>遺族基礎年金・遺族厚生年金・中高齢寡婦加算・埋葬料・死亡一時金・死亡保険金・葬儀費用</b>を自動で反映します。その年の年初めに亡くなったものとして試算します。</div>
+        <div class="field"><label>本人の死亡を見込む</label><input type="checkbox" id="hasSelfDeath"></div>
+        <div class="field"><label>　└ 時期（本人年齢）</label><div class="ig"><input type="number" id="selfDeathAge" value="55"><span class="unit">歳</span></div></div>
+        <div class="field"><label>　└ 死亡保険金（本人）</label><div class="ig"><input type="number" id="lifeInsSelf" value="0" step="100"><span class="unit">万</span></div></div>
+        <div class="field"><label>パートナーの死亡を見込む</label><input type="checkbox" id="hasPartnerDeath"></div>
+        <div class="field"><label>　└ 時期（<b>本人</b>年齢基準）</label><div class="ig"><input type="number" id="partnerDeathAge" value="55"><span class="unit">歳</span></div></div>
+        <div class="field"><label>　└ 死亡保険金（パートナー）</label><div class="ig"><input type="number" id="lifeInsPartner" value="0" step="100"><span class="unit">万</span></div></div>
+        <div class="field"><label>葬儀費用（1件あたり）</label><div class="ig"><input type="number" id="funeralCost" value="96"><span class="unit">万</span></div></div>
+        <div class="hint" style="margin-top:0">初期値は<b>家族葬の全国平均 96.4万円</b>（鎌倉新書「第7回お葬式に関する全国調査」2026年）。一般葬は約122万円、一日葬約74万円、直葬・火葬式約50万円が目安です（お布施平均約23万円は別途）。埋葬料（健保）・葬祭費（国保）の5万円は自動で受取りに計上します。</div>
+        <div class="field"><label>住宅ローンの団信に加入（本人）</label><input type="checkbox" id="hasDanshin" checked></div>
+        <div class="hint" style="margin-top:0">オンで、本人の死亡時に住宅ローンの残債がなくなり、以降の返済が止まります（住宅ローン控除も終了。固定資産税・管理費は継続）。</div>
+        <div class="hint" style="margin-top:0">遺族年金は<b>非課税</b>です。遺族厚生年金は報酬比例部分の3/4（加入300月未満は300月みなし）、遺族基礎年金は18歳到達年度末までの子がいる間、中高齢寡婦加算は妻が40〜65歳の間です。<b>2028年4月の改正</b>（子のない60歳未満の配偶者は原則5年の有期給付、有期給付加算で約1.3倍）も反映しています。</div>
       </div>
     </details>
 
@@ -903,6 +976,7 @@
         <button class="tab-btn" data-tab="tab-compare">ライフプラン比較</button>
       </div>
 
+      <div class="kf-box" id="kidFundBox" style="display:none"></div>
       <div class="tab-panel active" id="tab-rank">
         <div class="eyebrow">Rating</div>
         <h2>資産形成の評価</h2>
@@ -1008,12 +1082,12 @@
           <th class="l">経過</th><th>本人</th><th>相手</th><th class="l">子</th>
           <th class="l">ライフイベント</th>
           <th>額面年収</th><th>月手取り</th><th>月生活費</th><th>月住宅費</th><th>ボーナス</th>
-          <th>年間貯蓄</th><th>NISA積立</th><th>NISA評価</th><th>NISA元本</th>
+          <th>年間貯蓄</th><th>NISA積立</th><th>NISA評価</th><th>NISA元本</th><th>ローン残高</th>
           <th>現預金</th><th>総資産</th><th class="l">イベント費用（備考）</th>
         </tr></thead><tbody id="tbody"></tbody></table>
       </div>
       <p class="footnote" style="margin-top:10px">
-        ※ 金額は万円（一部は円表示）。<b>給与の入力は額面</b>（税・社会保険料を引く前）で、手取りは<b>実額計算</b>です（社会保険は標準報酬月額の等級表と標準賞与額の上限を適用し、所得税は給与所得控除→各種所得控除→超過累進税率＋復興特別所得税2.1%、住民税は所得割10%＋均等割5,000円に調整控除・非課税限度額を反映）。ただし<b>再雇用の年収は手取り</b>、<b>退職金は額面</b>での入力です。年次明細の「額面年収」は額面、「月手取り」以降の収支・資産はすべて手取りベースで表示しています。配偶者・扶養控除、iDeCoの小規模企業共済等掛金控除、退職所得の分離課税（退職所得控除→１/２→累進税率＋住民税10%）も法定額で計算します。健康保険料率は協会けんぽの都道府県別料率（令和8年度）を使い、「基本」欄の都道府県で切り替わります。制度は将来変わりうるため、令和8年分（2026年）の税制・料率を将来も据え置いて試算しています（厚生年金の標準報酬月額上限の段階引上げは反映済み）。死亡を見込むと、その年から収入が止まり、世帯人数に応じて生活費が下がり、<b>遺族基礎年金（基本額84.73万＋子の加算）・遺族厚生年金（報酬比例の3/4・300月みなし）・中高齢寡婦加算63.55万</b>（いずれも非課税）と、埋葬料・葬祭費5万、死亡一時金、死亡保険金、葬儀費用を反映します。団信に加入している場合は本人の死亡で住宅ローンの残債がなくなります。2028年4月施行の遺族厚生年金の見直し（子のなっ60歳未満の配偶者は原則５年の有期給付・約1.3倍）は、女性の段階的な対象年齢引上げを「死亡時４０歳未満の妻」で近似しています。学費は授業料無償化を反映し、公立小中高は授業料0で給食・教材・制服等の実費のみ（私立高校は就学支援金で授業料をほぼ相殺した実費目安、大学はMEXT等の平均）。多子世帯の大学無償化として、扶養中の子が3人以上いる間は第3子以降（扶養中）の大学授業料相当を免除（仕送りは対象外）。兄姉が独立年齢に達して扶養数が3人未満になると適用は外れます。塾・習い事は任意で別途加算。保険・固定資産税は自動概算です。生活費は「現在の世帯人数・月額」を基準に等価尺度（本人1.0／配偶者0.5／子0.3・14歳以上0.5）で世帯人数に応じて自動算出（家賃・教育・保険・旅行は別項目）。総資産は現預金＋教育積立（別口座）＋NISA評価額＋確定拠出年金（DCは「枠内一時金」をオンにすると受給時に退職所得控除の枠まで非課税で受取り超過分は運用継続、退職金との控除枠重複は10年／19年ルールを簡易調整した概算。DC残りは将来課税のため実効税率を引いた税引後で計上）。教育費を別口座で積立をオンにすると、毎年「教育積立費」を現預金から別口座へ振替（＝現預金の支出として計上）し、学費はその別口座から支払います（不足分のみ現預金から）。別口座は安全資産（利回りなし）として扱うため、その分をNISA等で運用する場合に比べ最終資産はやや低めに出ます。NISAは引き出しても運用益が非課税。NISA積立は「その年が黒字」かつ「生活防衛費を超える現預金がある」場合のみ行い、赤字の年や取り崩す年は入金しません（入金と取り崩しの往復を回避）。なお、挙式・新生活の特別費（結婚年）と住宅購入諸費用（物件価格に対する率で購入年に一括）は、いずれも現金支出として資産推移に反映しています。月住宅費は、購入前は家賃、購入後はローンの月々返済（元利）＋固定資産税・管理費の月割で、ローン完済後は固定資産税・管理費のみになります（頭金・諸費用・修繕はイベント費用の列に別途計上）。<br><br><b>■ 初期値の根拠</b>（すべて公的統計の最新値・2026年7月時点。ご自身の数字に置き換えてお使いください）<br>
+        ※ 金額は万円（一部は円表示）。<b>給与の入力は額面</b>（税・社会保険料を引く前）で、手取りは<b>実額計算</b>です（社会保険は標準報酬月額の等級表と標準賞与額の上限を適用し、所得税は給与所得控除→各種所得控除→超過累進税率＋復興特別所得税2.1%、住民税は所得割10%＋均等割5,000円に調整控除・非課税限度額を反映）。ただし<b>再雇用の年収は手取り</b>、<b>退職金は額面</b>での入力です。年次明細の「額面年収」は額面、「月手取り」以降の収支・資産はすべて手取りベースで表示しています。配偶者・扶養控除、iDeCoの小規模企業共済等掛金控除、退職所得の分離課税（退職所得控除→1/2→累進税率＋住民税10%）も法定額で計算します。健康保険料率は協会けんぽの都道府県別料率（令和8年度）を使い、「基本」欄の都道府県で切り替わります。制度は将来変わりうるため、令和8年分（2026年）の税制・料率を将来も据え置いて試算しています（厚生年金の標準報酬月額上限の段階引上げは反映済み）。死亡を見込むと、その年から収入が止まり、世帯人数に応じて生活費が下がり、<b>遺族基礎年金（基本額84.73万＋子の加算）・遺族厚生年金（報酬比例の3/4・300月みなし）・中高齢寡婦加算63.55万</b>（いずれも非課税）と、埋葬料・葬祭費5万、死亡一時金、死亡保険金、葬儀費用を反映します。団信に加入している場合は本人の死亡で住宅ローンの残債がなくなります。2028年4月施行の遺族厚生年金の見直し（子のない60歳未満の配偶者は原則5年の有期給付・約1.3倍）は、女性の段階的な対象年齢引上げを「死亡時40歳未満の妻」で近似しています。学費は授業料無償化を反映し、公立小中高は授業料0で給食・教材・制服等の実費のみ（私立高校は就学支援金で授業料をほぼ相殺した実費目安、大学はMEXT等の平均）。多子世帯の大学無償化として、扶養中の子が3人以上いる間は第3子以降（扶養中）の大学授業料相当を免除（仕送りは対象外）。兄姉が独立年齢に達して扶養数が3人未満になると適用は外れます。塾・習い事は任意で別途加算。保険・固定資産税は自動概算です。生活費は「現在の世帯人数・月額」を基準に等価尺度（本人1.0／配偶者0.5／子0.3・14歳以上0.5）で世帯人数に応じて自動算出（家賃・教育・保険・旅行は別項目）。総資産は現預金＋教育積立（別口座）＋NISA評価額＋確定拠出年金（DCは「枠内一時金」をオンにすると受給時に退職所得控除の枠まで非課税で受取り超過分は運用継続、退職金との控除枠重複は10年／19年ルールを簡易調整した概算。DC残りは将来課税のため実効税率を引いた税引後で計上）。教育費を別口座で積立をオンにすると、毎年「教育積立費」を現預金から別口座へ振替（＝現預金の支出として計上）し、学費はその別口座から支払います（不足分のみ現預金から）。別口座は安全資産（利回りなし）として扱うため、その分をNISA等で運用する場合に比べ最終資産はやや低めに出ます。NISAは引き出しても運用益が非課税。NISA積立は「その年が黒字」かつ「生活防衛費を超える現預金がある」場合のみ行い、赤字の年や取り崩す年は入金しません（入金と取り崩しの往復を回避）。なお、挙式・新生活の特別費（結婚年）と住宅購入諸費用（物件価格に対する率で購入年に一括）は、いずれも現金支出として資産推移に反映しています。月住宅費は、購入前は家賃、購入後はローンの月々返済（元利）＋固定資産税・管理費の月割で、ローン完済後は固定資産税・管理費のみになります（頭金・諸費用・修繕はイベント費用の列に別途計上）。<br><br><b>■ 初期値の根拠</b>（すべて公的統計の最新値・2026年7月時点。ご自身の数字に置き換えてお使いください）<br>
 ・<b>年齢設定</b>：本人24歳（単身男性）。結婚31歳＝男性の平均初婚年齢31.1歳（厚労省「令和6年人口動態統計」）。パートナーは同い年。<br>
 ・<b>子ども</b>：2人（夫婦の完結出生児数1.9人）。第1子は本人33歳＝結婚から平均結婚期間1.9年後、第2子はその2.1年後の35歳（第1子・第2子出生時の母の平均年齢差31.0歳→33.1歳による）。<br>
 ・<b>給与</b>：厚労省「令和7年賃金構造基本統計調査」の男性・所定内給与額。20〜24歳24.6万円/月を基本給21.5万＋諸手当3.0万に分解し、55〜59歳のピーク44.6万円/月に達するよう昇給0.57万円/年・基本給上限41.5万円を設定。<br>
@@ -1036,10 +1110,22 @@
   <div class="foot-links">
     <button class="foot-link" id="footDisc">免責事項</button><span class="foot-sep">・</span>
     <button class="foot-link" id="footProf">制作者について</button><span class="foot-sep">・</span>
-    <button class="foot-link" id="footWiz">かんたん入力をやり直す</button>
+    <button class="foot-link" id="footWiz">かんたん入力をやり直す</button><span class="foot-sep">・</span>
+    <button class="foot-link foot-danger" id="resetBtn">すべて初期値に戻す</button>
   </div>
   <div class="foot-copy">© <span id="footYear"></span> MiraiLog by Churosu ／ 本ツールは投資・税務の助言ではなく、将来を保証するものでもありません。税・社会保険は令和8年度の制度による試算です。</div>
 </footer>
+
+<div class="dockbar" id="dockBar">
+  <button type="button" class="bar-toggle" id="dockToggle" aria-controls="dockBar" aria-expanded="true"><span class="bt-l">保存・共有</span><span class="bt-c">▼</span></button>
+  <div class="dock-inner">
+    <button type="button" class="dock-b" id="appShareBtnDock" title="入力内容を含まない、ツールそのもののURLを共有します">MiraiLogを共有</button>
+    <button type="button" class="dock-b primary" id="shareBtnDock" title="いまの入力内容を含むURLを作ります（パスコードで保護できます）">個人結果URLを共有</button>
+    <button type="button" class="dock-b" id="postBtnDock">結果をポスト</button>
+    <button type="button" class="dock-b" id="imgBtnDock">画像で保存</button>
+    <button type="button" class="dock-b" id="pdfBtnDock">PDFで保存</button>
+  </div>
+</div>
 
 <script>
 /* ============ 計算エンジン ============ */
@@ -1204,6 +1290,20 @@ const KOKUMIN_NENKIN_MONTH = 1.79;  /* 国民年金保険料（万円/月） */
 const KOKUHO_RATE          = 10.0;  /* 国民健康保険 所得割（%・自治体平均の目安） */
 const KOKUHO_CAPITA        = 5.0;   /* 国民健康保険 均等割（万円/人・目安） */
 const KOKUHO_CAP           = 106;   /* 国民健康保険の賦課限度額（万円） */
+/* 「年収の壁」：被用者保険の適用ライン（月額8.8万円＝年収約106万円）。
+   これ未満で配偶者が厚生年金・健康保険に加入していれば第3号被保険者となり、本人負担の社会保険料は0。
+   （2025年の年金制度改正により、この賃金要件は2026年10月に撤廃される予定です） */
+const KABE_SHAKAI = 106;
+/* こどもNISA（令和8年度税制改正大綱で創設。2027年1月開始予定）
+   ・対象：0〜17歳の未成年名義／対象商品はつみたて投資枠と同様の投資信託
+   ・年間投資枠60万円（月5万円）／非課税保有限度額600万円（簿価・元本ベース）
+   ・非課税保有期間は無期限。18歳になると成人のNISAへ引き継がれる
+   ・払出しは原則12歳以降（本人のための資金であることなどの要件あり） */
+const KIDNISA_START_YEAR = 2027;
+const KIDNISA_ANNUAL_CAP = 60;    /* 年間投資枠（万円） */
+const KIDNISA_LIFE_CAP   = 600;   /* 非課税保有限度額（万円・簿価） */
+const KIDNISA_MAX_AGE    = 17;    /* 新規投資できるのは17歳まで */
+const KIDNISA_DRAW_AGE   = 12;    /* 払出しができるようになる年齢 */
 
 /* 社会保険料（本人負担・年額）。monthly=報酬月額、bonus=年間賞与（いずれも額面・万円） */
 function socialInsurance(monthly, bonus, age, opt){
@@ -1315,12 +1415,16 @@ function residentTaxOn(shotoku, deduction, humanDiff, famCount){
  */
 function netIncome(gross, age, opt){
   opt=opt||{};
-  if(!(gross>0)) return {net:0, social:0, income:0, resident:0, shotoku:0};
+  const otherInc=Math.max(0, opt.otherIncome||0);   /* 給与以外の所得（副業・不動産などの必要経費を引いたあと） */
+  if(!(gross>0) && otherInc<=0) return {net:0, social:0, income:0, resident:0, shotoku:0};
   const year=opt.year||CURRENT_YEAR;
   const bonus=(opt.bonus!=null)?Math.min(opt.bonus,gross):0;
   const monthly=(opt.monthly!=null)?opt.monthly:(gross-bonus)/12;
-  const social=socialInsurance(monthly,bonus,age,opt);
-  const shotoku=Math.max(0, gross-kyuyoDeduction(gross,year));
+  /* 年収の壁：配偶者の扶養に入れる水準なら社会保険料の本人負担は発生しない */
+  const dependent=!!opt.dependentEligible && gross>0 && gross<KABE_SHAKAI;
+  const social=dependent?0:socialInsurance(monthly,bonus,age,opt);
+  /* 給与所得＋給与以外の所得（副業・不動産は給与所得控除の対象外。総合課税で合算） */
+  const shotoku=Math.max(0, gross-kyuyoDeduction(gross,year))+otherInc;
   const other=opt.otherDeduction||0;
   const ages=opt.depAges||[];
   let spI=0,spR=0;
@@ -1338,7 +1442,7 @@ function netIncome(gross, age, opt){
   const it=incomeTaxOn(shotoku-kisoDeductionIncome(shotoku)-(social+other+spI+depI));
   const famCount=(opt.famCount!=null)?opt.famCount:((spI>0?1:0)+ages.filter(a=>a!=null&&a>=16).length);
   const rt=residentTaxOn(shotoku, kisoDeductionResident(shotoku)+social+other+spR+depR, humanDiff, famCount);
-  return {net:Math.max(0,gross-social-it-rt), social:social, income:it, resident:rt, shotoku:shotoku};
+  return {net:Math.max(0,gross+otherInc-social-it-rt), social:social, income:it, resident:rt, shotoku:shotoku, dependent:dependent};
 }
 /* 額面のみから手取りを求める簡易ラッパー（年齢・扶養の指定がない場合） */
 function takeHome(g,age,opt){ return netIncome(g, age!=null?age:40, opt).net; }
@@ -1380,6 +1484,7 @@ function balAfter(L,k){ if(k<=0)return L.borrow; if(k>=L.n/12)return 0; const m=
 function eventsFor(P,age,childAges,L){
   const e=[];
   if(age===P.marriageAgeEff && P.marriageRow>=0) e.push('結婚・新生活');
+  if(P.buyAge!=null && age===P.buyAge+P.loanYears) e.push('ローン完済');
   if(P.hasSelfDeath && age===P.selfDeathAge) e.push('本人死亡');
   if(P.hasPartnerDeath && P.marriageRow>=0 && age===P.partnerDeathAge) e.push('パートナー死亡');
   P.children.forEach((c,idx)=>{ if(c.birthAge===age) e.push(`第${idx+1}子 誕生`); });
@@ -1434,7 +1539,9 @@ function simulate(P){
   if(P.marriageAgeFrac==null) P.marriageAgeFrac=P.marriageAge+((P.marriageAgeMonths||0)/12);
   if(P.marriageRow==null) P.marriageRow=(P.marriageAgeFrac>P.currentAgeFrac)?Math.floor(P.marriageAgeFrac-P.currentAgeFrac):((P.marriageAgeFrac<=P.currentAgeFrac&&P.marriageAge>0)?0:-1);
   if(P.marriageAgeEff==null) P.marriageAgeEff=(P.marriageRow>=0)?P.currentAge+P.marriageRow:P.marriageAge;
-  const L=loanCalc(P); const rows=[]; let cash=P.initCash, nisaP=P.initNisaP, nisaV=(P.initNisaV>0?P.initNisaV:P.initNisaP), dcValue=0;
+  const L=loanCalc(P); const rows=[];
+  /* 子ども名義の積立口座（世帯の総資産には含めず、22歳時点の金額を別途表示する） */
+  const kidFunds=(P.children||[]).map(()=>({v:0,p:0,at22:null})); let cash=P.initCash, nisaP=P.initNisaP, nisaV=(P.initNisaV>0?P.initNisaV:P.initNisaP), dcValue=0;
   const eduTotalEach=eduTotalPerChild(P); const eduMonthlyEach=eduTotalEach/(EDU_SAVE_END*12); const totalEduAll=eduTotalEach*P.children.length; let eduFund=0, eduPaid=0, eduAccount=0; let lastCarPrice=0;
   let pcSelf=0, pcSpouse=0, pensionCalc=null, shortfallCum=0;
   const nY=Math.max(1,MAX_AGE-P.currentAge+1);
@@ -1487,6 +1594,8 @@ function simulate(P){
     /* 厚生年金の標準報酬を積み立て（就労中・上限あり。育休・産休は免除期間も加入期間とみなす） */
     pcSelf+=selfPc;
     if(married){ if(pGross>0) pcSpouse+=Math.min(pGross,PENSION_CAP); pcSpouse+=pPc; }
+    let sideInc=0;   /* 副業・不動産などの所得（額面。必要経費を引いたあと・税引き前） */
+    if(P.hasSideIncome && age>=P.sideFrom && age<=P.sideTo && !selfDead) sideInc=P.sideIncome*Math.pow(1+(P.sideGrowth||0), Math.max(0,age-P.sideFrom));
     let net, pensionNom=null, taxSocial=0, taxIncome=0, taxResident=0;
     if(age<P.selfRetire){
       /* 扶養控除の対象となる子の年齢（年少扶養は控除なし。非課税限度額には全員を含める） */
@@ -1499,10 +1608,11 @@ function simulate(P){
       /* 扶養控除・配偶者控除は収入の多い側で適用する（節税効果が大きいため） */
       const selfIsEarner=(selfGross>=pGross);
       const baseOpt={pref:P.pref, year:taxYear};
-      const selfOpt=Object.assign({}, baseOpt, {monthly:selfMonthly, bonus:selfBonus, kosei:koseiSelf, otherDeduction:idecoDed,
+      const selfOpt=Object.assign({}, baseOpt, {monthly:selfMonthly, bonus:selfBonus, kosei:koseiSelf, otherDeduction:idecoDed, otherIncome:sideInc,
+        dependentEligible:(married && !selfIsEarner),
         depAges:(useDed&&selfIsEarner)?depAges:[], famCount:(selfIsEarner?famKidCount:0)+((useDed&&married&&selfIsEarner)?1:0),
         spouseIncome:(useDed&&married&&selfIsEarner)?Math.max(0,pGross-kyuyoDeduction(pGross,taxYear)):null});
-      const partOpt=Object.assign({}, baseOpt, {monthly:pMonthly, bonus:pBonus,
+      const partOpt=Object.assign({}, baseOpt, {monthly:pMonthly, bonus:pBonus, dependentEligible:(married && selfIsEarner),
         depAges:(useDed&&!selfIsEarner)?depAges:[], famCount:(!selfIsEarner?famKidCount:0)+((useDed&&!selfIsEarner)?1:0),
         spouseIncome:(useDed&&!selfIsEarner)?Math.max(0,selfGross-kyuyoDeduction(selfGross,taxYear)):null});
       const rSelf=netIncome(selfGross, age, selfOpt);
@@ -1513,6 +1623,9 @@ function simulate(P){
     else {
       /* 定年後：再雇用収入と公的年金は併給できる（受給開始年齢に達していれば同時に受け取る） */
       const reemp=(age<P.reemployTo)?P.reemployIncome:0;
+      /* 定年後の副業・不動産所得も総合課税で手取り化する（再雇用収入は手取り入力のためそのまま） */
+      if(sideInc>0){ const rs2=netIncome(0, age, {pref:P.pref, year:CURRENT_YEAR+i, otherIncome:sideInc});
+        taxIncome+=rs2.income; taxResident+=rs2.resident; }
       const ps=Math.min(75,Math.max(60,P.pensionStartAge||65));
       if(age>=ps){
         /* 受給開始後もスライド調整が続くため毎年再計算する（現役中の加入実績は退職時点で確定） */
@@ -1607,8 +1720,6 @@ function simulate(P){
         dcCorp=(P.corpDcMode==='fixed') ? P.corpDcFixed*12 : selfBase*12*(P.corpDcRate/100);
       }
     }
-    let sideInc=0;
-    if(P.hasSideIncome && age>=P.sideFrom && age<=P.sideTo) sideInc=P.sideIncome*Math.pow(1+(P.sideGrowth||0), Math.max(0,age-P.sideFrom));
     /* ---- 遺族年金・死亡給付（いずれも非課税） ---- */
     let survivorPen=0, survivorParts=null, deathBenefit=0, deathBenefitLbl=[];
     {
@@ -1645,7 +1756,8 @@ function simulate(P){
       if(P.hasPartnerDeath && P.marriageRow>=0 && age===P.partnerDeathAge) addDeath('パートナー', P.lifeInsPartner);
     }
     net+=survivorPen;
-    const incomeCash=net+allowance+grant+credit+ded+dcDed+sideInc+deathBenefit;
+    /* 副業・不動産の所得は netIncome 内で給与と合算課税済みのため、ここでは二重計上しない */
+    const incomeCash=net+allowance+grant+credit+ded+dcDed+deathBenefit;
     // 表示用：世帯の支出・純貯蓄（教育費も支出に含む）
     const expense=living+housing+edu+oneoff;
     const saving=incomeCash-expense-dcContrib;
@@ -1675,16 +1787,38 @@ function simulate(P){
     // NISA積立：その年の黒字（saving>0）かつ生活防衛費を超える余剰のみ（教育の振替・支払い後の現預金で判定）。
     // 収支が赤字＝取り崩しが必要な年は積立しない。
     let contrib=0;
-    { const annualNisa=P.nisaMonthly*12; const room=Math.min(Math.max(0,P.nisaCap-nisaP),360);
+    { const accounts=1+((P.hasPartnerNisa&&married)?1:0);   /* NISA口座の数（本人＋パートナー） */
+      const annualNisa=(P.nisaMonthly+((P.hasPartnerNisa&&married)?(P.pNisaMonthly||0):0))*12;
+      const room=Math.min(Math.max(0,P.nisaCap*accounts-nisaP),360*accounts);
       /* 一度でも資金不足に陥った後は、生活費すらまかなえていないため新規投資は行わない */
       const affordable=(shortfallCum>0)?0:Math.min(Math.max(0, cash-emergency), Math.max(0, saving));
       contrib=Math.min(annualNisa, room, affordable);
       if(contrib>0){ cash-=contrib; nisaV+=contrib; nisaP+=contrib; } }
+    /* こどもNISA（2027年1月開始予定・非課税）。世帯の現預金から拠出し、
+       0〜17歳のあいだ年60万円・累計600万円まで積み立てる。18歳以降は新規投資せず非課税のまま運用を続け、
+       指定した年齢で子どもに渡す前提で金額を表示する（世帯の総資産には含めない）。 */
+    let kidContrib=0, kidFundNow=0;
+    const calYearNow=CURRENT_YEAR+i;
+    (P.children||[]).forEach((c,ci)=>{
+      const f=kidFunds[ci]; if(!f) return;
+      f.v=f.v*(1+_yr);
+      const ca=age-c.birthAge;
+      if(P.hasKidNisa && ca>=0 && ca<=KIDNISA_MAX_AGE && ca<P.kidNisaTo
+         && calYearNow>=KIDNISA_START_YEAR && shortfallCum<=0){
+        const want=Math.min((P.kidNisaMonthly||0)*12, KIDNISA_ANNUAL_CAP);
+        const room=Math.max(0, KIDNISA_LIFE_CAP-f.p);            /* 非課税保有限度額600万（簿価） */
+        const pay=Math.min(want, room, Math.max(0, cash-emergency));
+        if(pay>0){ cash-=pay; f.v+=pay; f.p+=pay; kidContrib+=pay; }
+      }
+      if(ca===P.kidNisaTo && f.at22==null) f.at22=f.v;            /* 非課税なので運用益に課税しない */
+      if(ca>=0 && ca<=P.kidNisaTo) kidFundNow+=f.v;
+    });
     // スイープ：上限超過分をNISAへ（教育口座は別勘定なので主口座のみが対象）
     let sweep=0;
     if(P.sweepNisa && shortfallCum<=0){ const floor=Math.max(P.cashCap,emergency);
       const sweepable=cash-floor;
-      if(sweepable>0){ const annualRoom=Math.max(0,360-contrib), lifeRoom=Math.max(0,P.nisaCap-nisaP);
+      const _acc=1+((P.hasPartnerNisa&&married)?1:0);
+      if(sweepable>0){ const annualRoom=Math.max(0,360*_acc-contrib), lifeRoom=Math.max(0,P.nisaCap*_acc-nisaP);
         sweep=Math.min(sweepable,annualRoom,lifeRoom); if(sweep>0){ cash-=sweep; nisaV+=sweep; nisaP+=sweep; } } }
     // 取り崩し：現預金が生活防衛費を下回る年のみ（この年は上のとおり入金していない）
     let drawNisa=0, drawDc=0, dcTaxPaid=0; const target=emergency;
@@ -1713,14 +1847,20 @@ function simulate(P){
     const busted=(shortfall>0 || liquid<=0);
     /* 生活が破綻した年は、引き出せない確定拠出年金が残っていても総資産は0として扱う
        （生活費をまかなえない以上、資産として機能していないため） */
+    /* 住宅ローン残高（購入前・完済後・団信で消滅した場合は0） */
+    let loanBal=0;
+    if(P.buyAge!=null && age>=P.buyAge && !(selfDead&&P.hasDanshin!==false)){
+      const k=age-P.buyAge+1; if(k<=P.loanYears) loanBal=Math.max(0, balAfter(L,k));
+    }
     const netWorth=busted?0:(cash+eduAccount+nisaV+dcValue*(1-P.dcTaxRate));
     const defl=Math.pow(1+P.inflation,i);
     const events=eventsFor(P,age,childAges,L);
-    rows.push({i,age,pAge,married,childAges,dep:dep.length,earners,emgMonths,emergency,pension:pensionNom,gross,bonus,pGross,net,taxSocial,taxIncome,taxResident,selfDead,widowed,survivorPen,survivorParts,deathBenefit,living,housing,edu,oneoff,oneoffLbl,saving,contrib,sweep,ded,dcContrib,dcCorp,dcDed,retireNet,dcLumpFree,dcValue,eduFund,sideInc,drawNisa,drawDc,drawEdu,dcTaxPaid,drawdown,shortfall,shortfallCum,liquid,busted,nisaV,nisaP,cash,netWorth,defl,livingBase,ins,trav,care,med,eduSave:eduSaveAnnual,eduTransfer,eduPayCash,eduAccount,incomeCash,expense,events});
+    rows.push({i,age,pAge,married,childAges,dep:dep.length,earners,emgMonths,emergency,pension:pensionNom,gross,bonus,pGross,net,taxSocial,taxIncome,taxResident,selfDead,widowed,survivorPen,survivorParts,deathBenefit,living,housing,edu,oneoff,oneoffLbl,saving,contrib,sweep,ded,dcContrib,dcCorp,dcDed,retireNet,dcLumpFree,dcValue,eduFund,sideInc,drawNisa,drawDc,drawEdu,dcTaxPaid,drawdown,shortfall,shortfallCum,liquid,busted,nisaV,nisaP,cash,netWorth,loanBal,kidFundNow,defl,livingBase,ins,trav,care,med,eduSave:eduSaveAnnual,eduTransfer,eduPayCash,eduAccount,incomeCash,expense,events});
     /* 生活資金が尽きた（＝支出をまかなえなくなった）時点で試算を終了する */
     if(selfDead && !married) break;   /* 世帯を継続する人がいないためここで終了 */
     if(busted) break;
   }
+  rows.kidFunds=kidFunds.map((f,ci)=>({birthAge:(P.children[ci]||{}).birthAge, at:P.kidNisaTo, value:f.at22, principal:f.p}));
   return rows;
 }
 
@@ -1771,6 +1911,8 @@ function readParams(){
     hasParentCare:document.getElementById('hasParentCare').checked, parentCareAge:num('parentCareAge'), parentCareYears:num('parentCareYears'), parentCareCost:num('parentCareCost'),
     hasSelfCare:document.getElementById('hasSelfCare').checked, selfCareAge:num('selfCareAge'), selfCareCost:num('selfCareCost'),
     medicalCost:num('medicalCost'), medicalOldMult:num('medicalOldMult'),
+    hasPartnerNisa:document.getElementById('hasPartnerNisa').checked, pNisaMonthly:num('pNisaMonthly'),
+    hasKidNisa:document.getElementById('hasKidNisa').checked, kidNisaMonthly:num('kidNisaMonthly'), kidNisaTo:num('kidNisaTo'),
     hasSideIncome:document.getElementById('hasSideIncome').checked, sideIncome:num('sideIncome'), sideFrom:num('sideFrom'), sideTo:num('sideTo'), sideGrowth:num('sideGrowth')/100,
     hasJobChange:document.getElementById('hasJobChange').checked, jobChangeAge:num('jobChangeAge'), jobChangeRate:num('jobChangeRate')/100, jobChangeGap:num('jobChangeGap'),
     hasDivorce:document.getElementById('hasDivorce').checked, divorceAge:num('divorceAge'), divorceCost:num('divorceCost'),
@@ -2563,6 +2705,7 @@ function render(){
   if(P.hasSelfDeath&&P.selfDeathAge>=start&&P.selfDeathAge<=P.endAge) flagDefs.push({age:P.selfDeathAge,lbl:'本人死亡'});
   if(P.hasPartnerDeath&&P.marriageRow>=0&&P.partnerDeathAge>=start&&P.partnerDeathAge<=P.endAge) flagDefs.push({age:P.partnerDeathAge,lbl:'配偶者死亡'});
   const firstUniv=rows.find(r=>r.childAges.some(a=>a===18)); if(firstUniv) flagDefs.push({age:firstUniv.age,lbl:'大学'});
+  if(P.buyAge!=null){ const payoff=P.buyAge+P.loanYears; if(payoff>=start&&payoff<=P.endAge) flagDefs.push({age:payoff,lbl:'ローン完済'}); }
   if(P.selfRetire>=start&&P.selfRetire<=P.endAge) flagDefs.push({age:P.selfRetire,lbl:'定年'});
   flagDefs.sort((a,b)=>a.age-b.age);
   document.getElementById('flags').innerHTML=flagDefs.map(f=>{
@@ -2624,15 +2767,29 @@ function render(){
       <td class="l">${r.i}年</td><td>${r.age}</td><td>${r.married?r.pAge:'-'}</td><td class="l">${kid}</td>
       <td class="ev">${evtxt}</td>
       <td>${man(r.gross)}</td><td>${yen(r.net/12)}</td><td>${yen(r.living/12)}</td><td>${yen(r.housing/12)}</td><td>${man(r.bonus)}</td>
-      <td class="${saveCls}">${man(r.saving)}</td><td>${man(r.contrib+r.sweep)}</td><td>${man(r.nisaV)}</td><td>${man(r.nisaP)}</td>
+      <td class="${saveCls}">${man(r.saving)}</td><td>${man(r.contrib+r.sweep)}</td><td>${man(r.nisaV)}</td><td>${man(r.nisaP)}</td><td>${(r.loanBal||0)>0.5?man(r.loanBal):'—'}</td>
       <td class="${cashCls}">${man(r.cash)}</td><td><b>${man(r.netWorth)}</b></td><td class="ev">${cost}</td>
     </tr>`;
   }).join('');
   const _mm=document.getElementById('mcMu'); if(_mm) _mm.textContent=(P.nisaYield*100).toFixed(1)+'%';
+  renderKidFunds(P,rows);
   renderCompare(P,rows);
   buildPrintCard(P,rows,rk);
   mcMarkStale();
   saveLocal();
+}
+
+/* ============ 子ども名義の積立の結果 ============ */
+function renderKidFunds(P,rows){
+  const el=document.getElementById('kidFundBox'); if(!el) return;
+  const list=(rows.kidFunds||[]).filter(f=>f && f.value!=null);
+  if(!P.hasKidNisa || !list.length){ el.style.display='none'; el.innerHTML=''; return; }
+  el.style.display='';
+  const at=P.kidNisaTo;
+  el.innerHTML='<div class="kf-h">こどもNISA（世帯の総資産には含めていません）</div>'
+    + list.map((f,i)=>`<div class="kf-row"><span>第${i+1}子（${f.birthAge}歳のときに誕生）が${at}歳の時点</span>`
+        +`<b>${manY(f.value)}</b><small>元本 ${manY(f.principal)}</small></div>`).join('')
+    + '<div class="kf-note">こどもNISA（2027年1月開始予定）で運用した場合の金額です。運用益は非課税のため、税金は差し引いていません。年60万円・累計600万円の枠内で、0〜17歳のあいだ積み立てる前提です。</div>';
 }
 
 /* ============ 戸建て金額欄の下：ローン返済額と家計比率の備考 ============ */
@@ -2685,6 +2842,7 @@ const DEFAULTS={currentAge:24,currentAgeMonths:0,marriageAge:31,marriageAgeMonth
   hasParentCare:false,parentCareAge:55,parentCareYears:5,parentCareCost:60,
   hasSelfCare:true,selfCareAge:80,selfCareCost:80,
   medicalCost:6,medicalOldMult:2.5,
+  hasPartnerNisa:false,pNisaMonthly:3,hasKidNisa:false,kidNisaMonthly:1,kidNisaTo:22,
   hasSideIncome:false,sideIncome:60,sideFrom:30,sideTo:70,sideGrowth:0,
   hasJobChange:false,jobChangeAge:35,jobChangeRate:10,jobChangeGap:0,
   hasDivorce:false,divorceAge:50,divorceCost:500,
@@ -2728,6 +2886,35 @@ function decodeShare(hash){
     if(m[1]==='c'){ if(!(window.LZString&&LZString.decompressFromEncodedURIComponent))return null; const j=LZString.decompressFromEncodedURIComponent(m[2]); return j?JSON.parse(j):null; }
     return JSON.parse(b64d(m[2])); /* d=差分base64 / s=旧・全項目 */
   }catch(e){ return null; }
+}
+/* ---- パスコード付き共有リンク（AES-GCM＋PBKDF2-SHA256） ----
+   4桁の数字を鍵として設定値を暗号化し、URLに載せる。復元にはパスコードが必要。
+   ※ 4桁は10,000通りしかないため、総当たりを完全に防げるものではない（下記の反復回数で時間を稼ぐだけ）。
+      あくまで「URLが第三者の目に触れたときの簡易的な保護」として使うこと。 */
+const PIN_ITER=500000;
+function cryptoOK(){ return !!(window.crypto && window.crypto.subtle && window.isSecureContext!==false); }
+function _b64u(bytes){ let s=''; bytes.forEach(b=>s+=String.fromCharCode(b)); return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+function _b64ud(str){ const t=str.replace(/-/g,'+').replace(/_/g,'/'); const pad=t.length%4?'='.repeat(4-t.length%4):''; const bin=atob(t+pad); const out=new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) out[i]=bin.charCodeAt(i); return out; }
+async function _pinKey(pin, salt){
+  const km=await crypto.subtle.importKey('raw', new TextEncoder().encode(String(pin)), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2', salt:salt, iterations:PIN_ITER, hash:'SHA-256'}, km,
+    {name:'AES-GCM', length:256}, false, ['encrypt','decrypt']);
+}
+async function encodeShareLocked(pin){
+  const json=JSON.stringify(getDiffState());
+  const salt=crypto.getRandomValues(new Uint8Array(16));
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const key=await _pinKey(pin, salt);
+  const ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM', iv:iv}, key, new TextEncoder().encode(json)));
+  const buf=new Uint8Array(salt.length+iv.length+ct.length);
+  buf.set(salt,0); buf.set(iv,16); buf.set(ct,28);
+  return 'k='+_b64u(buf);
+}
+async function decodeShareLocked(payload, pin){
+  const buf=_b64ud(payload);
+  const key=await _pinKey(pin, buf.slice(0,16));
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM', iv:buf.slice(16,28)}, key, buf.slice(28));
+  return JSON.parse(new TextDecoder().decode(pt));
 }
 function saveLocal(){ try{ localStorage.setItem('lifeplan', JSON.stringify(getState())); }catch(e){} }
 function flash(btn,msg){ const t=btn.textContent; btn.textContent=msg; setTimeout(()=>btn.textContent=t,1600); }
@@ -2946,7 +3133,7 @@ const WZ=(function(){
         /* 車は「これから買う／すでに持っている」でラベル・補足が変わるため、この場で描き直す */
         if(o.dataset.k==='car') render();
       }));
-      document.getElementById('wzNext').onclick=()=>{S.save();step++;render();};
+      document.getElementById('wzNext').onclick=()=>{ S.save(); try{ apply(); }catch(e){} step++; render(); };   /* 1問ごとにシートへ反映する */
       if(step>0) document.getElementById('wzBack').onclick=()=>{step--;render();};
     } else {
       card.innerHTML=`<p class="wz-q">入力おつかれさまでした</p>
@@ -3032,14 +3219,51 @@ const WZ=(function(){
     window.scrollTo(0,0);
   }
 
-  function start(){ step=0; document.body.classList.add('wiz-on'); render(); }
+  /* 現在の入力値からカンタン入力の回答を復元し、「続きから」入力できるようにする */
+  function prefill(){
+    const gv=id=>{const e=document.getElementById(id); return e?e.value:null;};
+    const gn=id=>{const e=document.getElementById(id); return e?(parseFloat(e.value)||0):0;};
+    A.gender=gv('gender')||A.gender;
+    A.age=gn('currentAge');
+    A.job=gv('jobType')||A.job;
+    A.base=gn('selfBaseMonthly'); A.allow=gn('selfAllowance'); A.bonus=gn('selfBonusMonths');
+    A.cash=gn('initCash'); A.nisaV=gn('initNisaV');
+    A.nisaG=Math.max(0, gn('initNisaV')-gn('initNisaP'));
+    A.nisa=gn('nisaMonthly');
+    const mAge=gn('marriageAge');
+    if(mAge>=999){ A.mar='no'; }
+    else { if(A.mar==='no') A.mar='yes'; A.marAge=mAge; A.wed=gn('weddingCost'); }
+    const ks=(typeof kids!=='undefined'&&kids)?kids:[];
+    A.kids=String(ks.length);
+    if(ks.length) A.kidAge=ks[0].birthAge;
+    const uv=gv('eduUniv'); if(uv) A.univ=uv;
+    /* 本人の働き方から「出産後の働き方」を推定 */
+    const swm=gv('selfWorkMode');
+    if(swm==='homemaker') A.momwork='homemaker';
+    else if(swm==='single') A.momwork='nobreak';
+    const buy=gn('buyAge');
+    A.home=(buy>0&&buy<900)?'buy':'rent';
+    if(A.home==='buy'){ A.buyAge=buy; A.price=gn('price'); A.down=gn('downpay'); }
+    A.rent=gn('rent');
+    A.hh=gn('curHouseholdSize'); A.liv=gn('curMonthlyLiving');
+    A.inf=gn('inflation');
+    const pc=gv('pensionCase'); if(pc) A.pen=pc;
+    const hasCar=document.getElementById('hasCar');
+    A.car=(hasCar&&hasCar.checked)?'yes':'no';
+    if(A.car==='yes'){ A.carAge=gn('carFirstAge'); A.carPrice=gn('carPrice'); A.carCycle=gn('carCycle'); A.carEnd=gn('carEndAge'); }
+    const hasDC=document.getElementById('hasDC');
+    if(hasDC&&hasDC.checked){ const t=gv('dcType'); A.dc=(t==='corp')?'corp':(t==='both'?'both':'ideco'); } else A.dc='none';
+    const rb=document.getElementById('hasRetireBonus');
+    A.rb=(rb&&rb.checked)?'yes':'no';
+  }
+  function start(resume){ if(resume) { try{ prefill(); }catch(e){} } step=0; document.body.classList.add('wiz-on'); render(); }
   return {start, skip:()=>{document.body.classList.remove('wiz-on');document.body.classList.add('wiz-done');}};
 })();
 document.getElementById('wzLogo').innerHTML=document.querySelector('.brand-logo').outerHTML;
 document.getElementById('wzSkip').onclick=()=>WZ.skip();
-document.getElementById('reopenWiz').onclick=()=>WZ.start();
+document.getElementById('reopenWiz').onclick=()=>WZ.start(true);   /* 現在の入力を引き継いで開く */
 
-/* ============ 画像で保存・ホーム画面に追加 ============ */
+/* ============ 画像で保存 ============ */
 (function(){
   const $=id=>document.getElementById(id);
   document.querySelectorAll('.mdl [data-close]').forEach(b=>b.addEventListener('click',()=>b.closest('.mdl').classList.remove('on')));
@@ -3238,7 +3462,8 @@ document.getElementById('reopenWiz').onclick=()=>WZ.start();
     return cv;
   }
 
-  $('imgBtn').addEventListener('click', ()=>{
+  const _imgBtn=document.getElementById('imgBtnDock');
+  if(_imgBtn) _imgBtn.addEventListener('click', ()=>{
     const prog=$('imgProg'); prog.classList.add('on');
     setTimeout(()=>{
       try{
@@ -3254,31 +3479,143 @@ document.getElementById('reopenWiz').onclick=()=>WZ.start();
     },60);
   });
 
-  /* ---- ホーム画面に追加 ---- */
-  let deferred=null;
-  try{ window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); deferred=e; }); }catch(_){}
-  const ua=navigator.userAgent;
-  const isIOS=/iPad|iPhone|iPod/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1);
-  const isAndroid=/Android/.test(ua);
-  $('homeBtn').addEventListener('click', async ()=>{
-    if(deferred){ deferred.prompt(); const r=await deferred.userChoice; deferred=null; if(r.outcome==='accepted') return; }
-    const steps = isIOS ? [
-        ['画面下の<b>共有ボタン</b>（□に↑のマーク）を押す',''],
-        ['メニューを下にスクロールし<b>「ホーム画面に追加」</b>を選ぶ',''],
-        ['右上の<b>「追加」</b>を押して完了','Safariでの操作です。Chromeなど他のブラウザでは追加できない場合があります']
-      ] : isAndroid ? [
-        ['右上の<b>︙</b>（メニュー）を押す',''],
-        ['<b>「ホーム画面に追加」</b>または「アプリをインストール」を選ぶ',''],
-        ['<b>「追加」</b>を押して完了','']
-      ] : [
-        ['アドレスバー右側の<b>インストールアイコン</b>を押す','見当たらない場合はメニュー（︙）から「インストール」を選びます'],
-        ['<b>「インストール」</b>を押して完了','']
-      ];
-    $('homeSteps').innerHTML = steps.map((st,i)=>
-      `<div class="mdl-step"><div class="mdl-num">${i+1}</div><div>${st[0]}${st[1]?`<div style="font-size:11.5px;color:var(--slate-2);margin-top:3px">${st[1]}</div>`:''}</div></div>`
-    ).join('') + `<div class="mdl-sub">入力した内容はお使いの端末内にのみ保存されます。別の端末やご家族と共有したい場合は「共有リンクをコピー」をお使いください。</div>`;
-    $('homeMdl').classList.add('on');
-  });
+  /* ---- 結果のみをポスト（個人情報を含まない1枚画像＋ツール URL） ---- */
+  const PENSION_CASE_LABEL={growth:'楽観（成長型経済移行・継続）', past30:'標準（過去30年投影）', zero:'慎重（ゼロ成長）'};
+  function postSummary(){
+    if(!SNAP_LAST) return null;
+    const {P,rows,rank}=SNAP_LAST, last=rows[rows.length-1];
+    const ran=last.busted && last.age<MAX_AGE;      /* 途中で資金が尽きたか */
+    return {
+      overall: rank && rank.overall ? rank.overall : 'D',
+      lastAge: last.age,
+      netWorth: last.netWorth,
+      ran: ran,
+      keptTo: ran ? last.age : P.endAge,
+      inflation: (P.inflation*100),
+      pensionCase: PENSION_CASE_LABEL[P.pensionCase]||'標準',
+      macro: !!P.macroSlide
+    };
+  }
+  function postImage(){
+    const d=postSummary(); if(!d) return null;
+    const W=1200,H=1200,S=W/1200;
+    const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+    const g=cv.getContext('2d');
+    const TEAL='#0CA795', INK='#2E363B', SLATE='#5A6672', SLATE2='#8A98AB', LINE='#E3EAF2';
+    const F=(w,px)=>`${w} ${px*S}px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif`;
+    const txt=(t,x,y,font,color,align)=>{g.font=font;g.fillStyle=color;g.textAlign=align||'left';g.textBaseline='alphabetic';g.fillText(t,x,y);};
+    const box=(x,y,w,h,r,fill,stroke)=>{g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();
+      if(fill){g.fillStyle=fill;g.fill();} if(stroke){g.strokeStyle=stroke;g.lineWidth=1.5*S;g.stroke();}};
+
+    g.fillStyle='#fff'; g.fillRect(0,0,W,H);
+    g.fillStyle=TEAL; g.fillRect(0,0,W,10*S);
+
+    /* ヘッダー */
+    txt('MiraiLog',72*S,110*S,F(800,42),INK);
+    txt('インフレに負けない資産形成',72*S,148*S,F(700,18),TEAL);
+    txt('試算結果',W-72*S,110*S,F(700,20),SLATE2,'right');
+
+    /* スコア */
+    const gradFor=(r)=>({SS:['#E4B53C','#C8901A'],S:['#8E6FC4','#6C4EA6'],A:['#3AA0E0','#1C74B4'],
+      B:['#3FB98B','#1E8A62'],C:['#E8A54B','#C97C1B'],D:['#9AA7B4','#77828F']})[r]||['#9AA7B4','#77828F'];
+    const gy=200*S, gh=240*S;
+    box(72*S,gy,W-144*S,gh,22*S,'#F7FAFC',LINE);
+    const gp=gradFor(d.overall);
+    const lg=g.createLinearGradient(110*S,gy+40*S,110*S+180*S,gy+40*S+160*S);
+    lg.addColorStop(0,gp[0]); lg.addColorStop(1,gp[1]);
+    box(110*S,gy+40*S,180*S,160*S,20*S,lg,null);
+    txt(d.overall,200*S,gy+152*S,F(800,86),'#fff','center');
+    txt('資産形成スコア',330*S,gy+92*S,F(700,22),SLATE);
+    txt('SS〜D の6段階',330*S,gy+128*S,F(400,17),SLATE2);
+    txt(d.ran?'資産が尽きる試算':'最後まで資産を維持',330*S,gy+184*S,F(800,30),d.ran?'#C2183C':'#12855F');
+
+    /* 主要数値 */
+    const cy=475*S, ch=150*S, cw=(W-144*S-24*S)/2;
+    const money=(v)=>{ const a=Math.round(v); return Math.abs(a)>=10000 ? (a/10000).toFixed(2).replace(/\.?0+$/,'')+'億円' : a.toLocaleString('ja-JP')+'万円'; };
+    box(72*S,cy,cw,ch,18*S,'#F7FAFC',LINE);
+    txt('最終総資産',72*S+28*S,cy+48*S,F(700,19),SLATE);
+    txt(money(d.netWorth),72*S+28*S,cy+108*S,F(800,44),INK);
+    box(72*S+cw+24*S,cy,cw,ch,18*S,'#F7FAFC',LINE);
+    txt('資産を維持できた年齢',72*S+cw+24*S+28*S,cy+48*S,F(700,19),SLATE);
+    txt(d.keptTo+'歳'+(d.ran?' まで':''),72*S+cw+24*S+28*S,cy+108*S,F(800,44),d.ran?'#C2183C':INK);
+
+    /* 前提 */
+    const py=665*S;
+    txt('試算の前提',72*S,py,F(700,20),SLATE);
+    const rowsD=[['インフレ率',d.inflation.toFixed(1)+'%／年'],
+                 ['年金の見通し',d.pensionCase],
+                 ['マクロ経済スライド',d.macro?'反映する':'反映しない']];
+    rowsD.forEach((r,i)=>{
+      const y=py+34*S+i*72*S;
+      box(72*S,y,W-144*S,60*S,14*S,'#fff',LINE);
+      txt(r[0],72*S+24*S,y+38*S,F(700,19),SLATE);
+      txt(r[1],W-72*S-24*S,y+38*S,F(800,19),INK,'right');
+    });
+
+    /* フッター */
+    const fy=930*S;
+    box(72*S,fy,W-144*S,120*S,18*S,'#EAF7F2','#9FD4C0');
+    txt('あなたの家計も試算できます',72*S+28*S,fy+48*S,F(700,20),'#12855F');
+    txt(TOOL_URL,72*S+28*S,fy+90*S,F(800,24),INK);
+    txt('※ 税・社会保険は令和8年度の制度にもとづく試算です。将来を保証するものではありません。',72*S,H-58*S,F(400,15),SLATE2);
+    txt('※ この画像に個人情報（年齢・年収・家族構成など）は含まれません。',72*S,H-28*S,F(400,15),SLATE2);
+    return cv;
+  }
+  const TOOL_URL=(location.origin+location.pathname).replace(/index\.html$/,'');
+  function postText(){
+    const d=postSummary(); if(!d) return '';
+    return ['MiraiLog で家計を試算しました。',
+      '資産形成スコア：'+d.overall,
+      '最終総資産：'+(Math.round(d.netWorth).toLocaleString('ja-JP'))+'万円'+(d.ran?'（'+d.keptTo+'歳で資金不足）':'（'+d.keptTo+'歳まで維持）'),
+      'インフレ率：'+d.inflation.toFixed(1)+'%／年',
+      '年金の見通し：'+d.pensionCase,
+      '#MiraiLog #資産形成'].join('\n');
+  }
+  async function doPost(btn){
+    const cv=postImage();
+    if(!cv){ alert('先に試算を実行してください。'); return; }
+    const label=btn?btn.textContent:'';
+    const text=postText();
+    const intent='https://twitter.com/intent/tweet?text='+encodeURIComponent(text)+'&url='+encodeURIComponent(TOOL_URL);
+    const blob=await new Promise(res=>cv.toBlob(res,'image/png'));
+    /* 画像つきで共有できる端末は共有シートへ（送信は利用者が確認してから） */
+    try{
+      if(blob && navigator.canShare && navigator.share){
+        const file=new File([blob],'mirailog-result.png',{type:'image/png'});
+        if(navigator.canShare({files:[file]})){
+          await navigator.share({files:[file], text:text, url:TOOL_URL});
+          return;
+        }
+      }
+    }catch(e){ if(e && e.name==='AbortError') return; }
+    /* 共有シートが使えない場合：画像を保存してから投稿画面を開く（自動投稿はしない） */
+    try{
+      const a=document.createElement('a');
+      a.href=cv.toDataURL('image/png'); a.download='mirailog-result.png';
+      document.body.appendChild(a); a.click(); a.remove();
+    }catch(e){}
+    window.open(intent,'_blank','noopener');
+    if(btn){ btn.textContent='画像を保存しました'; btn.classList.add('done'); setTimeout(()=>{btn.textContent=label;btn.classList.remove('done');},2600); }
+  }
+  const _pbd=document.getElementById('postBtnDock'); if(_pbd) _pbd.addEventListener('click',()=>doPost(_pbd));
+  /* 画面下部の固定バー：本体のボタンと同じ動作 */
+  const _sbd=document.getElementById('shareBtnDock'); if(_sbd) _sbd.addEventListener('click',()=>openShareModal(_sbd));
+  const _asd=document.getElementById('appShareBtnDock'); if(_asd) _asd.addEventListener('click',()=>{ if(typeof shareApp==='function') shareApp(_asd); });
+  (function(){ const dock=document.getElementById('dockBar'); if(!dock) return;
+    function syncDockH(){ const h=dock.offsetHeight; if(h>0) document.documentElement.style.setProperty('--dockh', h+'px'); }
+    if(window.ResizeObserver){ try{ new ResizeObserver(syncDockH).observe(dock); }catch(e){} }
+    window.addEventListener('resize', syncDockH); syncDockH(); setTimeout(syncDockH,300);
+    /* 下へたたむ（状態は次回も引き継ぐ） */
+    const dt=document.getElementById('dockToggle');
+    if(dt){
+      const setDock=(open)=>{ dock.classList.toggle('collapsed',!open); dt.setAttribute('aria-expanded',String(open));
+        dt.querySelector('.bt-l').textContent=open?'保存・共有':'保存・共有を開く'; syncDockH(); };
+      let st=null; try{ st=localStorage.getItem('mlog_dock_open'); }catch(e){}
+      setDock(st!=='0');
+      dt.addEventListener('click',()=>{ const open=dock.classList.contains('collapsed');
+        setDock(open); try{ localStorage.setItem('mlog_dock_open', open?'1':'0'); }catch(e){} });
+    }
+  })();
 })();
 
 
@@ -3456,20 +3793,55 @@ function proceedAfterDisclaimer(){
   render();
   if(window.__mlFirstTime) WZ.start(); else document.body.classList.add("wiz-done");
 }
-function init(){
-  setDefaults();
+function finishInit(loaded){
   syncDcFields();
-  let loaded=false;
-  const s=decodeShare(location.hash);
-  if(s){ try{ applyState(s); loaded=true; }catch(e){} }
-  if(!loaded){ try{ const ls=localStorage.getItem('lifeplan'); if(ls){ applyState(JSON.parse(ls)); } }catch(e){} }
-  syncDcFields();
-  /* 初回かどうかは render()（内部で保存を行う）より前に確定させる */
   let hasSaved=false; try{ hasSaved=!!localStorage.getItem('lifeplan'); }catch(e){}
   window.__mlFirstTime=(!loaded && !hasSaved);
   let discOK=false; try{ discOK=(localStorage.getItem('mlog_disc_ok')==='1'); }catch(e){}
   if(discOK) proceedAfterDisclaimer();
   else openDisclaimer(false);
+}
+/* パスコード付きリンク（#k=…）は、解除できてから本編に進む */
+function askUnlock(payload){
+  const m=document.getElementById('unlockMdl');
+  const pin=document.getElementById('ulPin'), err=document.getElementById('ulErr'), go=document.getElementById('ulGo');
+  const fallback=()=>{ try{ const ls=localStorage.getItem('lifeplan'); if(ls) applyState(JSON.parse(ls)); }catch(e){} finishInit(false); };
+  if(!m || !cryptoOK()){ fallback(); return; }
+  m.classList.add('on');
+  pin.value=''; err.textContent='';
+  setTimeout(()=>{ try{ pin.focus(); }catch(e){} },80);
+  pin.addEventListener('input',()=>{ pin.value=pin.value.replace(/[^0-9A-Za-z]/g,'').slice(0,16); err.textContent=''; });
+  const tryOpen=async ()=>{
+    if(!/^[0-9A-Za-z]{4,16}$/.test(pin.value)){ err.textContent='英数字で4〜16文字入力してください'; return; }
+    const label=go.textContent; go.disabled=true; go.textContent='確認しています…';
+    try{
+      const st=await decodeShareLocked(payload, pin.value);
+      applyState(st);
+      m.classList.remove('on');
+      finishInit(true);
+    }catch(e){
+      err.textContent='パスコードが違います';
+      pin.value='';
+      go.disabled=false; go.textContent=label;
+      return;
+    }
+    go.disabled=false; go.textContent=label;
+  };
+  go.addEventListener('click',tryOpen);
+  pin.addEventListener('keydown',e=>{ if(e.key==='Enter') tryOpen(); });
+  document.getElementById('ulSkip').addEventListener('click',()=>{ m.classList.remove('on'); fallback(); });
+}
+function init(){
+  setDefaults();
+  syncDcFields();
+  const km=/^#k=([\s\S]+)$/.exec(location.hash||'');
+  if(km){ askUnlock(km[1]); return; }
+  let loaded=false;
+  const s=decodeShare(location.hash);
+  if(s){ try{ applyState(s); loaded=true; }catch(e){} }
+  if(!loaded){ try{ const ls=localStorage.getItem('lifeplan'); if(ls){ applyState(JSON.parse(ls)); } }catch(e){} }
+  /* 初回かどうかは render()（内部で保存を行う）より前に確定させる */
+  finishInit(loaded);
 }
 document.getElementById('form').addEventListener('input',e=>{ if(e.target.matches('input,select')) render(); });
 document.getElementById('form').addEventListener('change',e=>{ if(e.target.matches('input,select')) render(); });
@@ -3495,6 +3867,18 @@ var _pph=document.getElementById('psetPartHome'); if(_pph) _pph.addEventListener
   if(window.ResizeObserver){ try{ new ResizeObserver(syncNavH).observe(nav); }catch(e){} }
   window.addEventListener('resize', syncNavH);
   syncNavH(); setTimeout(syncNavH,300);
+  /* 上へたたむ（状態は次回も引き継ぐ） */
+  var nt=document.getElementById('navToggle');
+  if(nt){
+    var setNav=function(open){ nav.classList.toggle('collapsed',!open); nt.setAttribute('aria-expanded',String(open));
+      nt.querySelector('.bt-l').textContent=open?'目次':'目次を開く'; syncNavH(); };
+    var st2=null; try{ st2=localStorage.getItem('mlog_nav_open'); }catch(e){}
+    setNav(st2!=='0');
+    nt.addEventListener('click',function(){ var open=nav.classList.contains('collapsed');
+      setNav(open); try{ localStorage.setItem('mlog_nav_open', open?'1':'0'); }catch(e){} });
+    /* たたんでいてもピルから飛べるよう、目次を使ったときは自動で開く */
+    btns.forEach(function(b){ b.addEventListener('click',function(){ if(b.dataset.target && nav.classList.contains('collapsed')){ setNav(true); try{ localStorage.setItem('mlog_nav_open','1'); }catch(e){} } }); });
+  }
 })();
 document.getElementById('addKid').addEventListener('click',()=>{ kids.push({birthAge:34}); renderKids(); render(); });
 document.getElementById('resetBtn').addEventListener('click',()=>{
@@ -3503,13 +3887,74 @@ document.getElementById('resetBtn').addEventListener('click',()=>{
   try{ localStorage.removeItem('lifeplan'); }catch(e){}
   render();
 });
-document.getElementById('shareBtn').addEventListener('click',(e)=>{
-  const url=location.origin+location.pathname+location.search+'#'+encodeShare();
+function shareUrlFrom(payload){ return location.origin+location.pathname+location.search+'#'+payload; }
+function copyShare(url, btn){
   if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(url).then(()=>flash(e.target,'コピーしました ✓')).catch(()=>window.prompt('このリンクをコピーして共有：',url));
+    navigator.clipboard.writeText(url).then(()=>{ if(btn) flash(btn,'コピーしました ✓'); })
+      .catch(()=>window.prompt('このリンクをコピーして共有：',url));
   } else { window.prompt('このリンクをコピーして共有：',url); }
-});
-document.getElementById('pdfBtn').addEventListener('click',()=>{
+}
+let _shareBtnRef=null;
+function openShareModal(btn){
+  _shareBtnRef=btn||null;
+  const m=document.getElementById('lockMdl'); if(!m){ copyShare(shareUrlFrom(encodeShare()), btn); return; }
+  document.getElementById('lkPinWrap').style.display='none';
+  document.getElementById('lkPin').value='';
+  document.getElementById('lkErr').textContent='';
+  document.getElementById('lkPlain').classList.remove('on');
+  document.getElementById('lkLock').classList.remove('on');
+  const lk=document.getElementById('lkLock');
+  if(!cryptoOK()){ lk.disabled=true; lk.style.opacity='.5';
+    lk.querySelector('span').textContent='この環境（http や file:// で開いた場合）では暗号化を利用できません'; }
+  m.classList.add('on');
+}
+/* MiraiLogを共有：入力内容を一切含まない、ツールそのもののURLだけを共有する */
+function shareApp(btn){
+  const url=location.origin+location.pathname;
+  const text='MiraiLog（インフレに負けない資産形成）— 将来の家計をシミュレーションできる無料ツールです。';
+  if(navigator.share){
+    navigator.share({title:'MiraiLog', text:text, url:url}).catch(()=>{});
+    return;
+  }
+  copyShare(url, btn);
+}
+/* 共有・ポストのボタンは画面下部のバーにのみ置く */
+(function(){
+  const $$=id=>document.getElementById(id);
+  const plain=$$('lkPlain'), lock=$$('lkLock'), wrap=$$('lkPinWrap'), pin=$$('lkPin'), err=$$('lkErr'), go=$$('lkGo');
+  if(!plain) return;
+  plain.addEventListener('click',()=>{
+    $$('lockMdl').classList.remove('on');
+    copyShare(shareUrlFrom(encodeShare()), _shareBtnRef);
+  });
+  lock.addEventListener('click',()=>{
+    if(lock.disabled) return;
+    lock.classList.add('on'); plain.classList.remove('on');
+    wrap.style.display=''; pin.focus();
+  });
+  const str=document.getElementById('lkStr');
+  pin.addEventListener('input',()=>{
+    pin.value=pin.value.replace(/[^0-9A-Za-z]/g,'').slice(0,16); err.textContent='';
+    const v=pin.value;
+    if(!v){ str.textContent='英数字で4〜16文字（大文字・小文字は区別します）'; str.style.color=''; return; }
+    const hasAl=/[A-Za-z]/.test(v);
+    if(v.length<4){ str.textContent='あと'+(4-v.length)+'文字'; str.style.color='#C2183C'; }
+    else if(!hasAl&&v.length<6){ str.textContent='数字だけなので弱め：英字を混ぜるか6文字以上にすると安全です'; str.style.color='#C97C1B'; }
+    else if(v.length<6){ str.textContent='まずまず：6文字以上にするとより安全です'; str.style.color='#C97C1B'; }
+    else { str.textContent='十分な強さです'; str.style.color='#12855F'; }
+  });
+  go.addEventListener('click',async ()=>{
+    if(!/^[0-9A-Za-z]{4,16}$/.test(pin.value)){ err.textContent='英数字で4〜16文字入力してください'; return; }
+    const label=go.textContent; go.disabled=true; go.textContent='作成しています…';
+    try{
+      const payload=await encodeShareLocked(pin.value);
+      $$('lockMdl').classList.remove('on');
+      copyShare(shareUrlFrom(payload), _shareBtnRef);
+    }catch(e){ err.textContent='リンクを作成できませんでした'; }
+    go.disabled=false; go.textContent=label;
+  });
+})();
+document.getElementById('pdfBtnDock').addEventListener('click',()=>{
   document.querySelectorAll('.foldblock').forEach(d=>{ if(!d.open){ d.dataset.wasClosed='1'; d.open=true; } });
   window.print();
 });
