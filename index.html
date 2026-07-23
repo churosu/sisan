@@ -577,6 +577,13 @@
     .ev-tbl td{padding:3.5px 6px; border:1px solid #E3EAF2; vertical-align:top}
     .ev-tbl td.age{font-weight:800; width:52px; white-space:nowrap}
     .ev-tbl td.amt{text-align:right; white-space:nowrap; width:74px}
+    .ev-full{font-size:10px}
+    .ev-full th{font-size:9px; padding:5px 7px}
+    .ev-full td{padding:4.5px 7px}
+    .ev-full td.age{width:46px}
+    .ev-full td.age2{width:62px; color:#7A8899; font-weight:700; white-space:nowrap}
+    .ev-full td.amt{width:96px}
+    .ev-full tr:nth-child(even) td{background:#FAFCFE}
     /* --- 汎用 --- */
     .pd-img{width:100%; height:auto; display:block; border:1px solid #E3EAF2; border-radius:7px}
     .pd-2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
@@ -594,6 +601,13 @@
     .pd-detail th{font-size:6.2px; padding:2.5px 1.5px; line-height:1.2; white-space:nowrap; overflow:hidden}
     .pd-detail td{padding:0 1.5px; height:11.4px; line-height:11.4px; white-space:nowrap; overflow:hidden; text-overflow:clip}
     .pd-detail td>*{display:inline; white-space:nowrap}
+    /* 画面用の td.ev（11px・折り返しあり・最小幅150px）を確実に打ち消す。
+       ここを外すとライフイベント欄だけ文字が大きくなり、行の高さも揃わなくなる。 */
+    .pd-detail tbody td.ev,
+    .pd-detail tbody td.l,
+    .pd-detail tbody td{font-size:6.6px!important; white-space:nowrap!important; min-width:0!important; max-width:none!important;
+      height:11.4px!important; line-height:11.4px!important; padding:0 1.5px!important; overflow:hidden; text-overflow:clip}
+    .pd-detail tbody td.ev{font-weight:600; color:#3A4658}
     .pd-detail .l{text-align:left}
     .pd-note{font-size:8.5px; color:#7A8899; line-height:1.65; margin-top:6px}
     .rankrow{display:flex; align-items:center; gap:9px; border:1.5px solid #111; border-radius:9px; padding:9px 12px; margin-bottom:9px}
@@ -4088,14 +4102,28 @@ function buildPrintDoc(){
 
   /* 途中で資金が尽きたときは内訳がすべて0になるため載せない */
   const brkBlock = busted ? '' : ('<div class="sec-t">最終資産の内訳（'+last.age+'歳時点）</div><div class="brk">'+brk+'</div>');
+  /* 1ページ目：基本情報・設定内容・結果の要約 */
   P0.push(pdPage('この試算の前提と結果', stamp,
     '<div class="hero">'+heroA+heroB+'</div>'
     +brkBlock
     +'<div class="sec-t">主な設定</div><div class="cond-a">'+condA+'</div><div class="cond-b">'+condB+'</div>'
-    +'<div class="sec-t">細かな設定</div><div class="cond-c">'+fine.join('')+'</div>'
-    +'<div class="sec-t">ライフイベント</div>'
-    +(evRows?'<table class="ev-tbl"><thead><tr><th>年齢</th><th>できごと</th><th>その年の一時費用</th><th>総資産</th></tr></thead><tbody>'+evRows+'</tbody></table>'
-            :'<div class="pd-note">設定されたライフイベントはありません。</div>')));
+    +'<div class="sec-t">細かな設定</div><div class="cond-c">'+fine.join('')+'</div>'));
+
+  /* 2ページ目：ライフイベントの年表（1ページを丸ごと使う） */
+  const evFull=evs.map(e=>'<tr><td class="age">'+e.age+'歳</td>'
+    +'<td class="age2">'+(e.pAge!=null&&P.marriageRow>=0?e.pAge+'歳':'—')+'</td>'
+    +'<td>'+pdEsc(e.txt)+'</td>'
+    +'<td class="amt">'+(e.cost>0.5?man(e.cost)+'万円':'—')+'</td>'
+    +'<td class="amt">'+manY(e.nw)+'</td></tr>').join('');
+  const evCost=evs.reduce((a,e)=>a+(e.cost>0?e.cost:0),0);
+  P0.push(pdPage('ライフイベントの年表', stamp,
+    '<div class="pd-lead">この試算で見込んでいるライフイベントを、起こる順に並べています。'
+    +'「その年の一時費用」は、通常の生活費とは別に発生するまとまった支出です'
+    +'（結婚・出産・入学・住宅購入・車の買い替えなど）。合計で約'+manY(evCost)+'を見込んでいます。</div>'
+    +(evFull?'<table class="ev-tbl ev-full"><thead><tr><th>本人</th><th>パートナー</th><th>できごと</th>'
+        +'<th>その年の一時費用</th><th>その年の総資産</th></tr></thead><tbody>'+evFull+'</tbody></table>'
+      :'<div class="pd-note">設定されたライフイベントはありません。</div>')
+    +'<div class="pd-note">※ 総資産はその年末時点の見込み額です。教育費のように毎年かかる支出は「一時費用」に含めず、生活費とあわせて年次明細に計上しています。</div>'));
 
   /* ---------- 2ページ目：主要な結果・グラフ・評価 ---------- */
   let minC={v:1e18,age:0}; rows.forEach(r=>{if(r.cash<minC.v)minC={v:r.cash,age:r.age};});
@@ -4253,7 +4281,7 @@ function buildPrintDoc(){
   if(tbl){
     const head=tbl.querySelector('thead') ? tbl.querySelector('thead').outerHTML : '';
     const trs=[...tbl.querySelectorAll('tbody tr')];
-    const per=Math.max(1,Math.ceil(trs.length/3));
+    const per=Math.max(1,Math.ceil(trs.length/2));   /* 2ページに分ける */
     for(let i=0;i<trs.length;i+=per){
       const chunk=trs.slice(i,i+per);
       const n=Math.floor(i/per)+1, tot=Math.ceil(trs.length/per);
