@@ -252,6 +252,7 @@
   .kabe[open]>summary{border-bottom:1px solid var(--line)}
   .kabe-b{padding:10px 12px; font-size:11.5px; line-height:1.85; color:var(--slate)}
   .kabe-b b{color:var(--ink)}
+  .cmp-h{font-size:14px; font-weight:800; color:var(--ink); margin:20px 0 6px; padding-left:9px; border-left:4px solid var(--teal)}
   .scn-dot{display:inline-block; width:8px; height:8px; border-radius:99px; margin-right:6px; vertical-align:middle}
   .kf-box{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:12px}
   .kf-h{font-size:12.5px; font-weight:800; color:var(--ink); margin-bottom:9px}
@@ -592,6 +593,14 @@
     .pd-pair{margin-top:4px}
     .pd-pair .sec-t{margin-top:6px}
     .pd-wide{width:100%}
+    .pd-cmp{font-size:9px; table-layout:auto; margin-bottom:2px}
+    .pd-cmp th{font-size:8px; padding:4px 5px; text-align:center}
+    .pd-cmp td{padding:4px 5px; height:auto; white-space:normal}
+    .pd-cmp td.plan{text-align:left; font-weight:700; width:34%}
+    .pd-cmp .cmp-badge{font-size:7px; background:#0CA795; color:#fff; border-radius:4px; padding:1px 4px; margin-left:4px}
+    .pd-cmp .th-sub{font-weight:600; opacity:.75}
+    .pd-cmp .cmp-neg{color:#C2183C; font-weight:800}
+    .pd-cmp tr.is-def td{background:#EAF7F2}
     .pd-tbl{width:100%; border-collapse:collapse; font-size:8px; table-layout:fixed}
     .pd-tbl th{background:#F0F4F8; color:#5A6672; font-size:7.5px; font-weight:800; padding:3px 2px; border:1px solid #D5DEE7; text-align:right}
     .pd-tbl th:first-child,.pd-tbl th:last-child{text-align:left}
@@ -1159,6 +1168,12 @@
         <div id="cmpResult"></div>
         <div class="chartbox short" style="margin-top:14px"><canvas id="cmpChart"></canvas></div>
         <div class="hint" id="cmpNote" style="margin-top:10px"></div>
+        <h3 class="cmp-h">結婚するかどうか</h3>
+        <div class="hint" id="cmpMarryNote" style="margin-top:0"></div>
+        <div id="cmpMarry"></div>
+        <h3 class="cmp-h">子どもの人数</h3>
+        <div class="hint" id="cmpKidsNote" style="margin-top:0"></div>
+        <div id="cmpKids"></div>
       </div>
 
     </div>
@@ -2938,6 +2953,7 @@ function render(){
   renderKidFunds(P,rows);
   renderPension(P,rows);
   renderCompare(P,rows);
+  renderCompareLife(P,rows);
   buildPrintCard(P,rows,rk);
   mcMarkStale();
   saveLocal();
@@ -4104,6 +4120,21 @@ function buildPrintDoc(){
   /* 途中で資金が尽きたときは内訳がすべて0になるため載せない */
   const brkBlock = busted ? '' : ('<div class="sec-t">最終資産の内訳（'+last.age+'歳時点）</div><div class="brk">'+brk+'</div>');
   /* 1ページ目：基本情報・設定内容・結果の要約 */
+  /* 資産形成の評価（1ページ目に載せる） */
+  let rankHtml='';
+  if(rk){
+    rankHtml='<div class="rankrow"><div class="rb">'+pdEsc(rk.overall)+'</div>'
+      +'<div class="rt"><b>総合の目安：'+pdEsc(rk.overall)+'</b>　各年代の「総資産 ÷ その年の年間生活費（資産が生活費の何年分か）」を年代別の目安と比べた参考指標です。</div></div>';
+    if(rk.decades&&rk.decades.length){
+      const cell=d=>'<tr><td>'+pdEsc(d.key)+'</td><td class="g">'+pdEsc(d.rank)+'</td>'
+        +'<td>'+d.years.toFixed(1)+'年分</td><td>'+d.age+'歳 '+manY(d.net)+'</td></tr>';
+      const half=Math.ceil(rk.decades.length/2);
+      rankHtml+='<div class="pd-2">'
+        +'<table class="rk-tbl"><tbody>'+rk.decades.slice(0,half).map(cell).join('')+'</tbody></table>'
+        +'<table class="rk-tbl"><tbody>'+(rk.decades.slice(half).map(cell).join('')||'<tr><td colspan="4">—</td></tr>')+'</tbody></table>'
+      +'</div>';
+    }
+  }
   /* 細かな設定は件数で密度が変わるので、余白が出ないよう文字と行間を調整する */
   const fineN=fine.length;
   const fineFS=Math.max(8.4, Math.min(12.4, 15.2 - fineN*0.30));
@@ -4112,6 +4143,7 @@ function buildPrintDoc(){
   P0.push(pdPage('この試算の前提と結果', stamp,
     '<div class="hero">'+heroA+heroB+'</div>'
     +brkBlock
+    +'<div class="sec-t">資産形成の評価</div>'+rankHtml
     +'<div class="sec-t">主な設定</div><div class="cond-a">'+condA+'</div><div class="cond-b">'+condB+'</div>'
     +'<div class="sec-t">細かな設定</div><div class="cond-c"'+condStyle+'>'+fine.join('')+'</div>'));
 
@@ -4147,23 +4179,22 @@ function buildPrintDoc(){
       (function(){ const r=rows.find(x=>x.pension&&x.pension.net>0); return r?(r.age+'歳から／額面 '+manY(r.pension.gross)):'受給前に試算終了'; })()],
   ].map(k=>'<div class="brk-i"><div class="brk-k">'+pdEsc(k[0])+'</div><div class="brk-v">'+k[1]+'</div><div class="brk-s">'+pdEsc(k[2])+'</div></div>').join('');
 
-  let rankHtml='';
-  if(rk){
-    rankHtml='<div class="rankrow"><div class="rb">'+pdEsc(rk.overall)+'</div>'
-      +'<div class="rt"><b>総合の目安：'+pdEsc(rk.overall)+'</b><br>各年代の「総資産 ÷ その年の年間生活費（資産が生活費の何年分か）」を年代別の目安と比べた参考指標です。</div></div>';
-    if(rk.decades&&rk.decades.length){
-      /* 20・30・40代を左、50・60・70代〜を右に縦積みで並べる */
-      const cell=d=>'<tr><td>'+pdEsc(d.key)+'</td><td class="g">'+pdEsc(d.rank)+'</td>'
-        +'<td>'+d.years.toFixed(1)+'年分</td><td>'+d.age+'歳 '+manY(d.net)+'</td></tr>';
-      const half=Math.ceil(rk.decades.length/2);
-      const L=rk.decades.slice(0,half).map(cell).join('');
-      const R=rk.decades.slice(half).map(cell).join('');
-      rankHtml+='<div class="pd-2">'
-        +'<table class="rk-tbl"><tbody>'+L+'</tbody></table>'
-        +'<table class="rk-tbl"><tbody>'+(R||'<tr><td colspan="4">—</td></tr>')+'</tbody></table>'
-      +'</div>';
-    }
-  }
+  /* 定年時点の資産内訳と年次キャッシュフロー（資産の推移と同じページに置く） */
+  const retireAge2=P.selfRetire||65;
+  const HALF_W2=700, HALF_H2=525;
+  const rRet2=rows.find(r=>r.age===retireAge2) || rows[rows.length-1];
+  const pieImg2=pdPieChart({w:HALF_W2,h:HALF_H2,items:rRet2?[
+    {label:'現預金',       value:Math.max(0,rRet2.cash),  color:'#3AA0E0'},
+    {label:'NISA評価額',   value:Math.max(0,rRet2.nisaV), color:'#0CA795'},
+    {label:'確定拠出年金', value:Math.max(0,rRet2.dcValue*(1-P.dcTaxRate)), color:'#8E6FC4'},
+    {label:'教育資金',     value:Math.max(0,rRet2.eduAccount), color:'#E8A54B'},
+  ]:[]});
+  const cfMax2=Math.ceil(Math.max(1,...rows.map(r=>Math.max(r.incomeCash,r.expense)))*1.1/100)*100;
+  const flowImg2=pdLineChart({w:HALF_W2,h:HALF_H2,xMin:rows[0].age,xMax:last.age,
+    yMin:0,yMax:cfMax2,legend:true,series:[
+      {label:'収入（手取り）', color:'#0CA795', width:2.2, data:rows.map(r=>({x:r.age,y:r.incomeCash}))},
+      {label:'支出',           color:'#C2183C', width:2.2, dash:true, data:rows.map(r=>({x:r.age,y:r.expense}))}
+    ]});
   /* 資産の推移：主要な系列＋ライフイベントのラベル（引き出し線つき） */
   const evForChart=evs.slice(0,14).map(e=>({x:e.age, y:e.nw, label:e.txt.length>9?e.txt.slice(0,9)+'…':e.txt, color:'#0CA795'}));
   const chartMax=Math.ceil(Math.max(1,...rows.map(r=>r.netWorth))*1.28/100)*100;
@@ -4175,12 +4206,15 @@ function buildPrintDoc(){
       {label:'NISA評価額',  color:'#8E6FC4', width:1.8, data:rows.map(r=>({x:r.age,y:r.nisaV}))},
       {label:'住宅ローン残高',color:'#C2183C', width:1.6, dash:true, data:rows.map(r=>({x:r.age,y:r.loanBal||0}))}
     ]});
-  P0.push(pdPage('おもな結果と資産形成の評価', stamp,
+  P0.push(pdPage('資産の推移', stamp,
     '<div class="brk" style="grid-template-columns:repeat(3,1fr)">'+kpi+'</div>'
     +'<div class="sec-t">資産の推移とライフイベント</div>'
     +'<img class="pd-img" src="'+assetImg+'">'
     +'<div class="pd-note">実線＝総資産（緑）・現預金（青）・NISA評価額（紫）、破線＝住宅ローン残高（赤）。ラベルはその年に起きるライフイベントで、点は当時の総資産の位置を示します。</div>'
-    +'<div class="sec-t">資産形成の評価</div>'+rankHtml));
+    +'<div class="pd-2 pd-pair">'
+    +'<div><div class="sec-t">'+retireAge2+'歳（定年）時点の資産内訳</div><img class="pd-half" src="'+pieImg2+'"></div>'
+    +'<div><div class="sec-t">年次キャッシュフロー</div><img class="pd-half" src="'+flowImg2+'"></div>'
+    +'</div>'));
 
   /* ---------- 3〜4ページ目：ライフイベントのアドバイス ---------- */
   const advEls=[...document.querySelectorAll('#adviceList > *')];
@@ -4214,19 +4248,30 @@ function buildPrintDoc(){
     return '<div class="adv"><div class="adv-t">'+pdEsc(title||'提案')+'</div><div class="adv-b">'+pdEsc(body)+'</div></div>';
   }).join('');
   const cmpTbl=document.querySelector('#cmpResult table');
-  P0.push(pdPage('プラン診断・改善提案・プラン比較', stamp,
+  P0.push(pdPage('プラン診断・改善提案', stamp,
     '<div class="sec-t">プラン診断</div>'
     +(diagTxt?'<div class="adv-b">'+pdEsc(diagTxt.textContent.trim())+'</div>':'<div class="pd-note">—</div>')
-    +'<div class="sec-t">改善提案</div>'+(propHtml||'<div class="pd-note">—</div>')
-    +'<div class="sec-t">ライフプラン比較（住まいの選び方）</div>'
-    +(cmpTbl?'<table class="pd-tbl">'+cmpTbl.innerHTML+'</table>':'<div class="pd-note">—</div>')
-    +(pdCanvas('cmpChart')||'')));
+    +'<div class="sec-t">改善提案</div>'+(propHtml||'<div class="pd-note">—</div>')));
+
+  /* ライフプラン比較：住まい・結婚・子どもの人数 */
+  const cmpMarryT=document.querySelector('#cmpMarry table');
+  const cmpKidsT=document.querySelector('#cmpKids table');
+  const note=id=>{ const e=document.getElementById(id); return e?'<div class="pd-note" style="margin:0 0 5px">'+pdEsc(e.textContent.trim())+'</div>':''; };
+  P0.push(pdPage('ライフプラン比較', stamp,
+    '<div class="pd-lead">ほかの前提はそのままに、大きな選択だけを入れ替えるとどうなるかを比べています。'
+    +'「規定値」がいま設定している条件です。金額は最終資産の実質額（今日の物価に換算）です。</div>'
+    +'<div class="sec-t">住まいの選び方</div>'
+    +(cmpTbl?'<table class="pd-tbl pd-cmp">'+cmpTbl.innerHTML+'</table>':'<div class="pd-note">—</div>')
+    +'<div class="sec-t">結婚するかどうか</div>'
+    +note('cmpMarryNote')
+    +(cmpMarryT?'<table class="pd-tbl pd-cmp">'+cmpMarryT.innerHTML+'</table>':'<div class="pd-note">—</div>')
+    +'<div class="sec-t">子どもの人数</div>'
+    +note('cmpKidsNote')
+    +(cmpKidsT?'<table class="pd-tbl pd-cmp">'+cmpKidsT.innerHTML+'</table>':'<div class="pd-note">—</div>')));
 
   /* ---------- 6ページ目：インフレ・年金パターン・年次キャッシュフロー ---------- */
   const inflT=document.getElementById('inflTbl');
   const WIDE_W=1560, WIDE_H=460;   /* 横いっぱい・縦は半分 */
-  const HALF_W=700, HALF_H=525;    /* 下段の2つ（4:3） */
-  const retireAge=P.selfRetire||65;
 
   /* 左上：インフレ率ごとの総資産 */
   const inflPcts=[...INFL_SCENARIOS]; const basePct=+(P.inflation*100).toFixed(2);
@@ -4254,35 +4299,15 @@ function buildPrintDoc(){
     yMin:0,yMax:penMax,legend:true,series:penSeries});
 
   /* 左下：65歳時点の資産内訳 */
-  const rRet=rows.find(r=>r.age===retireAge) || rows[rows.length-1];
-  const r65=rRet;
-  const pieImg=pdPieChart({w:HALF_W,h:HALF_H,items:r65?[
-    {label:'現預金',        value:Math.max(0,r65.cash),        color:'#3AA0E0'},
-    {label:'NISA評価額',    value:Math.max(0,r65.nisaV),       color:'#0CA795'},
-    {label:'確定拠出年金',  value:Math.max(0,r65.dcValue*(1-P.dcTaxRate)), color:'#8E6FC4'},
-    {label:'教育資金',      value:Math.max(0,r65.eduAccount),  color:'#E8A54B'},
-  ]:[]});
-
-  /* 右下：年次キャッシュフロー（収入と支出） */
-  const cfMax=Math.ceil(Math.max(1,...rows.map(r=>Math.max(r.incomeCash,r.expense)))*1.1/100)*100;
-  const flowImg=pdLineChart({w:HALF_W,h:HALF_H,xMin:rows[0].age,xMax:last.age,
-    yMin:0,yMax:cfMax,legend:true,series:[
-      {label:'収入（手取り）', color:'#0CA795', width:2.2, data:rows.map(r=>({x:r.age,y:r.incomeCash}))},
-      {label:'支出',           color:'#C2183C', width:2.2, dash:true, data:rows.map(r=>({x:r.age,y:r.expense}))}
-    ]});
-
   const penT=document.getElementById('penTbl');
-  P0.push(pdPage('インフレ率・年金・資産内訳・キャッシュフロー', stamp,
+  P0.push(pdPage('インフレ率と年金による資産の変化', stamp,
     '<div class="sec-t">インフレ率による資産の変化</div>'
     +'<img class="pd-wide-img" src="'+inflImg+'">'
     +(inflT?'<table class="pd-tbl pd-wide">'+inflT.innerHTML+'</table>':'')
     +'<div class="sec-t">年金の受け取り方による資産の変化（60歳〜）</div>'
     +'<img class="pd-wide-img" src="'+penImg+'">'
     +(penT?'<table class="pd-tbl pd-wide">'+penT.innerHTML+'</table>':'')
-    +'<div class="pd-2 pd-pair">'
-    +'<div><div class="sec-t">'+retireAge+'歳（定年）時点の資産内訳</div><img class="pd-half" src="'+pieImg+'"></div>'
-    +'<div><div class="sec-t">年次キャッシュフロー</div><img class="pd-half" src="'+flowImg+'"></div>'
-    +'</div>'));
+    +'<div class="pd-note">※ グラフはいずれも名目額です。年金の比較は、受給開始年齢（繰上げ・基準・繰下げ）と財政検証のケース（楽観・保守）を入れ替えたものです。</div>'));
 
   /* ---------- 7〜9ページ目：年次明細 ---------- */
   const tbl=document.getElementById('tbl');
@@ -4292,15 +4317,15 @@ function buildPrintDoc(){
   if(tbl){
     const head=tbl.querySelector('thead') ? tbl.querySelector('thead').outerHTML : '';
     const trs=[...tbl.querySelectorAll('tbody tr')];
-    const per=Math.max(1,Math.ceil(trs.length/2));   /* 2ページに分ける */
+    const per=Math.max(1,Math.ceil(trs.length/3));   /* 3ページに分ける */
     for(let i=0;i<trs.length;i+=per){
       const chunk=trs.slice(i,i+per);
       const n=Math.floor(i/per)+1, tot=Math.ceil(trs.length/per);
       const a0=chunk[0].cells[1].textContent.trim(), a1=chunk[chunk.length-1].cells[1].textContent.trim();
       /* A4縦（本文 約255mm）から見出しぶんを引き、行数で割って1行の高さを決める */
       const availMM=(n===tot?238:246), headMM=7;   /* 最終ページは注記のぶんを残す */
-      const rowMM=Math.max(3.0, Math.min(9.0, (availMM-headMM)/chunk.length));
-      const fsPX=Math.max(6.4, Math.min(11.0, rowMM*3.7795*0.34));
+      const rowMM=Math.max(3.0, Math.min(11.0, (availMM-headMM)/chunk.length));
+      const fsPX=Math.max(6.4, Math.min(12.0, rowMM*3.7795*0.32));
       const style=' style="--rowh:'+rowMM.toFixed(2)+'mm; --fs:'+fsPX.toFixed(1)+'px"';
       P0.push(pdPage('年次明細（'+n+'/'+tot+'）　本人 '+a0+'〜'+a1, stamp,
         '<table class="pd-tbl pd-detail"'+style+'>'+COLS+head+'<tbody>'+chunk.map(t=>t.outerHTML).join('')+'</tbody></table>'
@@ -4393,6 +4418,126 @@ function renderPension(P, baseRows){
       +`<td class="l ${bust?'neg':''}">${bust?last.age+'歳ごろ枯渇':last.age+'歳まで維持'}</td></tr>`;
   }).join('');
   document.getElementById('penNote').innerHTML='※ 繰下げ受給は、受け取りを待つあいだの生活費を資産でまかなえるかが判断材料になります。長生きするほど繰下げが有利になりますが、途中で資産が尽きては意味がないため、上の表で65歳・80歳時点の残高もあわせてご確認ください。';
+}
+
+/* ============ ライフプラン比較：結婚のしかた・子どもの人数 ============
+   厚生労働省「人口動態統計」の平均初婚年齢（男性31歳・女性30歳前後）を、未婚設定のときの仮定に使う。 */
+const AVG_MARRY_AGE={male:31, female:30};
+/* 「結婚しない」は marriageAge に 999 を入れて表す。simulate が計算する marriageRow は
+   この場合でも大きな正の値になるため、結婚するかどうかの判定には使えない。 */
+function cmpIsMarried(P){ return !!(P.marriageAge>0 && P.marriageAge<900); }
+function cmpMarriageAge(P){
+  const g=(P.gender==='female')?'female':'male';
+  const a=AVG_MARRY_AGE[g];
+  return Math.max(P.currentAge+1, a);   /* すでに平均を過ぎている場合は翌年に結婚する想定 */
+}
+/* 扶養内で働く配偶者（年収106万円未満に収まる水準） */
+function cmpDependentPartner(P, marryAge){
+  return {...P, marriageAge:marryAge, marriageAgeMonths:0, marriageAgeFrac:null, marriageRow:null, marriageAgeEff:null,
+    partnerWorkMode:'single', partnerStartAge:marryAge, partnerRetire:65,
+    partnerBaseMonthly:8, partnerCapMonthly:8, partnerAllowance:0, partnerRaise:0, partnerBonusMonths:0};
+}
+function cmpDualIncome(P, marryAge){
+  return {...P, marriageAge:marryAge, marriageAgeMonths:0, marriageAgeFrac:null, marriageRow:null, marriageAgeEff:null,
+    partnerWorkMode:'single', partnerStartAge:Math.max(22,marryAge-6), partnerRetire:65,
+    partnerBaseMonthly:DEFAULTS.partnerBaseMonthly, partnerCapMonthly:DEFAULTS.partnerCapMonthly,
+    partnerAllowance:DEFAULTS.partnerAllowance, partnerRaise:DEFAULTS.partnerRaise, partnerBonusMonths:DEFAULTS.partnerBonusMonths};
+}
+/* 結婚するかどうかの比較。3パターン（未婚／共働き／扶養内）を返す */
+function compareMarriage(P, baseRows){
+  const isMarried=cmpIsMarried(P);
+  const marryAge=isMarried?(P.marriageAgeEff||P.marriageAge):cmpMarriageAge(P);
+  const single={...P, marriageAge:999, marriageAgeMonths:0, marriageAgeFrac:null, marriageRow:null, marriageAgeEff:null, children:[]};
+  const dual=cmpDualIncome(P, marryAge);
+  const dep =cmpDependentPartner(P, marryAge);
+  if(isMarried){
+    /* すでに結婚する設定：いまの設定と、結婚しない場合だけを比べる */
+    const kidsTxt=(P.children||[]).length?('・お子さん'+P.children.length+'人'):'';
+    return [
+      {key:'cur',    name:'いまの設定（結婚する）', note:marryAge+'歳で結婚'+kidsTxt,
+       cur:true,  rows:baseRows},
+      {key:'single', name:'結婚しない', note:'単身のまま。子どもの費用もなし',
+       cur:false, rows:simulate(single)},
+    ];
+  }
+  /* 未婚の設定：いまの設定と、結婚した場合の2通り（共働き／扶養内）を比べる */
+  return [
+    {key:'cur',  name:'いまの設定（結婚しない）', note:'単身のまま',
+     cur:true,  rows:baseRows},
+    {key:'dual', name:'結婚・共働き', note:marryAge+'歳で結婚し、配偶者も正社員で働く',
+     cur:false, rows:simulate(dual)},
+    {key:'dep',  name:'結婚・扶養内で働く', note:marryAge+'歳で結婚し、配偶者は年収106万円未満',
+     cur:false, rows:simulate(dep)},
+  ];
+}
+/* 子どもの人数の比較（0〜3人）。出産年齢の作り方は設定によって変える */
+function childBirthAges(P){
+  const isMarried=cmpIsMarried(P);
+  const marryAge=isMarried?P.marriageAgeEff:cmpMarryAgeSafe(P);
+  const existing=(P.children||[]).map(c=>c.birthAge).sort((a,b)=>a-b);
+  if(existing.length) return {base:existing, marryAge};
+  /* 子どもがいない設定：結婚から5年後に第1子 */
+  return {base:[marryAge+5], marryAge};
+}
+function cmpMarryAgeSafe(P){ return cmpMarriageAge(P); }
+function compareKids(P, baseRows){
+  const isMarried=cmpIsMarried(P);
+  const marryAge=isMarried?(P.marriageAgeEff||P.marriageAge):cmpMarriageAge(P);
+  const {base}=childBirthAges(P);
+  /* 既存の子＋2年おきに最大3人まで */
+  const ages=[];
+  for(let i=0;i<3;i++){
+    if(i<base.length) ages.push(base[i]);
+    else ages.push(ages[ages.length-1]+2);
+  }
+  /* 未婚設定なら平均初婚年齢で結婚した前提にそろえる */
+  const marryFix=isMarried?{}:cmpDualIncome(P, marryAge);   /* 未婚設定なら結婚後の前提にそろえる */
+  const curN=(P.children||[]).length;
+  return [0,1,2,3].map(n=>{
+    const sp={...P, ...marryFix, children:ages.slice(0,n).map(a=>({birthAge:a}))};
+    const cur=(n===curN);
+    return {n, name:n+'人', ages:ages.slice(0,n),
+      note:n===0?'子どもをもたない場合':ages.slice(0,n).map(a=>a+'歳').join('・')+'で出産',
+      cur, rows:simulate(sp)};
+  });
+}
+/* 比較表の共通の行づくり */
+function cmpRowHtml(name, note, rows, cur){
+  const last=rows[rows.length-1];
+  const busts=last.busted&&last.age<MAX_AGE;
+  const real=busts?0:last.netWorth/last.defl;
+  let minC={cash:Infinity,age:0}; rows.forEach(r=>{ if(r.cash<minC.cash)minC={cash:r.cash,age:r.age}; });
+  const edu=rows.reduce((a,r)=>a+r.edu,0);
+  return '<tr class="'+(cur?'is-def':'')+'">'
+    +'<td class="plan">'+name+(cur?'<span class="cmp-badge">規定値</span>':'')
+      +'<br><span style="font-size:10.5px;color:var(--slate-2);font-weight:600">'+note+'</span></td>'
+    +'<td>'+manY(real)+'</td>'
+    +'<td class="'+(busts?'cmp-neg':'')+'">'+(busts?(last.age+'歳で不足'):(last.age>=MAX_AGE?'生涯維持':last.age+'歳まで'))+'</td>'
+    +'<td class="'+(minC.cash<0?'cmp-neg':'')+'">'+man(minC.cash)+'万<br><span style="font-size:10px;color:var(--slate-2)">'+minC.age+'歳ごろ</span></td>'
+    +'<td>'+man(edu)+'万</td></tr>';
+}
+function cmpTableHtml(rowsHtml, lastCol){
+  return '<div class="cmp-scroll"><table class="cmp-tbl"><thead><tr><th>プラン</th>'
+    +'<th>最終資産<br><span class="th-sub">実質</span></th><th>資産の<br>持続</th><th>最低<br>現預金</th>'
+    +'<th>'+lastCol+'</th></tr></thead><tbody>'+rowsHtml+'</tbody></table></div>';
+}
+function renderCompareLife(P, baseRows){
+  const mEl=document.getElementById('cmpMarry'), kEl=document.getElementById('cmpKids');
+  if(!mEl||!kEl) return;
+  const mar=compareMarriage(P, baseRows);
+  mEl.innerHTML=cmpTableHtml(mar.map(sc=>cmpRowHtml(sc.name, sc.note, sc.rows, sc.cur)).join(''), '生涯の<br>教育費');
+  const kid=compareKids(P, baseRows);
+  kEl.innerHTML=cmpTableHtml(kid.map(sc=>cmpRowHtml(sc.name+'の子ども', sc.note, sc.rows, sc.cur)).join(''), '生涯の<br>教育費');
+  const isMarried=cmpIsMarried(P);
+  const marryAge=isMarried?(P.marriageAgeEff||P.marriageAge):cmpMarriageAge(P);
+  document.getElementById('cmpMarryNote').innerHTML=
+    isMarried?('いまの設定（<b>'+marryAge+'歳で結婚</b>）と、結婚しなかった場合を比べています。結婚しない場合は子どもの費用も生じない前提です。')
+    :('いまの設定は<b>未婚</b>です。結婚する場合は平均初婚年齢の<b>'+marryAge+'歳</b>で結婚したと仮定し、配偶者が正社員で働く場合と、扶養内（年収106万円未満）で働く場合を比べています（人口動態統計の平均初婚年齢：男性31歳・女性30歳前後）。');
+  document.getElementById('cmpKidsNote').innerHTML=
+    (isMarried?'':'未婚の設定のため、'+marryAge+'歳で結婚し共働きになる前提でそろえています。')
+    +((P.children||[]).length?'いまの設定のお子さんに加えて、2年おきに3人まで増やした場合を比べています。'
+      :'結婚から5年後に第1子が生まれ、その後2年おきに3人まで増やした場合を比べています。')
+    +'進学先や独立年齢の想定はすべて同じです。教育費のほか、生活費・住居費（1人あたりの広さ）も人数に応じて変わります。';
 }
 
 /* ============ ライフプラン比較（住まいの選び方） ============ */
