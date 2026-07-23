@@ -542,8 +542,9 @@
     body{background:#fff; padding:0!important; margin:0!important; color:#111;
          font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
          -webkit-print-color-adjust:exact; print-color-adjust:exact}
-    .pg{break-after:page; page-break-after:always}
-    .pg:last-child{break-after:auto; page-break-after:auto}
+    .pg{break-after:auto; page-break-after:auto}
+    .pg + .pg{break-before:page; page-break-before:always}
+    .pg{break-inside:auto}
     .pg-h{display:flex; align-items:baseline; gap:8px; border-bottom:2px solid #0CA795; padding-bottom:5px; margin:0 0 10px}
     .pg-h .ph-t{font-size:15px; font-weight:800; color:#111}
     .pg-h .ph-s{font-size:9.5px; font-weight:700; color:#7A8899; margin-left:auto}
@@ -568,7 +569,7 @@
     .cond-b{display:grid; grid-template-columns:repeat(4,1fr); gap:6px 10px; margin-bottom:9px}
     .cond-b .c-k{font-size:8px; font-weight:800; color:#7A8899}
     .cond-b .c-v{font-size:11.5px; font-weight:800; color:#222}
-    .cond-c{column-count:2; column-gap:18px; color:#5A6672}
+    .cond-c{display:grid; grid-template-columns:1fr 1fr; column-gap:18px; color:#5A6672}
     .cond-c div{break-inside:avoid; padding:1.5px 0}
     .cond-c b{color:#222; font-weight:700}
     .sec-t{font-size:11px; font-weight:800; color:#111; margin:11px 0 5px; padding-left:7px; border-left:3px solid #0CA795}
@@ -578,9 +579,9 @@
     .ev-tbl td{padding:3.5px 6px; border:1px solid #E3EAF2; vertical-align:top}
     .ev-tbl td.age{font-weight:800; width:52px; white-space:nowrap}
     .ev-tbl td.amt{text-align:right; white-space:nowrap; width:74px}
-    .ev-full{font-size:10px}
-    .ev-full th{font-size:9px; padding:5px 7px}
-    .ev-full td{padding:4.5px 7px}
+    .ev-full{font-size:var(--evfs,10px)}
+    .ev-full th{font-size:calc(var(--evfs,10px) * .82); padding:4px 7px}
+    .ev-full td{padding:0 7px; height:var(--evrow,6mm); line-height:var(--evrow,6mm); font-size:var(--evfs,10px)}
     .ev-full td.age{width:46px}
     .ev-full td.age2{width:62px; color:#7A8899; font-weight:700; white-space:nowrap}
     .ev-full td.amt{width:96px}
@@ -4154,11 +4155,16 @@ function buildPrintDoc(){
     +'<td class="amt">'+(e.cost>0.5?man(e.cost)+'万円':'—')+'</td>'
     +'<td class="amt">'+manY(e.nw)+'</td></tr>').join('');
   const evCost=evs.reduce((a,e)=>a+(e.cost>0?e.cost:0),0);
+  /* 件数に応じて行の高さと文字を決め、1ページを使い切る */
+  const evAvail=222, evHead=9;
+  const evRowMM=Math.max(4.2, Math.min(13.0, (evAvail-evHead)/Math.max(1,evs.length)));
+  const evFS=Math.max(8.0, Math.min(13.5, evRowMM*3.7795*0.30));
+  const evStyle=' style="--evrow:'+evRowMM.toFixed(2)+'mm; --evfs:'+evFS.toFixed(1)+'px"';
   P0.push(pdPage('ライフイベントの年表', stamp,
     '<div class="pd-lead">この試算で見込んでいるライフイベントを、起こる順に並べています。'
     +'「その年の一時費用」は、通常の生活費とは別に発生するまとまった支出です'
     +'（結婚・出産・入学・住宅購入・車の買い替えなど）。合計で約'+manY(evCost)+'を見込んでいます。</div>'
-    +(evFull?'<table class="ev-tbl ev-full"><thead><tr><th>本人</th><th>パートナー</th><th>できごと</th>'
+    +(evFull?'<table class="ev-tbl ev-full"'+evStyle+'><thead><tr><th>本人</th><th>パートナー</th><th>できごと</th>'
         +'<th>その年の一時費用</th><th>その年の総資産</th></tr></thead><tbody>'+evFull+'</tbody></table>'
       :'<div class="pd-note">設定されたライフイベントはありません。</div>')
     +'<div class="pd-note">※ 総資産はその年末時点の見込み額です。教育費のように毎年かかる支出は「一時費用」に含めず、生活費とあわせて年次明細に計上しています。</div>'));
@@ -4248,17 +4254,14 @@ function buildPrintDoc(){
     return '<div class="adv"><div class="adv-t">'+pdEsc(title||'提案')+'</div><div class="adv-b">'+pdEsc(body)+'</div></div>';
   }).join('');
   const cmpTbl=document.querySelector('#cmpResult table');
-  P0.push(pdPage('プラン診断・改善提案', stamp,
-    '<div class="sec-t">プラン診断</div>'
-    +(diagTxt?'<div class="adv-b">'+pdEsc(diagTxt.textContent.trim())+'</div>':'<div class="pd-note">—</div>')
-    +'<div class="sec-t">改善提案</div>'+(propHtml||'<div class="pd-note">—</div>')));
-
-  /* ライフプラン比較：住まい・結婚・子どもの人数 */
   const cmpMarryT=document.querySelector('#cmpMarry table');
   const cmpKidsT=document.querySelector('#cmpKids table');
   const note=id=>{ const e=document.getElementById(id); return e?'<div class="pd-note" style="margin:0 0 5px">'+pdEsc(e.textContent.trim())+'</div>':''; };
-  P0.push(pdPage('ライフプラン比較', stamp,
-    '<div class="pd-lead">ほかの前提はそのままに、大きな選択だけを入れ替えるとどうなるかを比べています。'
+
+  const diagHtml='<div class="sec-t">プラン診断</div>'
+    +(diagTxt?'<div class="adv-b">'+pdEsc(diagTxt.textContent.trim())+'</div>':'<div class="pd-note">—</div>')
+    +'<div class="sec-t">改善提案</div>'+(propHtml||'<div class="pd-note">—</div>');
+  const cmpHtml='<div class="pd-lead">ほかの前提はそのままに、大きな選択だけを入れ替えるとどうなるかを比べています。'
     +'「規定値」がいま設定している条件です。金額は最終資産の実質額（今日の物価に換算）です。</div>'
     +'<div class="sec-t">住まいの選び方</div>'
     +(cmpTbl?'<table class="pd-tbl pd-cmp">'+cmpTbl.innerHTML+'</table>':'<div class="pd-note">—</div>')
@@ -4267,7 +4270,28 @@ function buildPrintDoc(){
     +(cmpMarryT?'<table class="pd-tbl pd-cmp">'+cmpMarryT.innerHTML+'</table>':'<div class="pd-note">—</div>')
     +'<div class="sec-t">子どもの人数</div>'
     +note('cmpKidsNote')
-    +(cmpKidsT?'<table class="pd-tbl pd-cmp">'+cmpKidsT.innerHTML+'</table>':'<div class="pd-note">—</div>')));
+    +(cmpKidsT?'<table class="pd-tbl pd-cmp">'+cmpKidsT.innerHTML+'</table>':'<div class="pd-note">—</div>');
+
+  /* 診断・改善提案の分量を見積もる。ページの半分に満たなければ比較と1ページにまとめる。
+     （印刷前に実寸は測れないため、文字数と行数からの概算） */
+  const estMM=(function(){
+    /* 本文幅は約187mm。9pxの全角文字なら1行あたり約76字 */
+    const perLine=76;
+    let mm=14;                   /* 「プラン診断」の見出し */
+    const dt=diagTxt?diagTxt.textContent.trim().length:0;
+    mm+=Math.ceil(dt/perLine)*4.2;
+    mm+=14;                      /* 「改善提案」の見出し */
+    /* 1件あたり：枠の余白＋見出し行＋本文の行数 */
+    propEls.forEach(el=>{ mm+=6.8+Math.ceil(el.textContent.trim().length/perLine)*3.6; });
+    return mm;
+  })();
+  const HALF_PAGE=126;           /* A4本文の約半分 */
+  if(estMM<=HALF_PAGE){
+    P0.push(pdPage('プラン診断・改善提案とライフプラン比較', stamp, diagHtml+'<div class="sec-t">ライフプラン比較</div>'+cmpHtml));
+  } else {
+    P0.push(pdPage('プラン診断・改善提案', stamp, diagHtml));
+    P0.push(pdPage('ライフプラン比較', stamp, cmpHtml));
+  }
 
   /* ---------- 6ページ目：インフレ・年金パターン・年次キャッシュフロー ---------- */
   const inflT=document.getElementById('inflTbl');
@@ -4317,7 +4341,10 @@ function buildPrintDoc(){
   if(tbl){
     const head=tbl.querySelector('thead') ? tbl.querySelector('thead').outerHTML : '';
     const trs=[...tbl.querySelectorAll('tbody tr')];
-    const per=Math.max(1,Math.ceil(trs.length/3));   /* 3ページに分ける */
+    /* 1ページ20〜25行を目安に、3〜5ページへ分ける */
+    let np=3;
+    for(let k=3;k<=5;k++){ np=k; if(Math.ceil(trs.length/k)<=25) break; }
+    const per=Math.max(1,Math.ceil(trs.length/np));
     for(let i=0;i<trs.length;i+=per){
       const chunk=trs.slice(i,i+per);
       const n=Math.floor(i/per)+1, tot=Math.ceil(trs.length/per);
