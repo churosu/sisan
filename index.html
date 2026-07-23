@@ -241,6 +241,8 @@
   .lk-pin input::placeholder{font-size:15px; letter-spacing:0; text-indent:0; font-weight:700; color:var(--slate-2); font-family:inherit}
   .lk-hint{margin:6px 0 0; font-size:11.5px; color:var(--slate-2); text-align:center}
   .lk-pin input:focus{outline:2px solid var(--teal); outline-offset:1px; border-color:var(--teal)}
+  .copy-url{width:100%; box-sizing:border-box; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:12px; line-height:1.6; color:var(--ink); border:1.5px solid var(--line); border-radius:10px; padding:10px; resize:none; word-break:break-all}
+  .copy-url:focus{outline:2px solid var(--teal); outline-offset:1px}
   .lk-skip{width:100%; margin-top:9px; background:none; border:none; color:var(--slate); font-size:12px; font-weight:700; text-decoration:underline; cursor:pointer; padding:6px}
   .lk-err{min-height:17px; margin:4px 0 0; font-size:12px; font-weight:700; color:#C2183C; text-align:center}
   .kabe{margin:8px 0 2px; border:1px solid var(--line); border-radius:10px; background:#F7FAFC}
@@ -250,6 +252,7 @@
   .kabe[open]>summary{border-bottom:1px solid var(--line)}
   .kabe-b{padding:10px 12px; font-size:11.5px; line-height:1.85; color:var(--slate)}
   .kabe-b b{color:var(--ink)}
+  .scn-dot{display:inline-block; width:8px; height:8px; border-radius:99px; margin-right:6px; vertical-align:middle}
   .kf-box{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:12px}
   .kf-h{font-size:12.5px; font-weight:800; color:var(--ink); margin-bottom:9px}
   .kf-row{display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding:6px 0; border-top:1px solid var(--line); font-size:12.5px; color:var(--slate)}
@@ -577,12 +580,21 @@
     /* --- 汎用 --- */
     .pd-img{width:100%; height:auto; display:block; border:1px solid #E3EAF2; border-radius:7px}
     .pd-2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+    .pd-4{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:4px}
+    .pd-sq{width:100%; aspect-ratio:1/1; object-fit:contain; display:block; border:1px solid #E3EAF2; border-radius:7px}
+    .pd-wide{width:100%}
     .pd-tbl{width:100%; border-collapse:collapse; font-size:8px; table-layout:fixed}
     .pd-tbl th{background:#F0F4F8; color:#5A6672; font-size:7.5px; font-weight:800; padding:3px 2px; border:1px solid #D5DEE7; text-align:right}
     .pd-tbl th:first-child,.pd-tbl th:last-child{text-align:left}
     .pd-tbl td{padding:2.5px 2px; border:1px solid #E8EDF3; text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
     .pd-tbl td:first-child,.pd-tbl td:last-child{text-align:left}
     .pd-tbl tr:nth-child(even) td{background:#FAFCFE}
+    /* 年次明細：改行させず、行の高さを一定に保つ */
+    .pd-detail{font-size:6.6px; letter-spacing:-.02em}
+    .pd-detail th{font-size:6.2px; padding:2.5px 1.5px; line-height:1.2; white-space:nowrap; overflow:hidden}
+    .pd-detail td{padding:0 1.5px; height:11.4px; line-height:11.4px; white-space:nowrap; overflow:hidden; text-overflow:clip}
+    .pd-detail td>*{display:inline; white-space:nowrap}
+    .pd-detail .l{text-align:left}
     .pd-note{font-size:8.5px; color:#7A8899; line-height:1.65; margin-top:6px}
     .rankrow{display:flex; align-items:center; gap:9px; border:1.5px solid #111; border-radius:9px; padding:9px 12px; margin-bottom:9px}
     .rankrow .rb{font-size:30px; font-weight:800; color:#0CA795; line-height:1}
@@ -640,7 +652,7 @@
     <button type="button" class="lk-opt" id="lkLock"><b>パスコードを設定して共有</b><span>英数字のパスコードを知っている人だけが復元できます</span></button>
   </div>
   <div id="lkPinWrap" style="display:none">
-    <div class="lk-pin"><input type="text" maxlength="16" id="lkPin" placeholder="パスコード" autocomplete="off" spellcheck="false"></div>
+    <div class="lk-pin"><input type="text" maxlength="16" id="lkPin" placeholder="パスコード" autocomplete="off" spellcheck="false" autocapitalize="none" autocorrect="off" enterkeyhint="done"></div>
     <p class="lk-hint" id="lkStr">英数字で4〜16文字（大文字・小文字は区別します）</p>
     <p class="lk-err" id="lkErr"></p>
     <p class="mdl-sub">数字だけの4文字は1万通りしかなく、時間をかければ突破されえます。<b>英字を混ぜて6文字以上</b>にすると桁違いに強くなります。パスコードはリンクとは別の手段（口頭やメッセージなど）で相手に伝えてください。忘れると復元できません。</p>
@@ -648,10 +660,16 @@
   </div>
   <button class="mdl-close" data-close>閉じる</button>
 </div></div>
+<div class="mdl" id="copyMdl"><div class="mdl-box">
+  <p class="mdl-t">リンクをコピー</p>
+  <p class="mdl-p">下の欄をタップして<b>全体を選択</b>し、コピーしてください。途中で切れると復元できなくなります。</p>
+  <textarea id="copyUrl" class="copy-url" readonly rows="4"></textarea>
+  <button class="mdl-close" data-close>閉じる</button>
+</div></div>
 <div class="mdl" id="unlockMdl"><div class="mdl-box">
   <p class="mdl-t">パスコードを入力</p>
   <p class="mdl-p">このリンクはパスコードで保護されています。共有した人から聞いたパスコードを入力してください（大文字・小文字は区別します）。</p>
-  <div class="lk-pin"><input type="text" maxlength="16" id="ulPin" placeholder="パスコード" autocomplete="off" spellcheck="false"></div>
+  <div class="lk-pin"><input type="text" maxlength="16" id="ulPin" placeholder="パスコード" autocomplete="off" spellcheck="false" autocapitalize="none" autocorrect="off" enterkeyhint="go"></div>
   <p class="lk-err" id="ulErr"></p>
   <button class="disc-btn" id="ulGo">開く</button>
   <button class="lk-skip" id="ulSkip">パスコードなしで自分の入力を使う</button>
@@ -1049,6 +1067,7 @@
         <button class="tab-btn" data-tab="tab-proposal">診断・改善提案 <span class="tb-badge" id="tabBadgeProposal"></span></button>
         <button class="tab-btn" data-tab="tab-snapshot">指定年齢の詳細</button>
         <button class="tab-btn" data-tab="tab-mc">資産運用のブレ</button>
+        <button class="tab-btn" data-tab="tab-pension">年金の受け取り方</button>
         <button class="tab-btn" data-tab="tab-compare">ライフプラン比較</button>
       </div>
 
@@ -1102,6 +1121,20 @@
           </div>
           <div class="mc-hint">標準偏差は「1年のリターンがどれだけ上下に散らばるか」の幅、相関は「良い年の翌年も良くなりやすいか」を表します（0なら各年独立）。いずれも将来を予測する値ではなく、ブレの大きさを仮定して幅を見るための入力です。運用対象や期間により実際のブレは変わります。</div>
         </details>
+      </div>
+
+      <div class="tab-panel" id="tab-pension">
+        <div class="eyebrow">Pension</div>
+        <h2>年金の受け取り方による資産の違い</h2>
+        <div class="hint" id="penIntro" style="margin-top:0"></div>
+        <div class="legend" id="penLegend"></div>
+        <div class="chartbox short"><canvas id="penChart"></canvas></div>
+        <div class="tablescroll" style="max-height:none; margin-top:12px">
+          <table id="penTbl"><thead><tr>
+            <th class="l">受け取り方</th><th>65歳の総資産</th><th>80歳の総資産</th><th>最終総資産</th><th class="l">結果</th>
+          </tr></thead><tbody id="penBody"></tbody></table>
+        </div>
+        <div class="hint" id="penNote"></div>
       </div>
 
       <div class="tab-panel" id="tab-compare">
@@ -2148,7 +2181,7 @@ function stageOf(P,r){
 const ROWBG={single:'#F4F8FC',couple:'#F1F8F6',kids:'#FEF8EE',edu:'#FBF1F4',old:'#F6F2FA'};
 
 /* ============ メイン描画 ============ */
-let assetChart, flowChart, inflChart, snapPieChart, snapAssetChart, cmpChart;
+let assetChart, flowChart, inflChart, snapPieChart, snapAssetChart, cmpChart, penChart;
 let SNAP_LAST=null;
 const RANK_TH={
   '20代':{SS:5,S:3.5,A:2.2,B:1.2,C:0.5},
@@ -2435,12 +2468,16 @@ function renderInflation(P, baseRows){
     borderWidth:s.isBase?3:1.8, borderDash:s.isBase?[]:[5,4],
     fill:false, tension:.25, pointRadius:0
   }));
+  const inflPeak=Math.max(1,...scns.map(s=>Math.max(...s.rows.map(r=>r.netWorth))));
+  const inflYMax=Math.ceil(inflPeak*1.1/100)*100;
   document.getElementById('inflLegend').innerHTML=scns.map((s,i)=>`<span><i style="background:${INFL_COLORS[i%INFL_COLORS.length]}"></i>${s.pct}%${s.isBase?'（設定値）':''}${Math.abs(s.pct-2.0)<0.001?'（日銀目標）':''}</span>`).join('');
   if(inflChart) inflChart.destroy();
   inflChart=new Chart(document.getElementById('inflChart'),{type:'line',data:{labels,datasets:dsets},options:{
     responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
     plugins:{legend:{display:false},tooltip:{callbacks:{title:it=>`本人 ${it[0].label} 歳`,label:c=>`${c.dataset.label}: ${man(c.parsed.y)}万円`}}},
-    scales:{x:{grid:{display:false},ticks:{maxTicksLimit:12,color:'#8A98AB',font:{size:10}}},y:{grid:{color:'#EEF1F6'},ticks:{color:'#8A98AB',font:{size:10},callback:v=>man(v)}}}
+    scales:{x:{grid:{display:false},ticks:{maxTicksLimit:12,color:'#8A98AB',font:{size:10}}},
+      /* 1本だけ極端に伸びると他が潰れるため、全系列の最高値＋10%で頭を打つ */
+      y:{grid:{color:'#EEF1F6'},min:0,max:inflYMax,ticks:{color:'#8A98AB',font:{size:10},callback:v=>man(v)}}}
   }});
 
   /* table */
@@ -2884,6 +2921,7 @@ function render(){
   }).join('');
   const _mm=document.getElementById('mcMu'); if(_mm) _mm.textContent=(P.nisaYield*100).toFixed(1)+'%';
   renderKidFunds(P,rows);
+  renderPension(P,rows);
   renderCompare(P,rows);
   buildPrintCard(P,rows,rk);
   mcMarkStale();
@@ -3022,8 +3060,25 @@ async function encodeShareLocked(pin){
   buf.set(salt,0); buf.set(iv,16); buf.set(ct,28);
   return 'k='+_b64u(buf);
 }
+/* パスコード付きリンクの中身が形として成立しているか。
+   ソルト16＋IV12＋認証タグ16＝最低44バイト必要。ここで弾ければ「パスコードが違う」と誤って伝えずに済む。 */
+/* メッセージアプリの自動リンク化で末尾に「）」「。」などが付くことがあるため、
+   base64url に使われる文字だけを残してから扱う。 */
+function cleanLockedPayload(x){
+  let t=String(x==null?'':x);
+  /* 「）」などの非ASCIIは location.hash では %EF%BC%89 の形で入るため、先に元へ戻してから取り除く。
+     そのまま記号だけ削ると 'EFBC89' が本文に紛れ込んで復号に失敗する。 */
+  try{ t=decodeURIComponent(t); }catch(e){}
+  return t.replace(/[^A-Za-z0-9\-_]/g,'');
+}
+function lockedPayloadOK(payload){
+  const t=cleanLockedPayload(payload);
+  if(!t) return false;
+  if(t.length%4===1) return false;                     /* base64として成立しない長さ */
+  try{ return _b64ud(t).length>=44; }catch(e){ return false; }
+}
 async function decodeShareLocked(payload, pin){
-  const buf=_b64ud(payload);
+  const buf=_b64ud(cleanLockedPayload(payload));
   const key=await _pinKey(pin, buf.slice(0,16));
   const pt=await crypto.subtle.decrypt({name:'AES-GCM', iv:buf.slice(16,28)}, key, buf.slice(28));
   return JSON.parse(new TextDecoder().decode(pt));
@@ -3793,6 +3848,133 @@ function buildPrintCard(P, rows, rk){
 }
 
 
+
+/* ---- 印刷用の作図（画面のグラフは長方形なので、紙面向けに描き直す） ---- */
+function pdCv(w,h){ const cv=document.createElement('canvas'); cv.width=w; cv.height=h; return cv; }
+function pdFmt(v){ const a=Math.abs(v); if(a>=10000) return (v/10000).toFixed(1)+'億'; if(a>=1000) return Math.round(v/100)/10+'千'; return String(Math.round(v)); }
+/* 折れ線グラフ。events を渡すと、線の近くに引き出し線つきでラベルを置く（重ならないよう縦にずらす） */
+function pdLineChart(o){
+  const W=o.w||760, H=o.h||760, S=W/760;
+  const cv=pdCv(W,H), g=cv.getContext('2d');
+  const padL=68*S, padR=18*S, padT=(o.title?34:14)*S, padB=(o.legend?52:30)*S;
+  const iw=W-padL-padR, ih=H-padT-padB;
+  g.fillStyle='#fff'; g.fillRect(0,0,W,H);
+  const F=(w,px)=>`${w} ${px*S}px system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans JP",sans-serif`;
+  if(o.title){ g.font=F(800,14); g.fillStyle='#2E363B'; g.textAlign='left'; g.textBaseline='alphabetic'; g.fillText(o.title,padL,20*S); }
+  const xMin=o.xMin, xMax=o.xMax, yMin=o.yMin||0, yMax=o.yMax;
+  const X=v=>padL+(v-xMin)/Math.max(1e-9,xMax-xMin)*iw;
+  const Y=v=>padT+ih-(v-yMin)/Math.max(1e-9,yMax-yMin)*ih;
+  /* grid */
+  g.strokeStyle='#EEF1F6'; g.lineWidth=1*S; g.font=F(600,10); g.fillStyle='#8A98AB';
+  const yTicks=5;
+  for(let i=0;i<=yTicks;i++){
+    const v=yMin+(yMax-yMin)*i/yTicks, y=Y(v);
+    g.beginPath(); g.moveTo(padL,y); g.lineTo(padL+iw,y); g.stroke();
+    g.textAlign='right'; g.textBaseline='middle'; g.fillText(pdFmt(v),padL-7*S,y);
+  }
+  g.textAlign='center'; g.textBaseline='top';
+  const step=Math.max(5,Math.ceil((xMax-xMin)/6/5)*5);
+  for(let a=Math.ceil(xMin/step)*step;a<=xMax;a+=step){
+    g.strokeStyle='#F4F7FA'; g.beginPath(); g.moveTo(X(a),padT); g.lineTo(X(a),padT+ih); g.stroke();
+    g.fillStyle='#8A98AB'; g.fillText(a+'歳',X(a),padT+ih+6*S);
+  }
+  g.strokeStyle='#CBD5E0'; g.lineWidth=1.2*S;
+  g.beginPath(); g.moveTo(padL,padT); g.lineTo(padL,padT+ih); g.lineTo(padL+iw,padT+ih); g.stroke();
+  /* series */
+  (o.series||[]).forEach(sr=>{
+    g.strokeStyle=sr.color; g.lineWidth=(sr.width||2)*S;
+    g.setLineDash(sr.dash?[6*S,4*S]:[]);
+    g.beginPath(); let started=false;
+    sr.data.forEach(pt=>{
+      if(pt==null||pt.y==null){ started=false; return; }
+      const x=X(pt.x), y=Y(Math.max(yMin,Math.min(yMax,pt.y)));
+      if(!started){ g.moveTo(x,y); started=true; } else g.lineTo(x,y);
+    });
+    g.stroke();
+  });
+  g.setLineDash([]);
+  /* events：引き出し線つきラベル。近いものは段を変えて重なりを避ける */
+  if(o.events&&o.events.length){
+    const lanes=[]; const laneH=15*S, labFont=F(700,9.5);
+    g.font=labFont;
+    const placed=[];
+    o.events.forEach(ev=>{
+      const x=X(ev.x), yPt=Y(Math.max(yMin,Math.min(yMax,ev.y)));
+      const tw=g.measureText(ev.label).width+8*S;
+      let lane=0;
+      while(lane<12){
+        const y=padT+10*S+lane*laneH;
+        const clash=placed.some(pl=>pl.lane===lane && !(x+tw/2< pl.x-pl.w/2-4*S || x-tw/2> pl.x+pl.w/2+4*S));
+        if(!clash){ placed.push({lane,x,w:tw,yPt,label:ev.label,color:ev.color||'#5A6672'}); break; }
+        lane++;
+      }
+    });
+    placed.forEach(pl=>{
+      const y=padT+10*S+pl.lane*laneH;
+      /* 引き出し線 */
+      g.strokeStyle='#C3CDD8'; g.lineWidth=1*S; g.setLineDash([2*S,2*S]);
+      g.beginPath(); g.moveTo(pl.x,y+5*S); g.lineTo(pl.x,pl.yPt); g.stroke(); g.setLineDash([]);
+      g.fillStyle=pl.color; g.beginPath(); g.arc(pl.x,pl.yPt,2.6*S,0,Math.PI*2); g.fill();
+      /* ラベル */
+      const tw=g.measureText(pl.label).width;
+      g.fillStyle='#fff'; g.strokeStyle='#DCE4EC'; g.lineWidth=1*S;
+      const bx=Math.max(padL, Math.min(padL+iw-tw-8*S, pl.x-tw/2-4*S));
+      g.beginPath(); g.rect(bx,y-4*S,tw+8*S,13*S); g.fill(); g.stroke();
+      g.fillStyle=pl.color; g.textAlign='left'; g.textBaseline='middle';
+      g.font=labFont; g.fillText(pl.label,bx+4*S,y+2.5*S);
+    });
+  }
+  /* legend */
+  if(o.legend){
+    let lx=padL, ly=H-(o.legendRows>1?34:18)*S;
+    g.font=F(700,10); g.textBaseline='middle';
+    (o.series||[]).forEach(sr=>{
+      const tw=g.measureText(sr.label).width;
+      if(lx+tw+26*S>W-padR){ lx=padL; ly+=15*S; }
+      g.strokeStyle=sr.color; g.lineWidth=2.4*S; g.setLineDash(sr.dash?[5*S,3*S]:[]);
+      g.beginPath(); g.moveTo(lx,ly); g.lineTo(lx+16*S,ly); g.stroke(); g.setLineDash([]);
+      g.fillStyle='#5A6672'; g.textAlign='left'; g.fillText(sr.label,lx+20*S,ly);
+      lx+=tw+34*S;
+    });
+  }
+  return cv.toDataURL('image/png');
+}
+/* 円グラフ（内訳） */
+function pdPieChart(o){
+  const W=o.w||760, H=o.h||760, S=W/760;
+  const cv=pdCv(W,H), g=cv.getContext('2d');
+  g.fillStyle='#fff'; g.fillRect(0,0,W,H);
+  const F=(w,px)=>`${w} ${px*S}px system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans JP",sans-serif`;
+  if(o.title){ g.font=F(800,14); g.fillStyle='#2E363B'; g.textAlign='left'; g.textBaseline='alphabetic'; g.fillText(o.title,18*S,20*S); }
+  const items=(o.items||[]).filter(i=>i.value>0);
+  const total=items.reduce((a,i)=>a+i.value,0);
+  const cx=W/2, cy=H*0.44, R=Math.min(W,H)*0.29;
+  if(total<=0){ g.font=F(700,12); g.fillStyle='#8A98AB'; g.textAlign='center'; g.fillText('該当なし',cx,cy); return cv.toDataURL('image/png'); }
+  let a0=-Math.PI/2;
+  items.forEach(it=>{
+    const a1=a0+it.value/total*Math.PI*2;
+    g.beginPath(); g.moveTo(cx,cy); g.arc(cx,cy,R,a0,a1); g.closePath();
+    g.fillStyle=it.color; g.fill();
+    g.strokeStyle='#fff'; g.lineWidth=2*S; g.stroke();
+    a0=a1;
+  });
+  g.beginPath(); g.arc(cx,cy,R*0.52,0,Math.PI*2); g.fillStyle='#fff'; g.fill();
+  g.font=F(800,15); g.fillStyle='#2E363B'; g.textAlign='center'; g.textBaseline='middle';
+  g.fillText(pdFmt(total)+'万円',cx,cy);
+  /* 凡例 */
+  let ly=cy+R+26*S;
+  g.textBaseline='middle'; g.textAlign='left';
+  items.forEach(it=>{
+    g.fillStyle=it.color; g.fillRect(30*S,ly-5*S,11*S,11*S);
+    g.font=F(700,11); g.fillStyle='#5A6672'; g.fillText(it.label,48*S,ly);
+    g.font=F(800,11); g.fillStyle='#2E363B'; g.textAlign='right';
+    g.fillText(pdFmt(it.value)+'万円（'+Math.round(it.value/total*100)+'%）',W-30*S,ly);
+    g.textAlign='left';
+    ly+=19*S;
+  });
+  return cv.toDataURL('image/png');
+}
+
 /* ============ 印刷（PDF）用の組み版 ============
    画面のレイアウトをそのまま印刷するのではなく、ページごとに内容を組み直す。
    グラフは <canvas> のままだと分割・改ページで崩れるため、画像に変換して貼り付ける。 */
@@ -3904,9 +4086,11 @@ function buildPrintDoc(){
   const evRows=evs.map(e=>'<tr><td class="age">'+e.age+'歳</td><td>'+pdEsc(e.txt)+'</td>'
     +'<td class="amt">'+(e.cost>0.5?man(e.cost)+'万':'—')+'</td><td class="amt">'+manY(e.nw)+'</td></tr>').join('');
 
+  /* 途中で資金が尽きたときは内訳がすべて0になるため載せない */
+  const brkBlock = busted ? '' : ('<div class="sec-t">最終資産の内訳（'+last.age+'歳時点）</div><div class="brk">'+brk+'</div>');
   P0.push(pdPage('この試算の前提と結果', stamp,
     '<div class="hero">'+heroA+heroB+'</div>'
-    +'<div class="sec-t">最終資産の内訳（'+last.age+'歳時点）</div><div class="brk">'+brk+'</div>'
+    +brkBlock
     +'<div class="sec-t">主な設定</div><div class="cond-a">'+condA+'</div><div class="cond-b">'+condB+'</div>'
     +'<div class="sec-t">細かな設定</div><div class="cond-c">'+fine.join('')+'</div>'
     +'<div class="sec-t">ライフイベント</div>'
@@ -3925,7 +4109,8 @@ function buildPrintDoc(){
     ['生涯の税・社会保険', manY(lifeTax), '同期間の累計'],
     ['生涯の住居費', manY(lifeHouse), '家賃・ローン・維持費'],
     ['生涯の教育費', manY(lifeEdu), P.children.length+'人分'],
-    ['公的年金（世帯）', manY((rows.find(r=>r.pension>0)||{pension:0}).pension), '受給開始年の額'],
+    ['公的年金（世帯・手取り）', (function(){ const r=rows.find(x=>x.pension&&x.pension.net>0); return r?manY(r.pension.net):'—'; })(),
+      (function(){ const r=rows.find(x=>x.pension&&x.pension.net>0); return r?(r.age+'歳から／額面 '+manY(r.pension.gross)):'受給前に試算終了'; })()],
   ].map(k=>'<div class="brk-i"><div class="brk-k">'+pdEsc(k[0])+'</div><div class="brk-v">'+k[1]+'</div><div class="brk-s">'+pdEsc(k[2])+'</div></div>').join('');
 
   let rankHtml='';
@@ -3933,13 +4118,34 @@ function buildPrintDoc(){
     rankHtml='<div class="rankrow"><div class="rb">'+pdEsc(rk.overall)+'</div>'
       +'<div class="rt"><b>総合の目安：'+pdEsc(rk.overall)+'</b><br>各年代の「総資産 ÷ その年の年間生活費（資産が生活費の何年分か）」を年代別の目安と比べた参考指標です。</div></div>';
     if(rk.decades&&rk.decades.length){
-      rankHtml+='<table class="rk-tbl"><tbody>'+rk.decades.map(d=>'<tr><td>'+pdEsc(d.key)+'</td><td class="g">'+pdEsc(d.rank)+'</td>'
-        +'<td>'+d.years.toFixed(1)+'年分</td><td>'+d.age+'歳時点 '+manY(d.net)+'</td></tr>').join('')+'</tbody></table>';
+      /* 20・30・40代を左、50・60・70代〜を右に縦積みで並べる */
+      const cell=d=>'<tr><td>'+pdEsc(d.key)+'</td><td class="g">'+pdEsc(d.rank)+'</td>'
+        +'<td>'+d.years.toFixed(1)+'年分</td><td>'+d.age+'歳 '+manY(d.net)+'</td></tr>';
+      const half=Math.ceil(rk.decades.length/2);
+      const L=rk.decades.slice(0,half).map(cell).join('');
+      const R=rk.decades.slice(half).map(cell).join('');
+      rankHtml+='<div class="pd-2">'
+        +'<table class="rk-tbl"><tbody>'+L+'</tbody></table>'
+        +'<table class="rk-tbl"><tbody>'+(R||'<tr><td colspan="4">—</td></tr>')+'</tbody></table>'
+      +'</div>';
     }
   }
+  /* 資産の推移：主要な系列＋ライフイベントのラベル（引き出し線つき） */
+  const evForChart=evs.slice(0,14).map(e=>({x:e.age, y:e.nw, label:e.txt.length>9?e.txt.slice(0,9)+'…':e.txt, color:'#0CA795'}));
+  const chartMax=Math.ceil(Math.max(1,...rows.map(r=>r.netWorth))*1.28/100)*100;
+  const assetImg=pdLineChart({w:1180,h:620,xMin:rows[0].age,xMax:last.age,yMin:0,yMax:chartMax,
+    legend:true, events:evForChart,
+    series:[
+      {label:'総資産',      color:'#0CA795', width:2.6, data:rows.map(r=>({x:r.age,y:r.netWorth}))},
+      {label:'現預金',      color:'#3AA0E0', width:1.8, data:rows.map(r=>({x:r.age,y:r.cash}))},
+      {label:'NISA評価額',  color:'#8E6FC4', width:1.8, data:rows.map(r=>({x:r.age,y:r.nisaV}))},
+      {label:'住宅ローン残高',color:'#C2183C', width:1.6, dash:true, data:rows.map(r=>({x:r.age,y:r.loanBal||0}))}
+    ]});
   P0.push(pdPage('おもな結果と資産形成の評価', stamp,
     '<div class="brk" style="grid-template-columns:repeat(3,1fr)">'+kpi+'</div>'
-    +'<div class="sec-t">資産と収入の推移</div>'+(pdCanvas('assetChart')||'<div class="pd-note">グラフを取得できませんでした。</div>')
+    +'<div class="sec-t">資産の推移とライフイベント</div>'
+    +'<img class="pd-img" src="'+assetImg+'">'
+    +'<div class="pd-note">実線＝総資産（緑）・現預金（青）・NISA評価額（紫）、破線＝住宅ローン残高（赤）。ラベルはその年に起きるライフイベントで、点は当時の総資産の位置を示します。</div>'
     +'<div class="sec-t">資産形成の評価</div>'+rankHtml));
 
   /* ---------- 3〜4ページ目：ライフイベントのアドバイス ---------- */
@@ -3984,25 +4190,66 @@ function buildPrintDoc(){
 
   /* ---------- 6ページ目：インフレ・年金パターン・年次キャッシュフロー ---------- */
   const inflT=document.getElementById('inflTbl');
-  const penRows=['growth','past30','zero'].map(pcKey=>{
-    const alt=simulate({...P, pensionCase:pcKey});
-    const l=alt[alt.length-1];
-    const b=l.busted&&l.age<MAX_AGE;
-    return '<tr><td>'+pdEsc({growth:'楽観（成長型経済移行・継続）',past30:'標準（過去30年投影）',zero:'保守（ゼロ成長）'}[pcKey])
-      +(pcKey===P.pensionCase?'（選択中）':'')+'</td><td>'+(b?(l.age+'歳で不足'):manY(l.netWorth))+'</td>'
-      +'<td>'+(b?'—':manY(l.netWorth/l.defl))+'</td></tr>';
-  }).join('');
-  P0.push(pdPage('インフレ率・年金・年次キャッシュフロー', stamp,
-    '<div class="sec-t">インフレ率による資産の変化</div>'
-    +(pdCanvas('inflChart')||'')
-    +(inflT?'<table class="pd-tbl" style="margin-top:7px">'+inflT.innerHTML+'</table>':'')
-    +'<div class="sec-t">年金の見通しによる資産の変化</div>'
-    +'<table class="pd-tbl"><thead><tr><th>年金の見通し</th><th>最終総資産</th><th>実質（今日の物価）</th></tr></thead><tbody>'+penRows+'</tbody></table>'
-    +'<div class="pd-note">※ 2024年財政検証の3ケース。ほかの条件は同じにして、年金の前提だけを入れ替えた試算です。</div>'
-    +'<div class="sec-t">年次キャッシュフロー</div>'+(pdCanvas('flowChart')||'')));
+  const SQ=560;   /* 4つとも同じ正方形にそろえる */
+
+  /* 左上：インフレ率ごとの総資産 */
+  const inflPcts=[...INFL_SCENARIOS]; const basePct=+(P.inflation*100).toFixed(2);
+  if(!inflPcts.some(v=>Math.abs(v-basePct)<0.001)){ inflPcts.push(basePct); inflPcts.sort((a,b)=>a-b); }
+  const inflCols=['#0CA795','#3AA0E0','#8E6FC4','#E8A54B','#C2183C','#77828F'];
+  const inflSeries=inflPcts.map((pct,i)=>{
+    const rs=Math.abs(pct-basePct)<0.001?rows:simulate({...P,inflation:pct/100});
+    return {label:pct+'%'+(Math.abs(pct-basePct)<0.001?'（設定）':''), color:inflCols[i%inflCols.length],
+            width:Math.abs(pct-basePct)<0.001?2.6:1.6, dash:Math.abs(pct-basePct)>=0.001,
+            data:rs.map(r=>({x:r.age,y:r.netWorth}))};
+  });
+  const inflMax=Math.ceil(Math.max(1,...inflSeries.flatMap(sr=>sr.data.map(d=>d.y)))*1.1/100)*100;
+  const inflImg=pdLineChart({w:SQ,h:SQ,title:'インフレ率による資産の変化',xMin:rows[0].age,xMax:P.endAge,
+    yMin:0,yMax:inflMax,legend:true,legendRows:2,series:inflSeries});
+
+  /* 右上：年金の受け取り方ごとの総資産（60歳から） */
+  const penPats=(typeof pensionPatterns==='function'?pensionPatterns(P):[]).map((pt,i)=>({
+    ...pt, rows:simulate({...P, ...pt.o}), color:PEN_COLORS[i%PEN_COLORS.length]
+  }));
+  const penSeries=penPats.map(pt=>({label:pt.label.replace(/ケース・/,' '), color:pt.color,
+    width:pt.current?2.6:1.6, dash:!pt.current,
+    data:pt.rows.filter(r=>r.age>=60).map(r=>({x:r.age,y:r.netWorth}))}));
+  const penMax=Math.ceil(Math.max(1,...penSeries.flatMap(sr=>sr.data.map(d=>d.y)))*1.1/100)*100;
+  const penImg=pdLineChart({w:SQ,h:SQ,title:'年金の受け取り方による違い（60歳〜）',xMin:60,xMax:P.endAge,
+    yMin:0,yMax:penMax,legend:true,legendRows:2,series:penSeries});
+
+  /* 左下：65歳時点の資産内訳 */
+  const r65=rows.find(r=>r.age===65);
+  const pieImg=pdPieChart({w:SQ,h:SQ,title:'65歳時点の資産の内訳',items:r65?[
+    {label:'現預金',        value:Math.max(0,r65.cash),        color:'#3AA0E0'},
+    {label:'NISA評価額',    value:Math.max(0,r65.nisaV),       color:'#0CA795'},
+    {label:'確定拠出年金',  value:Math.max(0,r65.dcValue*(1-P.dcTaxRate)), color:'#8E6FC4'},
+    {label:'教育資金',      value:Math.max(0,r65.eduAccount),  color:'#E8A54B'},
+  ]:[]});
+
+  /* 右下：年次キャッシュフロー（収入と支出） */
+  const cfMax=Math.ceil(Math.max(1,...rows.map(r=>Math.max(r.incomeCash,r.expense)))*1.1/100)*100;
+  const flowImg=pdLineChart({w:SQ,h:SQ,title:'年次キャッシュフロー',xMin:rows[0].age,xMax:last.age,
+    yMin:0,yMax:cfMax,legend:true,series:[
+      {label:'収入（手取り）', color:'#0CA795', width:2.2, data:rows.map(r=>({x:r.age,y:r.incomeCash}))},
+      {label:'支出',           color:'#C2183C', width:2.2, dash:true, data:rows.map(r=>({x:r.age,y:r.expense}))}
+    ]});
+
+  P0.push(pdPage('インフレ率・年金・資産内訳・キャッシュフロー', stamp,
+    '<div class="pd-4">'
+    +'<img class="pd-sq" src="'+inflImg+'">'
+    +'<img class="pd-sq" src="'+penImg+'">'
+    +'<img class="pd-sq" src="'+pieImg+'">'
+    +'<img class="pd-sq" src="'+flowImg+'">'
+    +'</div>'
+    +'<div class="sec-t">インフレ率による資産の変化（詳細）</div>'
+    +(inflT?'<table class="pd-tbl pd-wide">'+inflT.innerHTML+'</table>':'<div class="pd-note">—</div>')
+    +'<div class="pd-note">※ 上の4つはいずれも同じ縮尺の正方形です。年金のグラフは、受給開始年齢（繰上げ・基準・繰下げ）と財政検証のケース（楽観・保守）を入れ替えた5パターンを比べています。</div>'));
 
   /* ---------- 7〜9ページ目：年次明細 ---------- */
   const tbl=document.getElementById('tbl');
+  /* 経過/本人/相手/子/イベント/…/備考 の18列。合計100%になるよう配分する */
+  const COLS='<colgroup>'+[3.6,3.6,3.6,3.2,10.2,5.9,5.3,5.3,5.3,5.1,5.7,5.1,5.7,5.7,5.7,5.7,5.9,9.4]
+    .map(w=>'<col style="width:'+w+'%">').join('')+'</colgroup>';
   if(tbl){
     const head=tbl.querySelector('thead') ? tbl.querySelector('thead').outerHTML : '';
     const trs=[...tbl.querySelectorAll('tbody tr')];
@@ -4012,7 +4259,7 @@ function buildPrintDoc(){
       const n=Math.floor(i/per)+1, tot=Math.ceil(trs.length/per);
       const a0=chunk[0].cells[1].textContent.trim(), a1=chunk[chunk.length-1].cells[1].textContent.trim();
       P0.push(pdPage('年次明細（'+n+'/'+tot+'）　本人 '+a0+'〜'+a1, stamp,
-        '<table class="pd-tbl">'+head+'<tbody>'+chunk.map(t=>t.outerHTML).join('')+'</tbody></table>'
+        '<table class="pd-tbl pd-detail">'+COLS+head+'<tbody>'+chunk.map(t=>t.outerHTML).join('')+'</tbody></table>'
         +(n===tot?'<div class="pd-note">※ 金額は各年末時点。総資産＝現預金＋NISA評価額＋教育資金＋確定拠出年金（税引後）。ローン残高は団信で消滅した場合0になります。</div>':'')));
     }
   }
@@ -4034,6 +4281,74 @@ function buildPrintDoc(){
     +'<div class="pd-note" style="margin-top:14px">MiraiLog ／ インフレに負けない資産形成　—　'+today+' 出力</div>'));
 
   host.innerHTML=P0.join('');
+}
+
+/* ============ 年金の受け取り方による資産の違い ============
+   受給開始年齢（繰上げ／基準／繰下げ）と、財政検証のケース（楽観／保守）を組み合わせて比較する。
+   年金が効いてくるのは60歳以降なので、グラフも60歳から描く。 */
+const PEN_COLORS=['#3AA0E0','#8E6FC4','#E8A54B','#0CA795','#12855F','#C2183C'];
+function pensionPatterns(P){
+  const caseLbl={growth:'楽観',past30:'標準',zero:'保守'};
+  const cur=P.pensionCase||'past30', curLbl=caseLbl[cur]||'標準';
+  const startNow=P.pensionStartAge||65;
+  const raw=[
+    /* 受給開始年齢を変えたとき（ケースは今の設定のまま） */
+    {key:'early', pc:cur,      st:60,       label:curLbl+'ケース・60歳から（繰上げ）'},
+    {key:'base',  pc:cur,      st:65,       label:curLbl+'ケース・65歳から（基準）'},
+    {key:'late',  pc:cur,      st:70,       label:curLbl+'ケース・70歳から（繰下げ）'},
+    /* 財政検証のケースを変えたとき（受給開始は今の設定のまま） */
+    {key:'std',   pc:'past30', st:startNow, label:'標準ケース・'+startNow+'歳から'},
+    {key:'opt',   pc:'growth', st:startNow, label:'楽観ケース・'+startNow+'歳から'},
+    {key:'con',   pc:'zero',   st:startNow, label:'保守ケース・'+startNow+'歳から'},
+  ];
+  /* 同じ組み合わせが重ならないようにまとめる（例：設定が標準・65歳なら「基準」と「標準ケース」は同じ） */
+  const seen=new Set(), out=[];
+  raw.forEach(r=>{
+    const id=r.pc+'|'+r.st;
+    if(seen.has(id)) return;
+    seen.add(id);
+    const isCurrent=(r.pc===cur && r.st===startNow);   /* いま設定している条件と一致するか */
+    out.push({key:r.key, label:r.label+(isCurrent?'（設定中）':''), current:isCurrent,
+              o:{pensionCase:r.pc, pensionStartAge:r.st}});
+  });
+  return out;
+}
+function renderPension(P, baseRows){
+  const body=document.getElementById('penBody'); if(!body) return;
+  const FROM=60;
+  const pats=pensionPatterns(P).map((pt,i)=>{
+    const rows=simulate({...P, ...pt.o});
+    return {...pt, rows, color:PEN_COLORS[i%PEN_COLORS.length]};
+  });
+  const at=(rows,age)=>{ const r=rows.find(x=>x.age===age); return r?r.netWorth:null; };
+  const ages=[]; for(let a=FROM;a<=P.endAge;a++) ages.push(a);
+  const peak=Math.max(1,...pats.map(p=>Math.max(0,...p.rows.filter(r=>r.age>=FROM).map(r=>r.netWorth))));
+  const yMax=Math.ceil(peak*1.1/100)*100;
+  const dsets=pats.map(p=>({
+    label:p.label,
+    data:ages.map(a=>{ const r=p.rows.find(x=>x.age===a); return r?r.netWorth:null; }),
+    /* いま設定している条件だけ実線、ほかは破線 */
+    borderColor:p.color, borderWidth:p.current?3:1.8, borderDash:p.current?[]:[5,4],
+    fill:false, tension:.25, pointRadius:0, spanGaps:false
+  }));
+  document.getElementById('penIntro').innerHTML='年金の<b>受給開始年齢</b>と<b>財政検証のケース</b>を変えたときの総資産を、60歳以降について比較します。繰上げは1か月あたり−0.4%、繰下げは+0.7%で、増減した水準が生涯続きます。ほかの条件はすべて同じです。';
+  document.getElementById('penLegend').innerHTML=pats.map(p=>`<span><i style="background:${p.color}"></i>${p.label}</span>`).join('');
+  if(penChart) penChart.destroy();
+  penChart=new Chart(document.getElementById('penChart'),{type:'line',data:{labels:ages,datasets:dsets},options:{
+    responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
+    plugins:{legend:{display:false},tooltip:{callbacks:{title:it=>`本人 ${it[0].label} 歳`,label:c=>`${c.dataset.label}: ${man(c.parsed.y)}万円`}}},
+    scales:{x:{grid:{display:false},ticks:{maxTicksLimit:12,color:'#8A98AB',font:{size:10}}},
+      y:{grid:{color:'#EEF1F6'},min:0,max:yMax,ticks:{color:'#8A98AB',font:{size:10},callback:v=>man(v)}}}
+  }});
+  body.innerHTML=pats.map(p=>{
+    const last=p.rows[p.rows.length-1], bust=last.busted&&last.age<MAX_AGE;
+    const v65=at(p.rows,65), v80=at(p.rows,80);
+    return `<tr><td class="l"><span class="scn-dot" style="background:${p.color}"></span>${p.label}</td>`
+      +`<td>${v65==null?'—':man(v65)+'万円'}</td><td>${v80==null?'—':man(v80)+'万円'}</td>`
+      +`<td class="${bust?'neg':''}">${bust?'—':man(last.netWorth)+'万円'}</td>`
+      +`<td class="l ${bust?'neg':''}">${bust?last.age+'歳ごろ枯渇':last.age+'歳まで維持'}</td></tr>`;
+  }).join('');
+  document.getElementById('penNote').innerHTML='※ 繰下げ受給は、受け取りを待つあいだの生活費を資産でまかなえるかが判断材料になります。長生きするほど繰下げが有利になりますが、途中で資産が尽きては意味がないため、上の表で65歳・80歳時点の残高もあわせてご確認ください。';
 }
 
 /* ============ ライフプラン比較（住まいの選び方） ============ */
@@ -4186,19 +4501,28 @@ function askUnlock(payload){
   pin.addEventListener('input',()=>{ pin.value=pin.value.replace(/[^0-9A-Za-z]/g,'').slice(0,16); err.textContent=''; });
   const tryOpen=async ()=>{
     if(!/^[0-9A-Za-z]{4,16}$/.test(pin.value)){ err.textContent='英数字で4〜16文字入力してください'; return; }
+    if(!lockedPayloadOK(payload)){
+      /* リンク自体が途中で切れている場合。パスコードのせいにしない */
+      err.innerHTML='このリンクは途中で切れているようです。<br>URL全体をコピーし直して開いてください。';
+      return;
+    }
     const label=go.textContent; go.disabled=true; go.textContent='確認しています…';
+    let st=null;
     try{
-      const st=await decodeShareLocked(payload, pin.value);
-      applyState(st);
-      m.classList.remove('on');
-      finishInit(true);
+      st=await decodeShareLocked(payload, pin.value);
     }catch(e){
-      err.textContent='パスコードが違います';
+      /* ここに来るのは「復号できなかった」ときだけ＝パスコード違い、またはURLの破損 */
+      console.warn('unlock failed', e);
+      err.innerHTML='パスコードが違います。<br><span style="font-weight:600;color:#7A8899">合っているはずの場合は、URLが途中で切れていないかご確認ください。</span>';
       pin.value='';
       go.disabled=false; go.textContent=label;
       return;
     }
+    /* 復号は成功。ここから先で失敗しても、パスコードは正しい */
+    m.classList.remove('on');
     go.disabled=false; go.textContent=label;
+    try{ applyState(st); }catch(e){ console.error('applyState failed after unlock', e); }
+    try{ finishInit(true); }catch(e){ console.error('init failed after unlock', e); try{ finishInit(false); }catch(e2){} }
   };
   go.addEventListener('click',tryOpen);
   pin.addEventListener('keydown',e=>{ if(e.key==='Enter') tryOpen(); });
@@ -4266,11 +4590,29 @@ document.getElementById('resetBtn').addEventListener('click',()=>{
   render();
 });
 function shareUrlFrom(payload){ return location.origin+location.pathname+location.search+'#'+payload; }
+/* リンクは長いので、手作業での選択ミスによる切れを防ぐ。
+   クリップボードAPI → execCommand → 全選択済みの入力欄、の順に確実な方法へ落とす。 */
+function showCopyFallback(url){
+  const m=document.getElementById('copyMdl'), inp=document.getElementById('copyUrl');
+  if(!m||!inp){ window.prompt('このリンクをコピーして共有：',url); return; }
+  inp.value=url; m.classList.add('on');
+  setTimeout(()=>{ try{ inp.focus(); inp.setSelectionRange(0,url.length); }catch(e){} },60);
+}
 function copyShare(url, btn){
+  const done=()=>{ if(btn) flash(btn,'コピーしました ✓'); };
+  const legacy=()=>{
+    try{
+      const ta=document.createElement('textarea');
+      ta.value=url; ta.setAttribute('readonly',''); ta.style.position='fixed'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0,url.length);
+      const okc=document.execCommand('copy'); ta.remove();
+      if(okc){ done(); return true; }
+    }catch(e){}
+    return false;
+  };
   if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(url).then(()=>{ if(btn) flash(btn,'コピーしました ✓'); })
-      .catch(()=>window.prompt('このリンクをコピーして共有：',url));
-  } else { window.prompt('このリンクをコピーして共有：',url); }
+    navigator.clipboard.writeText(url).then(done).catch(()=>{ if(!legacy()) showCopyFallback(url); });
+  } else if(!legacy()){ showCopyFallback(url); }
 }
 let _shareBtnRef=null;
 function openShareModal(btn){
