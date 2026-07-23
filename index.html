@@ -567,8 +567,8 @@
     .cond-b{display:grid; grid-template-columns:repeat(4,1fr); gap:6px 10px; margin-bottom:9px}
     .cond-b .c-k{font-size:8px; font-weight:800; color:#7A8899}
     .cond-b .c-v{font-size:11.5px; font-weight:800; color:#222}
-    .cond-c{column-count:3; column-gap:14px; font-size:8.5px; color:#5A6672; line-height:1.6}
-    .cond-c div{break-inside:avoid}
+    .cond-c{column-count:2; column-gap:18px; color:#5A6672}
+    .cond-c div{break-inside:avoid; padding:1.5px 0}
     .cond-c b{color:#222; font-weight:700}
     .sec-t{font-size:11px; font-weight:800; color:#111; margin:11px 0 5px; padding-left:7px; border-left:3px solid #0CA795}
     /* --- ライフイベント年表 --- */
@@ -587,8 +587,10 @@
     /* --- 汎用 --- */
     .pd-img{width:100%; height:auto; display:block; border:1px solid #E3EAF2; border-radius:7px}
     .pd-2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
-    .pd-4{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:4px}
-    .pd-sq{width:100%; aspect-ratio:1/1; object-fit:contain; display:block; border:1px solid #E3EAF2; border-radius:7px}
+    .pd-wide-img{width:100%; aspect-ratio:3.4/1; object-fit:contain; display:block; border:1px solid #E3EAF2; border-radius:7px; margin-bottom:5px}
+    .pd-half{width:100%; aspect-ratio:4/3; object-fit:contain; display:block; border:1px solid #E3EAF2; border-radius:7px}
+    .pd-pair{margin-top:4px}
+    .pd-pair .sec-t{margin-top:6px}
     .pd-wide{width:100%}
     .pd-tbl{width:100%; border-collapse:collapse; font-size:8px; table-layout:fixed}
     .pd-tbl th{background:#F0F4F8; color:#5A6672; font-size:7.5px; font-weight:800; padding:3px 2px; border:1px solid #D5DEE7; text-align:right}
@@ -596,17 +598,16 @@
     .pd-tbl td{padding:2.5px 2px; border:1px solid #E8EDF3; text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
     .pd-tbl td:first-child,.pd-tbl td:last-child{text-align:left}
     .pd-tbl tr:nth-child(even) td{background:#FAFCFE}
-    /* 年次明細：改行させず、行の高さを一定に保つ */
-    .pd-detail{font-size:6.6px; letter-spacing:-.02em}
-    .pd-detail th{font-size:6.2px; padding:2.5px 1.5px; line-height:1.2; white-space:nowrap; overflow:hidden}
-    .pd-detail td{padding:0 1.5px; height:11.4px; line-height:11.4px; white-space:nowrap; overflow:hidden; text-overflow:clip}
+    /* 年次明細：行数に応じて --rowh / --fs を決め、ページの縦を使い切る（行の高さは全行そろえる） */
+    .pd-detail{letter-spacing:-.01em}
+    .pd-detail th{font-size:calc(var(--fs) * .94); padding:1px 2px; line-height:1.25; white-space:nowrap; overflow:hidden}
     .pd-detail td>*{display:inline; white-space:nowrap}
     /* 画面用の td.ev（11px・折り返しあり・最小幅150px）を確実に打ち消す。
        ここを外すとライフイベント欄だけ文字が大きくなり、行の高さも揃わなくなる。 */
     .pd-detail tbody td.ev,
     .pd-detail tbody td.l,
-    .pd-detail tbody td{font-size:6.6px!important; white-space:nowrap!important; min-width:0!important; max-width:none!important;
-      height:11.4px!important; line-height:11.4px!important; padding:0 1.5px!important; overflow:hidden; text-overflow:clip}
+    .pd-detail tbody td{font-size:var(--fs)!important; white-space:nowrap!important; min-width:0!important; max-width:none!important;
+      height:var(--rowh)!important; line-height:var(--rowh)!important; padding:0 2px!important; overflow:hidden; text-overflow:clip}
     .pd-detail tbody td.ev{font-weight:600; color:#3A4658}
     .pd-detail .l{text-align:left}
     .pd-note{font-size:8.5px; color:#7A8899; line-height:1.65; margin-top:6px}
@@ -4103,11 +4104,16 @@ function buildPrintDoc(){
   /* 途中で資金が尽きたときは内訳がすべて0になるため載せない */
   const brkBlock = busted ? '' : ('<div class="sec-t">最終資産の内訳（'+last.age+'歳時点）</div><div class="brk">'+brk+'</div>');
   /* 1ページ目：基本情報・設定内容・結果の要約 */
+  /* 細かな設定は件数で密度が変わるので、余白が出ないよう文字と行間を調整する */
+  const fineN=fine.length;
+  const fineFS=Math.max(8.4, Math.min(12.4, 15.2 - fineN*0.30));
+  const fineLH=Math.max(1.75, Math.min(2.45, 2.75 - fineN*0.045));
+  const condStyle=' style="font-size:'+fineFS.toFixed(1)+'px; line-height:'+fineLH.toFixed(2)+'"';
   P0.push(pdPage('この試算の前提と結果', stamp,
     '<div class="hero">'+heroA+heroB+'</div>'
     +brkBlock
     +'<div class="sec-t">主な設定</div><div class="cond-a">'+condA+'</div><div class="cond-b">'+condB+'</div>'
-    +'<div class="sec-t">細かな設定</div><div class="cond-c">'+fine.join('')+'</div>'));
+    +'<div class="sec-t">細かな設定</div><div class="cond-c"'+condStyle+'>'+fine.join('')+'</div>'));
 
   /* 2ページ目：ライフイベントの年表（1ページを丸ごと使う） */
   const evFull=evs.map(e=>'<tr><td class="age">'+e.age+'歳</td>'
@@ -4218,7 +4224,9 @@ function buildPrintDoc(){
 
   /* ---------- 6ページ目：インフレ・年金パターン・年次キャッシュフロー ---------- */
   const inflT=document.getElementById('inflTbl');
-  const SQ=560;   /* 4つとも同じ正方形にそろえる */
+  const WIDE_W=1560, WIDE_H=460;   /* 横いっぱい・縦は半分 */
+  const HALF_W=700, HALF_H=525;    /* 下段の2つ（4:3） */
+  const retireAge=P.selfRetire||65;
 
   /* 左上：インフレ率ごとの総資産 */
   const inflPcts=[...INFL_SCENARIOS]; const basePct=+(P.inflation*100).toFixed(2);
@@ -4231,8 +4239,8 @@ function buildPrintDoc(){
             data:rs.map(r=>({x:r.age,y:r.netWorth}))};
   });
   const inflMax=Math.ceil(Math.max(1,...inflSeries.flatMap(sr=>sr.data.map(d=>d.y)))*1.1/100)*100;
-  const inflImg=pdLineChart({w:SQ,h:SQ,title:'インフレ率による資産の変化',xMin:rows[0].age,xMax:P.endAge,
-    yMin:0,yMax:inflMax,legend:true,legendRows:2,series:inflSeries});
+  const inflImg=pdLineChart({w:WIDE_W,h:WIDE_H,xMin:rows[0].age,xMax:P.endAge,
+    yMin:0,yMax:inflMax,legend:true,series:inflSeries});
 
   /* 右上：年金の受け取り方ごとの総資産（60歳から） */
   const penPats=(typeof pensionPatterns==='function'?pensionPatterns(P):[]).map((pt,i)=>({
@@ -4242,12 +4250,13 @@ function buildPrintDoc(){
     width:pt.current?2.6:1.6, dash:!pt.current,
     data:pt.rows.filter(r=>r.age>=60).map(r=>({x:r.age,y:r.netWorth}))}));
   const penMax=Math.ceil(Math.max(1,...penSeries.flatMap(sr=>sr.data.map(d=>d.y)))*1.1/100)*100;
-  const penImg=pdLineChart({w:SQ,h:SQ,title:'年金の受け取り方による違い（60歳〜）',xMin:60,xMax:P.endAge,
-    yMin:0,yMax:penMax,legend:true,legendRows:2,series:penSeries});
+  const penImg=pdLineChart({w:WIDE_W,h:WIDE_H,xMin:60,xMax:P.endAge,
+    yMin:0,yMax:penMax,legend:true,series:penSeries});
 
   /* 左下：65歳時点の資産内訳 */
-  const r65=rows.find(r=>r.age===65);
-  const pieImg=pdPieChart({w:SQ,h:SQ,title:'65歳時点の資産の内訳',items:r65?[
+  const rRet=rows.find(r=>r.age===retireAge) || rows[rows.length-1];
+  const r65=rRet;
+  const pieImg=pdPieChart({w:HALF_W,h:HALF_H,items:r65?[
     {label:'現預金',        value:Math.max(0,r65.cash),        color:'#3AA0E0'},
     {label:'NISA評価額',    value:Math.max(0,r65.nisaV),       color:'#0CA795'},
     {label:'確定拠出年金',  value:Math.max(0,r65.dcValue*(1-P.dcTaxRate)), color:'#8E6FC4'},
@@ -4256,22 +4265,24 @@ function buildPrintDoc(){
 
   /* 右下：年次キャッシュフロー（収入と支出） */
   const cfMax=Math.ceil(Math.max(1,...rows.map(r=>Math.max(r.incomeCash,r.expense)))*1.1/100)*100;
-  const flowImg=pdLineChart({w:SQ,h:SQ,title:'年次キャッシュフロー',xMin:rows[0].age,xMax:last.age,
+  const flowImg=pdLineChart({w:HALF_W,h:HALF_H,xMin:rows[0].age,xMax:last.age,
     yMin:0,yMax:cfMax,legend:true,series:[
       {label:'収入（手取り）', color:'#0CA795', width:2.2, data:rows.map(r=>({x:r.age,y:r.incomeCash}))},
       {label:'支出',           color:'#C2183C', width:2.2, dash:true, data:rows.map(r=>({x:r.age,y:r.expense}))}
     ]});
 
+  const penT=document.getElementById('penTbl');
   P0.push(pdPage('インフレ率・年金・資産内訳・キャッシュフロー', stamp,
-    '<div class="pd-4">'
-    +'<img class="pd-sq" src="'+inflImg+'">'
-    +'<img class="pd-sq" src="'+penImg+'">'
-    +'<img class="pd-sq" src="'+pieImg+'">'
-    +'<img class="pd-sq" src="'+flowImg+'">'
-    +'</div>'
-    +'<div class="sec-t">インフレ率による資産の変化（詳細）</div>'
-    +(inflT?'<table class="pd-tbl pd-wide">'+inflT.innerHTML+'</table>':'<div class="pd-note">—</div>')
-    +'<div class="pd-note">※ 上の4つはいずれも同じ縮尺の正方形です。年金のグラフは、受給開始年齢（繰上げ・基準・繰下げ）と財政検証のケース（楽観・保守）を入れ替えた5パターンを比べています。</div>'));
+    '<div class="sec-t">インフレ率による資産の変化</div>'
+    +'<img class="pd-wide-img" src="'+inflImg+'">'
+    +(inflT?'<table class="pd-tbl pd-wide">'+inflT.innerHTML+'</table>':'')
+    +'<div class="sec-t">年金の受け取り方による資産の変化（60歳〜）</div>'
+    +'<img class="pd-wide-img" src="'+penImg+'">'
+    +(penT?'<table class="pd-tbl pd-wide">'+penT.innerHTML+'</table>':'')
+    +'<div class="pd-2 pd-pair">'
+    +'<div><div class="sec-t">'+retireAge+'歳（定年）時点の資産内訳</div><img class="pd-half" src="'+pieImg+'"></div>'
+    +'<div><div class="sec-t">年次キャッシュフロー</div><img class="pd-half" src="'+flowImg+'"></div>'
+    +'</div>'));
 
   /* ---------- 7〜9ページ目：年次明細 ---------- */
   const tbl=document.getElementById('tbl');
@@ -4286,8 +4297,13 @@ function buildPrintDoc(){
       const chunk=trs.slice(i,i+per);
       const n=Math.floor(i/per)+1, tot=Math.ceil(trs.length/per);
       const a0=chunk[0].cells[1].textContent.trim(), a1=chunk[chunk.length-1].cells[1].textContent.trim();
+      /* A4縦（本文 約255mm）から見出しぶんを引き、行数で割って1行の高さを決める */
+      const availMM=(n===tot?238:246), headMM=7;   /* 最終ページは注記のぶんを残す */
+      const rowMM=Math.max(3.0, Math.min(9.0, (availMM-headMM)/chunk.length));
+      const fsPX=Math.max(6.4, Math.min(11.0, rowMM*3.7795*0.34));
+      const style=' style="--rowh:'+rowMM.toFixed(2)+'mm; --fs:'+fsPX.toFixed(1)+'px"';
       P0.push(pdPage('年次明細（'+n+'/'+tot+'）　本人 '+a0+'〜'+a1, stamp,
-        '<table class="pd-tbl pd-detail">'+COLS+head+'<tbody>'+chunk.map(t=>t.outerHTML).join('')+'</tbody></table>'
+        '<table class="pd-tbl pd-detail"'+style+'>'+COLS+head+'<tbody>'+chunk.map(t=>t.outerHTML).join('')+'</tbody></table>'
         +(n===tot?'<div class="pd-note">※ 金額は各年末時点。総資産＝現預金＋NISA評価額＋教育資金＋確定拠出年金（税引後）。ローン残高は団信で消滅した場合0になります。</div>':'')));
     }
   }
