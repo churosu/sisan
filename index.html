@@ -618,18 +618,19 @@
     .pd-cmp .th-sub{font-weight:600; opacity:.75}
     .pd-cmp .cmp-neg{color:#C2183C; font-weight:800}
     .pd-cmp tr.is-def td{background:#EAF7F2}
-    .bs-pd{gap:9px; margin-bottom:4px}
-    .bsh{font-size:9px; font-weight:800; padding:3px 7px; border-radius:5px; margin-bottom:3px}
+    .bs-block{break-inside:avoid; page-break-inside:avoid}
+    .bs-pd{gap:9px; margin-bottom:3px}
+    .bsh{font-size:calc(var(--bsfs,9px) * .95); font-weight:800; padding:2.5px 7px; border-radius:5px; margin-bottom:2px}
     .bsh-a{background:#EAF7F2; color:#12855F}
     .bsh-l{background:#FDECF1; color:#C2183C}
-    .bstbl{width:100%; border-collapse:collapse; font-size:9px}
-    .bstbl td{padding:2.5px 6px; border-bottom:1px solid #E3EAF2; text-align:right; font-weight:700; color:#111}
+    .bstbl{width:100%; border-collapse:collapse; font-size:var(--bsfs,9px)}
+    .bstbl td{padding:var(--bspad,2.5px) 6px; border-bottom:1px solid #E3EAF2; text-align:right; font-weight:700; color:#111}
     .bstbl td.l{text-align:left; font-weight:600; color:#5A6672}
-    .bsn{display:block; font-size:7.5px; color:#8A98AB; font-weight:600}
+    .bsn{display:block; font-size:calc(var(--bsfs,9px) * .82); color:#8A98AB; font-weight:600; line-height:1.35}
     .bstbl tr.bss td{border-top:1.2px solid #111; border-bottom:none; font-weight:800; color:#111}
-    .bsnet{display:flex; align-items:baseline; justify-content:space-between; margin-top:6px; padding:6px 11px; background:#F7FAFC; border:1.2px solid #111; border-radius:8px}
-    .bsnet span{font-size:10px; font-weight:800; color:#5A6672}
-    .bsnet b{font-size:16px; font-weight:800; color:#0CA795}
+    .bsnet{display:flex; align-items:baseline; justify-content:space-between; margin-top:5px; padding:calc(var(--bspad,2.5px) * 2) 11px; background:#F7FAFC; border:1.2px solid #111; border-radius:8px}
+    .bsnet span{font-size:calc(var(--bsfs,9px) * 1.1); font-weight:800; color:#5A6672}
+    .bsnet b{font-size:calc(var(--bsfs,9px) * 1.8); font-weight:800; color:#0CA795}
     .bsnet b.bsneg{color:#C2183C}
     .pd-tbl{width:100%; border-collapse:collapse; font-size:8px; table-layout:fixed}
     .pd-tbl th{background:#F0F4F8; color:#5A6672; font-size:7.5px; font-weight:800; padding:3px 2px; border:1px solid #D5DEE7; text-align:right}
@@ -3960,7 +3961,8 @@ function pdCv(w,h){ const cv=document.createElement('canvas'); cv.width=w; cv.he
 function pdFmt(v){ const a=Math.abs(v); if(a>=10000) return (v/10000).toFixed(1)+'億'; if(a>=1000) return Math.round(v/100)/10+'千'; return String(Math.round(v)); }
 /* 折れ線グラフ。events を渡すと、線の近くに引き出し線つきでラベルを置く（重ならないよう縦にずらす） */
 function pdLineChart(o){
-  const W=o.w||760, H=o.h||760, S=W/760;
+  const W=o.w||760, H=o.h||760;
+  const S=(W/760)*(o.fontScale||1);
   const cv=pdCv(W,H), g=cv.getContext('2d');
   const padL=68*S, padR=18*S, padT=(o.title?34:14)*S, padB=(o.legend?52:30)*S;
   const iw=W-padL-padR, ih=H-padT-padB;
@@ -4047,14 +4049,16 @@ function pdLineChart(o){
 }
 /* 円グラフ（内訳） */
 function pdPieChart(o){
-  const W=o.w||760, H=o.h||760, S=W/760;
+  const W=o.w||760, H=o.h||760;
+  /* 紙面では幅90mm程度に縮むため、文字は canvas 上で大きめに描く必要がある */
+  const S=(W/760)*(o.fontScale||1);
   const cv=pdCv(W,H), g=cv.getContext('2d');
   g.fillStyle='#fff'; g.fillRect(0,0,W,H);
   const F=(w,px)=>`${w} ${px*S}px system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans JP",sans-serif`;
   if(o.title){ g.font=F(800,14); g.fillStyle='#2E363B'; g.textAlign='left'; g.textBaseline='alphabetic'; g.fillText(o.title,18*S,20*S); }
   const items=(o.items||[]).filter(i=>i.value>0);
   const total=items.reduce((a,i)=>a+i.value,0);
-  const cx=W/2, cy=H*0.44, R=Math.min(W,H)*0.29;
+  const cx=W/2, cy=H*0.40, R=Math.min(W,H)*0.25;
   if(total<=0){ g.font=F(700,12); g.fillStyle='#8A98AB'; g.textAlign='center'; g.fillText('該当なし',cx,cy); return cv.toDataURL('image/png'); }
   let a0=-Math.PI/2;
   items.forEach(it=>{
@@ -4065,18 +4069,18 @@ function pdPieChart(o){
     a0=a1;
   });
   g.beginPath(); g.arc(cx,cy,R*0.52,0,Math.PI*2); g.fillStyle='#fff'; g.fill();
-  g.font=F(800,15); g.fillStyle='#2E363B'; g.textAlign='center'; g.textBaseline='middle';
+  g.font=F(800,17); g.fillStyle='#2E363B'; g.textAlign='center'; g.textBaseline='middle';
   g.fillText(pdFmt(total)+'万円',cx,cy);
   /* 凡例 */
-  let ly=cy+R+26*S;
+  let ly=cy+R+30*S;
   g.textBaseline='middle'; g.textAlign='left';
   items.forEach(it=>{
-    g.fillStyle=it.color; g.fillRect(30*S,ly-5*S,11*S,11*S);
-    g.font=F(700,11); g.fillStyle='#5A6672'; g.fillText(it.label,48*S,ly);
-    g.font=F(800,11); g.fillStyle='#2E363B'; g.textAlign='right';
-    g.fillText(pdFmt(it.value)+'万円（'+Math.round(it.value/total*100)+'%）',W-30*S,ly);
+    g.fillStyle=it.color; g.fillRect(26*S,ly-6*S,13*S,13*S);
+    g.font=F(700,13.5); g.fillStyle='#5A6672'; g.fillText(it.label,48*S,ly);
+    g.font=F(800,13.5); g.fillStyle='#2E363B'; g.textAlign='right';
+    g.fillText(pdFmt(it.value)+'万円（'+Math.round(it.value/total*100)+'%）',W-26*S,ly);
     g.textAlign='left';
-    ly+=19*S;
+    ly+=23*S;
   });
   return cv.toDataURL('image/png');
 }
@@ -4195,19 +4199,47 @@ function buildPrintDoc(){
   /* 途中で資金が尽きたときは内訳がすべて0になるため載せない */
   const brkBlock = busted ? '' : ('<div class="sec-t">最終資産の内訳（'+last.age+'歳時点）</div><div class="brk">'+brk+'</div>');
   /* 1ページ目：基本情報・設定内容・結果の要約 */
-  /* 現在のバランスシート（1ページ目の最後に載せる） */
+  /* 現在のバランスシート（1ページ目の最後に載せる）。
+     1ページ目は要素が多いので、全体の分量から縮小率を決めて2ページ目にはみ出さないようにする。 */
+  const bsData=balanceSheet(P);
+  const fineN0=fine.length;
+  const bsRows=Math.max(bsData.assets.length, Math.max(1,bsData.liabilities.length))+1;  /* 合計行を含む */
+  /* 1ページ目は要素が多い。実際に使う文字サイズから高さを見積もり、
+     A4の本文（約250mm）に収まる縮小率を少しずつ探す。 */
+  const PX=3.7795;                       /* 1mm あたりの px */
+  const FIXED1=12                        /* ページ見出し */
+    +30                                  /* 大きな数字2つ */
+    +(busted?0:20)                       /* 最終資産の内訳 */
+    +26+22                               /* 資産形成の評価 */
+    +26+20                               /* 主な設定 */
+    +8+8                                 /* 見出し2つ */
+    +13+9;                               /* 純資産の枠と注記 */
+  const fineCols=(fineN0>=14)?3:2;      /* 項目が多いときは3段組にして行数を減らす */
+  const fineRows=Math.ceil(fineN0/fineCols);
+  function page1Height(sq){
+    const fs=Math.max(7.0, Math.min(12.4, 15.2-fineN0*0.30)*sq);
+    const lh=Math.max(1.5, Math.min(2.45, 2.75-fineN0*0.045)*sq);
+    const bfs=Math.max(6.2, 9*sq), bpad=Math.max(1.2, 2.5*sq);
+    const fineMM=fineRows*(fs*lh+3)/PX;
+    const bsMM=bsRows*(bfs*1.3 + bfs*0.82*1.35 + bpad*2)/PX;
+    return {mm:FIXED1+fineMM+bsMM, fs, lh, bfs, bpad};
+  }
+  let squeeze=1, m1=page1Height(1);
+  for(let k=0;k<26 && m1.mm>252;k++){ squeeze=Math.max(0.52, squeeze-0.02); m1=page1Height(squeeze); }
   const bsHtml=(function(){
-    const bs=balanceSheet(P);
+    const bs=bsData;
     const row=i=>'<tr><td class="l">'+pdEsc(i.k)+'<span class="bsn">'+pdEsc(i.note)+'</span></td><td>'+man(i.v)+'万円</td></tr>';
     const la=bs.liabilities.length?bs.liabilities.map(row).join(''):'<tr><td class="l" colspan="2">借入はありません</td></tr>';
-    return '<div class="pd-2 bs-pd">'
+    const st=' style="--bsfs:'+m1.bfs.toFixed(1)+'px; --bspad:'+m1.bpad.toFixed(1)+'px"';
+    return '<div class="bs-block"'+st+'><div class="pd-2 bs-pd">'
       +'<div><div class="bsh bsh-a">資産</div><table class="bstbl"><tbody>'+bs.assets.map(row).join('')
         +'<tr class="bss"><td class="l">資産の合計</td><td>'+man(bs.aSum)+'万円</td></tr></tbody></table></div>'
       +'<div><div class="bsh bsh-l">負債</div><table class="bstbl"><tbody>'+la
         +'<tr class="bss"><td class="l">負債の合計</td><td>'+man(bs.lSum)+'万円</td></tr></tbody></table></div>'
       +'</div>'
       +'<div class="bsnet"><span>純資産（資産 − 負債）</span><b'+(bs.net<0?' class="bsneg"':'')+'>'+manY(bs.net)+'</b></div>'
-      +'<div class="pd-note" style="margin-top:4px">※ 車・建物・土地の評価額は<b>概算</b>です。車は購入からの経過年数、建物は築年数に応じた残価率で機械的に計算し、土地は購入時の価格のまま据え置いています。実際の売却価格は車種・立地・建物の状態・相場により大きく異なります。</div>';
+      +'<div class="pd-note" style="margin-top:3px">※ 車・建物・土地の評価額は<b>概算</b>です。車は購入からの経過年数、建物は築年数に応じた残価率で機械的に計算し、土地は購入時の価格のまま据え置いています。実際の売却価格は車種・立地・建物の状態・相場により大きく異なります。</div>'
+      +'</div>';
   })();
   /* 資産形成の評価（1ページ目に載せる） */
   let rankHtml='';
@@ -4226,9 +4258,8 @@ function buildPrintDoc(){
   }
   /* 細かな設定は件数で密度が変わるので、余白が出ないよう文字と行間を調整する */
   const fineN=fine.length;
-  const fineFS=Math.max(8.4, Math.min(12.4, 15.2 - fineN*0.30));
-  const fineLH=Math.max(1.75, Math.min(2.45, 2.75 - fineN*0.045));
-  const condStyle=' style="font-size:'+fineFS.toFixed(1)+'px; line-height:'+fineLH.toFixed(2)+'"';
+  const fineFS=m1.fs, fineLH=m1.lh;
+  const condStyle=' style="font-size:'+fineFS.toFixed(1)+'px; line-height:'+fineLH.toFixed(2)+'; grid-template-columns:repeat('+fineCols+',1fr)"';
   P0.push(pdPage('この試算の前提と結果', stamp,
     '<div class="hero">'+heroA+heroB+'</div>'
     +brkBlock
@@ -4278,14 +4309,14 @@ function buildPrintDoc(){
   const retireAge2=P.selfRetire||65;
   const HALF_W2=700, HALF_H2=525;
   const rRet2=rows.find(r=>r.age===retireAge2) || rows[rows.length-1];
-  const pieImg2=pdPieChart({w:HALF_W2,h:HALF_H2,items:rRet2?[
+  const pieImg2=pdPieChart({w:HALF_W2,h:HALF_H2,fontScale:1.9,items:rRet2?[
     {label:'現預金',       value:Math.max(0,rRet2.cash),  color:'#3AA0E0'},
     {label:'NISA評価額',   value:Math.max(0,rRet2.nisaV), color:'#0CA795'},
     {label:'確定拠出年金', value:Math.max(0,rRet2.dcValue*(1-P.dcTaxRate)), color:'#8E6FC4'},
     {label:'教育資金',     value:Math.max(0,rRet2.eduAccount), color:'#E8A54B'},
   ]:[]});
   const cfMax2=Math.ceil(Math.max(1,...rows.map(r=>Math.max(r.incomeCash,r.expense)))*1.1/100)*100;
-  const flowImg2=pdLineChart({w:HALF_W2,h:HALF_H2,xMin:rows[0].age,xMax:last.age,
+  const flowImg2=pdLineChart({w:HALF_W2,h:HALF_H2,fontScale:1.9,xMin:rows[0].age,xMax:last.age,
     yMin:0,yMax:cfMax2,legend:true,series:[
       {label:'収入（手取り）', color:'#0CA795', width:2.2, data:rows.map(r=>({x:r.age,y:r.incomeCash}))},
       {label:'支出',           color:'#C2183C', width:2.2, dash:true, data:rows.map(r=>({x:r.age,y:r.expense}))}
