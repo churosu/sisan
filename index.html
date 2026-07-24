@@ -552,9 +552,9 @@
 
   #printPlanCard{display:none}
   #printDoc{display:none}
-  /* 余白は0として扱い、用紙の297mmをそのまま計算に使う。
-     左右だけは文字が端に寄らないよう、ページ側の内側余白で確保する。 */
-  @page{ size:A4 portrait; margin:0; }
+  /* 下に20mmの余白を確保する。ブラウザの印刷フッター（ページ番号・日時）はここに入り、
+     プリンタが印字できない用紙の端もここで吸収する。左右はページ側の内側余白で確保。 */
+  @page{ size:A4 portrait; margin:0 0 20mm; }
   @media print{
     /* 画面用の要素はすべて隠し、印刷専用の組み版だけを出す */
     body>*{display:none!important}
@@ -1360,7 +1360,7 @@ function eduTotalPerChild(P){ let t=0; for(let a=3;a<=21;a++) t+=eduAnnual(a,P);
 function insurance(age){ if(age<30)return 8; if(age<40)return 14; if(age<50)return 22; if(age<60)return 28; if(age<70)return 22; return 14; }
 /* 公的年金（令和7年度基準・概算）: 老齢基礎満額83.17万/年、報酬比例乗率5.481/1000（2003年4月〜）、標準報酬の年間上限概算1230万 */
 const CURRENT_YEAR=new Date().getFullYear();
-const APP_VERSION='0.0.1';   /* 更新するたびに末尾を増やす */
+const APP_VERSION='0.0.2';   /* 更新するたびに末尾を増やす */
 const MAX_AGE=120;  /* 生活資金が尽きなかった場合の試算上限 */
 const PENSION_FULL=83.17, PENSION_RATE=5.481/1000, PENSION_CAP=1230, PENSION_NET=0.90;
 /* マクロ経済スライドの調整期間（2024年財政検証・過去30年投影ケース）
@@ -4589,15 +4589,16 @@ function buildPrintDoc(){
     /* ② 用紙から余白・ページ見出し・表見出し（いずれもCSSで高さを固定）を引く
        ③ さらに安全余裕を引いて実際の描画範囲を出す
        ④ 描画範囲 ÷ 行数 で1行の高さを決める（全ページ共通にして見た目をそろえる） */
-    /* 用紙297mmから、ページ見出し・表の見出し行・注記を引いた残りが行に使える高さ。
-         297 − 12（ページ見出し） − 8（表の見出し行） − 14（注記） ＝ 263mm
+    /* 用紙297mmから、下余白・ページ見出し・表の見出し行・注記を引いた残りが行に使える高さ。
+         297 − 20（下余白） − 12（ページ見出し） − 8（表の見出し行） − 14（注記） ＝ 243mm
        これを最も行数の多いページの行数で割り、端数の余裕として0.5mm引いた値を
-       全ページ共通の行の高さにする（例：20行 → 263/20−0.5＝12.65mm）。 */
+       全ページ共通の行の高さにする（例：20行 → 243/20−0.5＝11.65mm）。 */
     const PAGE_MM=297;
+    const BOTTOM_MM=20;                  /* 印刷フッターと印字できない端のために空ける */
     const PGHEAD_MM=12;                  /* .pg-h を12mmで固定 */
     const THEAD_MM=8;                    /* 表の見出し行を8mmで固定 */
     const NOTE_MM=14;                    /* 最終ページに入る注記 */
-    const AVAIL_MM=PAGE_MM-PGHEAD_MM-THEAD_MM-NOTE_MM;   /* 263mm */
+    const AVAIL_MM=PAGE_MM-BOTTOM_MM-PGHEAD_MM-THEAD_MM-NOTE_MM;   /* 243mm */
     const MARGIN_ROW_MM=0.5;             /* 端数のための余裕 */
     const rowMM=Math.max(2.6, AVAIL_MM/per-MARGIN_ROW_MM);
     const fsPX=Math.max(6.0, Math.min(13.0, rowMM*3.7795*0.30));
