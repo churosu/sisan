@@ -561,6 +561,9 @@
     .pg{break-after:auto; page-break-after:auto}
     .pg + .pg{break-before:page; page-break-before:always}
     .pg{break-inside:auto}
+    /* 画面用の thead は sticky。印刷では見出しが紙面の途中に浮くため必ず解除する */
+    #printDoc thead th, #printDoc th{position:static!important; top:auto!important}
+    #printDoc thead{display:table-header-group}
     .pg-h{display:flex; align-items:baseline; gap:8px; border-bottom:2px solid #0CA795; padding-bottom:5px; margin:0 0 10px}
     .pg-h .ph-t{font-size:15px; font-weight:800; color:#111}
     .pg-h .ph-s{font-size:9.5px; font-weight:700; color:#7A8899; margin-left:auto}
@@ -627,6 +630,8 @@
     .bstbl td{padding:var(--bspad,2.5px) 6px; border-bottom:1px solid #E3EAF2; text-align:right; font-weight:700; color:#111}
     .bstbl td.l{text-align:left; font-weight:600; color:#5A6672}
     .bsn{display:block; font-size:calc(var(--bsfs,9px) * .82); color:#8A98AB; font-weight:600; line-height:1.35}
+    /* 詰まっている場合は注記を同じ行に収めて高さを稼ぐ */
+    .bs-inline .bsn{display:inline; margin-left:5px; line-height:1}
     .bstbl tr.bss td{border-top:1.2px solid #111; border-bottom:none; font-weight:800; color:#111}
     .bsnet{display:flex; align-items:baseline; justify-content:space-between; margin-top:5px; padding:calc(var(--bspad,2.5px) * 2) 11px; background:#F7FAFC; border:1.2px solid #111; border-radius:8px}
     .bsnet span{font-size:calc(var(--bsfs,9px) * 1.1); font-weight:800; color:#5A6672}
@@ -4069,8 +4074,10 @@ function pdPieChart(o){
     a0=a1;
   });
   g.beginPath(); g.arc(cx,cy,R*0.52,0,Math.PI*2); g.fillStyle='#fff'; g.fill();
-  g.font=F(800,17); g.fillStyle='#2E363B'; g.textAlign='center'; g.textBaseline='middle';
-  g.fillText(pdFmt(total)+'万円',cx,cy);
+  /* 「3千万」ではなく「3,000万円」と読める形にする */
+  const yen=v=>Math.round(v).toLocaleString('ja-JP')+'万円';
+  g.font=F(800,15); g.fillStyle='#2E363B'; g.textAlign='center'; g.textBaseline='middle';
+  g.fillText(yen(total),cx,cy);
   /* 凡例 */
   let ly=cy+R+30*S;
   g.textBaseline='middle'; g.textAlign='left';
@@ -4078,7 +4085,7 @@ function pdPieChart(o){
     g.fillStyle=it.color; g.fillRect(26*S,ly-6*S,13*S,13*S);
     g.font=F(700,13.5); g.fillStyle='#5A6672'; g.fillText(it.label,48*S,ly);
     g.font=F(800,13.5); g.fillStyle='#2E363B'; g.textAlign='right';
-    g.fillText(pdFmt(it.value)+'万円（'+Math.round(it.value/total*100)+'%）',W-26*S,ly);
+    g.fillText(yen(it.value)+'（'+Math.round(it.value/total*100)+'%）',W-26*S,ly);
     g.textAlign='left';
     ly+=23*S;
   });
@@ -4102,9 +4109,11 @@ function pdClone(id){
   const el=document.getElementById(id);
   return el?el.innerHTML:'';
 }
+/* 値が未定義のまま文字列に混ざるのを防ぐ（設定項目が増減しても崩れないように） */
+function pdSafe(html){ return String(html).replace(/undefined/g,'—').replace(/\bNaN\b/g,'—'); }
 function pdPage(title, sub, body){
   return '<section class="pg"><div class="pg-h"><span class="ph-t">'+pdEsc(title)+'</span>'
-       + (sub?'<span class="ph-s">'+pdEsc(sub)+'</span>':'')+'</div>'+body+'</section>';
+       + (sub?'<span class="ph-s">'+pdEsc(sub)+'</span>':'')+'</div>'+pdSafe(body)+'</section>';
 }
 /* ライフイベントの一覧（年齢・内容・その年の一時費用） */
 function pdEvents(P, rows){
@@ -4154,7 +4163,7 @@ function buildPrintDoc(){
   ].map(b=>'<div class="brk-i"><div class="brk-k">'+pdEsc(b[0])+'</div><div class="brk-v">'+b[1]+'</div><div class="brk-s">'+pdEsc(b[2])+'</div></div>').join('');
 
   const condA=[
-    ['現在の年齢', P.currentAge+'歳'+(P.marriageRow>=0?'／パートナー '+P.partnerAge+'歳':'')],
+    ['現在の年齢', P.currentAge+'歳'+(cmpIsMarried(P)&&P.partnerCurrentAge>0?'／パートナー '+P.partnerCurrentAge+'歳':'')],
     ['世帯', married+'・'+kidsTxt],
     ['住まい', home],
   ].map(c=>'<div><div class="c-k">'+pdEsc(c[0])+'</div><div class="c-v">'+pdEsc(c[1])+'</div></div>').join('');
@@ -4181,7 +4190,7 @@ function buildPrintDoc(){
     fine.push('<div><b>住宅ローン減税</b>：'+P.creditYears+'年・残高×'+(P.creditRate*100).toFixed(1)+'%・年上限'+P.creditCap+'万</div>');
   }
   if(P.hasHousingSubsidy) fine.push('<div><b>住宅ローン手当</b>：'+(P.housingSubsidyMode==='rate'?('残高×'+(P.housingSubsidyRate*100).toFixed(2)+'%/年'):('定額 月'+P.housingSubsidyFixed+'万'))+'／購入から'+P.housingSubsidyYears+'年／'+(P.housingSubsidyTaxable?'課税（給与扱い）':'非課税')+'</div>');
-  if(P.hasCar) fine.push('<div><b>車</b>：'+P.carFirstAge+'歳から'+man(P.carPrice)+'万を'+P.carCycle+'年ごと（'+P.carEndAge+'歳まで）／維持費 年'+P.carCost+'万</div>');
+  if(P.hasCar) fine.push('<div><b>車</b>：'+P.carFirstAge+'歳から'+man(P.carPrice)+'万を'+P.carCycle+'年ごと（'+P.carReturnAge+'歳で免許返納）／下取り'+Math.round(P.carTradeIn*100)+'%・車体上昇 年'+(P.carInflation*100).toFixed(1)+'%</div>');
   if(P.children.length) fine.push('<div><b>進学の想定</b>：大学 '+pdEsc(document.getElementById('eduUniv')?document.getElementById('eduUniv').selectedOptions[0].textContent:'—')+'</div>');
   if(P.hasPartnerNisa) fine.push('<div><b>パートナーのNISA</b>：月'+P.pNisaMonthly+'万（枠は2人分）</div>');
   if(P.hasKidNisa) fine.push('<div><b>こどもNISA</b>：月'+P.kidNisaMonthly+'万・'+P.kidNisaTo+'歳で受け渡し（2027年開始予定）</div>');
@@ -4190,7 +4199,8 @@ function buildPrintDoc(){
   if(P.hasDivorce) fine.push('<div><b>離婚</b>：'+P.divorceAge+'歳・費用'+man(P.divorceCost)+'万</div>');
   if(P.hasParentCare) fine.push('<div><b>親の介護</b>：'+P.parentCareAge+'歳から'+P.parentCareYears+'年・年'+P.parentCareCost+'万</div>');
   if(P.hasSelfDeath) fine.push('<div><b>本人の死亡</b>：'+P.selfDeathAge+'歳（遺族年金・団信を反映）</div>');
-  fine.push('<div><b>生活防衛費</b>：'+P.emgMonths+'か月分／現預金の上限 '+man(P.cashCap)+'万'+(P.sweepNisa?'（超過分はNISAへ）':'')+'</div>');
+  /* 生活防衛費の月数は年ごとに変わる（扶養の有無・共働き・退職後）ので、初年度の値を示す */
+  fine.push('<div><b>生活防衛費</b>：'+(rows[0]&&rows[0].emgMonths!=null?rows[0].emgMonths+'か月分（現時点）':'自動')+'／現預金の上限 '+man(P.cashCap)+'万'+(P.sweepNisa?'（超過分はNISAへ）':'')+'</div>');
 
   const evs=pdEvents(P,rows);
   const evRows=evs.map(e=>'<tr><td class="age">'+e.age+'歳</td><td>'+pdEsc(e.txt)+'</td>'
@@ -4207,45 +4217,53 @@ function buildPrintDoc(){
   /* 1ページ目は要素が多い。実際に使う文字サイズから高さを見積もり、
      A4の本文（約250mm）に収まる縮小率を少しずつ探す。 */
   const PX=3.7795;                       /* 1mm あたりの px */
+  /* 実際の描画は見積もりより膨らむため、各ブロックを多めに見積もる */
   const FIXED1=12                        /* ページ見出し */
     +30                                  /* 大きな数字2つ */
-    +(busted?0:20)                       /* 最終資産の内訳 */
-    +26+22                               /* 資産形成の評価 */
-    +26+20                               /* 主な設定 */
-    +8+8                                 /* 見出し2つ */
-    +13+9;                               /* 純資産の枠と注記 */
-  const fineCols=(fineN0>=14)?3:2;      /* 項目が多いときは3段組にして行数を減らす */
+    +(busted?0:22)                       /* 最終資産の内訳 */
+    +9+20+18                             /* 資産形成の評価（見出し＋バッジ＋年代表） */
+    +9+13+16                             /* 主な設定 */
+    +9+9                                 /* 見出し2つ */
+    +16+13;                              /* 純資産の枠と注記 */
+  const fineCols=(fineN0>=18)?4:((fineN0>=11)?3:2);   /* 項目が多いほど段を増やして行数を減らす */
   const fineRows=Math.ceil(fineN0/fineCols);
   function page1Height(sq){
-    const fs=Math.max(7.0, Math.min(12.4, 15.2-fineN0*0.30)*sq);
-    const lh=Math.max(1.5, Math.min(2.45, 2.75-fineN0*0.045)*sq);
-    const bfs=Math.max(6.2, 9*sq), bpad=Math.max(1.2, 2.5*sq);
-    const fineMM=fineRows*(fs*lh+3)/PX;
-    const bsMM=bsRows*(bfs*1.3 + bfs*0.82*1.35 + bpad*2)/PX;
-    return {mm:FIXED1+fineMM+bsMM, fs, lh, bfs, bpad};
+    const fs=Math.max(6.0, Math.min(12.4, 15.2-fineN0*0.30)*sq);
+    const lh=Math.max(1.30, Math.min(2.45, 2.75-fineN0*0.045)*sq);
+    const bfs=Math.max(5.4, 9*sq), bpad=Math.max(0.6, 2.5*sq);
+    const inline=(sq<0.80);                          /* 詰まってきたら注記を同じ行に収める */
+    const terse=(sq<0.70);                           /* さらに詰まる場合は説明文も短くする */
+    const fineMM=fineRows*(fs*lh+4)/PX;              /* 上下の余白ぶんを多めに見る */
+    const bsMM=bsRows*(bfs*1.35 + (inline?0:bfs*0.82*1.45) + bpad*2 + 2)/PX;
+    return {mm:FIXED1+fineMM+bsMM-(terse?17:0), fs, lh, bfs, bpad, inline, terse};
   }
+  /* 目標は210mm（A4本文273mmに対して十分な余裕）。バランスシートまで必ず1ページに収める。 */
   let squeeze=1, m1=page1Height(1);
-  for(let k=0;k<26 && m1.mm>252;k++){ squeeze=Math.max(0.52, squeeze-0.02); m1=page1Height(squeeze); }
+  for(let k=0;k<40 && m1.mm>215;k++){ squeeze=Math.max(0.42, squeeze-0.02); m1=page1Height(squeeze); }
   const bsHtml=(function(){
     const bs=bsData;
     const row=i=>'<tr><td class="l">'+pdEsc(i.k)+'<span class="bsn">'+pdEsc(i.note)+'</span></td><td>'+man(i.v)+'万円</td></tr>';
+    const cls=m1.inline?' bs-inline':'';
     const la=bs.liabilities.length?bs.liabilities.map(row).join(''):'<tr><td class="l" colspan="2">借入はありません</td></tr>';
     const st=' style="--bsfs:'+m1.bfs.toFixed(1)+'px; --bspad:'+m1.bpad.toFixed(1)+'px"';
-    return '<div class="bs-block"'+st+'><div class="pd-2 bs-pd">'
+    return '<div class="bs-block'+cls+'"'+st+'><div class="pd-2 bs-pd">'
       +'<div><div class="bsh bsh-a">資産</div><table class="bstbl"><tbody>'+bs.assets.map(row).join('')
         +'<tr class="bss"><td class="l">資産の合計</td><td>'+man(bs.aSum)+'万円</td></tr></tbody></table></div>'
       +'<div><div class="bsh bsh-l">負債</div><table class="bstbl"><tbody>'+la
         +'<tr class="bss"><td class="l">負債の合計</td><td>'+man(bs.lSum)+'万円</td></tr></tbody></table></div>'
       +'</div>'
       +'<div class="bsnet"><span>純資産（資産 − 負債）</span><b'+(bs.net<0?' class="bsneg"':'')+'>'+manY(bs.net)+'</b></div>'
-      +'<div class="pd-note" style="margin-top:3px">※ 車・建物・土地の評価額は<b>概算</b>です。車は購入からの経過年数、建物は築年数に応じた残価率で機械的に計算し、土地は購入時の価格のまま据え置いています。実際の売却価格は車種・立地・建物の状態・相場により大きく異なります。</div>'
+      +'<div class="pd-note" style="margin-top:3px">'+(m1.terse
+        ? '※ 車・建物・土地の評価額は<b>概算</b>です（経過年数に応じた残価率で機械的に計算。土地は購入時の価格）。'
+        : '※ 車・建物・土地の評価額は<b>概算</b>です。車は購入からの経過年数、建物は築年数に応じた残価率で機械的に計算し、土地は購入時の価格のまま据え置いています。実際の売却価格は車種・立地・建物の状態・相場により大きく異なります。')+'</div>'
       +'</div>';
   })();
   /* 資産形成の評価（1ページ目に載せる） */
   let rankHtml='';
   if(rk){
     rankHtml='<div class="rankrow"><div class="rb">'+pdEsc(rk.overall)+'</div>'
-      +'<div class="rt"><b>総合の目安：'+pdEsc(rk.overall)+'</b>　各年代の「総資産 ÷ その年の年間生活費（資産が生活費の何年分か）」を年代別の目安と比べた参考指標です。</div></div>';
+      +'<div class="rt"><b>総合の目安：'+pdEsc(rk.overall)+'</b>　'+(m1.terse?'各年代の「総資産÷年間生活費」を年代別の目安と比べた参考指標です。'
+        :'各年代の「総資産 ÷ その年の年間生活費（資産が生活費の何年分か）」を年代別の目安と比べた参考指標です。')+'</div></div>';
     if(rk.decades&&rk.decades.length){
       const cell=d=>'<tr><td>'+pdEsc(d.key)+'</td><td class="g">'+pdEsc(d.rank)+'</td>'
         +'<td>'+d.years.toFixed(1)+'年分</td><td>'+d.age+'歳 '+manY(d.net)+'</td></tr>';
@@ -4352,24 +4370,27 @@ function buildPrintDoc(){
     return '<div class="adv"><div class="adv-t">'+pdEsc(title||'アドバイス')+'</div><div class="adv-b">'+pdEsc(body)+'</div></div>';
   });
   /* 1件あたりの分量から1ページに載る件数を決め、余白が出ないよう文字と行間も調整する */
+  /* すべて1ページに収める。総量から文字・行間・余白を逆算する。 */
   const advChars=advEls.map(el=>el.textContent.trim().length);
-  const avgLines=advChars.length?Math.max(1,Math.ceil((advChars.reduce((a,b)=>a+b,0)/advChars.length)/74)):2;
-  const advPer=Math.max(4, Math.min(9, Math.floor(30/(avgLines+1.6))));
-  const advPages=Math.max(1, Math.ceil(advHtml.length/advPer));
-  const advEach=Math.ceil(advHtml.length/advPages);
-  /* 1ページに入る件数が少ないほど、1件を大きく見せる */
-  const advFS=Math.max(9.0, Math.min(13.0, 15.5-advEach*0.55));
-  const advLH=Math.max(1.75, Math.min(2.30, 2.55-advEach*0.055));
-  const advPad=Math.max(7, Math.min(17, 21-advEach*1.5));
+  const advTotal=advChars.reduce((a,b)=>a+b,0);
+  const advEach=advHtml.length;
+  function advHeight(fs,lh,pad){
+    const perLine=Math.floor(178/(fs*0.2646));   /* 本文幅178mmに入る全角の文字数 */
+    let mm=0;
+    advChars.forEach(c=>{ mm+=(pad*2+ (fs+1.6)*1.35 + Math.max(1,Math.ceil(c/perLine))*fs*lh)/3.7795 + pad*0.7/3.7795; });
+    return mm;
+  }
+  let advFS=12.5, advLH=1.95, advPad=13;
+  for(let k=0;k<40 && advHeight(advFS,advLH,advPad)>224;k++){
+    advFS=Math.max(6.4, advFS-0.25);
+    advLH=Math.max(1.35, advLH-0.02);
+    advPad=Math.max(2.5, advPad-0.5);
+  }
   const advStyle=' style="--advfs:'+advFS.toFixed(1)+'px; --advlh:'+advLH.toFixed(2)+'; --advpad:'+advPad.toFixed(0)+'px"';
   if(advHtml.length){
-    for(let i=0;i<advHtml.length;i+=advEach){
-      const part=advHtml.slice(i,i+advEach).join('');
-      const n=Math.floor(i/advEach)+1, tot=advPages;
-      P0.push(pdPage('ライフイベントに備えるアドバイス'+(tot>1?'（'+n+'/'+tot+'）':''), stamp,
-        (n===1?'<div class="pd-lead">これから訪れるライフイベントごとに、試算結果をもとにした準備額の目安と注意点をまとめています。</div>':'')
-        +'<div class="adv-wrap"'+advStyle+'>'+part+'</div>'));
-    }
+    P0.push(pdPage('ライフイベントに備えるアドバイス', stamp,
+      '<div class="pd-lead">これから訪れるライフイベントごとに、試算結果をもとにした準備額の目安と注意点をまとめています。</div>'
+      +'<div class="adv-wrap"'+advStyle+'>'+advHtml.join('')+'</div>'));
   } else {
     P0.push(pdPage('ライフイベントに備えるアドバイス', stamp,'<div class="pd-note">表示できるアドバイスがありません。</div>'));
   }
