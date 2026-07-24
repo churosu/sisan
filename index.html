@@ -552,9 +552,9 @@
 
   #printPlanCard{display:none}
   #printDoc{display:none}
-  /* 下に20mmの余白を確保する。ブラウザの印刷フッター（ページ番号・日時）はここに入り、
-     プリンタが印字できない用紙の端もここで吸収する。左右はページ側の内側余白で確保。 */
-  @page{ size:A4 portrait; margin:0 0 20mm; }
+  /* 用紙の余白は0。ただし計算側では下に20mm分を「使わない領域」として見込み、
+     ブラウザの印刷フッターやプリンタが印字できない端に行がかからないようにする。 */
+  @page{ size:A4 portrait; margin:0; }
   @media print{
     /* 画面用の要素はすべて隠し、印刷専用の組み版だけを出す */
     body>*{display:none!important}
@@ -662,7 +662,7 @@
     .pd-detail tbody td.ev,
     .pd-detail tbody td.l,
     .pd-detail tbody td{font-size:var(--fs)!important; white-space:nowrap!important; min-width:0!important; max-width:none!important;
-      box-sizing:border-box!important; height:var(--rowh)!important; line-height:calc(var(--rowh) - 1px)!important;
+      box-sizing:border-box!important; height:var(--rowh)!important; line-height:var(--rowh)!important;
       padding:0 2px!important; overflow:hidden; text-overflow:clip}
     .pd-detail tbody td.ev{font-weight:600; color:#3A4658}
     .pd-detail tr{break-inside:avoid; page-break-inside:avoid; height:var(--rowh)}
@@ -1360,7 +1360,7 @@ function eduTotalPerChild(P){ let t=0; for(let a=3;a<=21;a++) t+=eduAnnual(a,P);
 function insurance(age){ if(age<30)return 8; if(age<40)return 14; if(age<50)return 22; if(age<60)return 28; if(age<70)return 22; return 14; }
 /* 公的年金（令和7年度基準・概算）: 老齢基礎満額83.17万/年、報酬比例乗率5.481/1000（2003年4月〜）、標準報酬の年間上限概算1230万 */
 const CURRENT_YEAR=new Date().getFullYear();
-const APP_VERSION='0.0.2';   /* 更新するたびに末尾を増やす */
+const APP_VERSION='0.0.3';   /* 更新するたびに末尾を増やす */
 const MAX_AGE=120;  /* 生活資金が尽きなかった場合の試算上限 */
 const PENSION_FULL=83.17, PENSION_RATE=5.481/1000, PENSION_CAP=1230, PENSION_NET=0.90;
 /* マクロ経済スライドの調整期間（2024年財政検証・過去30年投影ケース）
