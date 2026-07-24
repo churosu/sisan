@@ -4571,12 +4571,13 @@ function buildPrintDoc(){
   if(tbl){
     const head=tbl.querySelector('thead') ? tbl.querySelector('thead').outerHTML : '';
     const trs=[...tbl.querySelectorAll('tbody tr')];
-    /* 1ページ20〜25行を目安に、3〜5ページへ分ける。
-       100行前後まで伸びる場合は上限の5ページに収め、1ページあたり20行程度にする。 */
-    let np;
-    if(trs.length>=90){ np=5; }
-    else { np=3; for(let k=3;k<=5;k++){ np=k; if(Math.ceil(trs.length/k)<=25) break; } }
-    const per=Math.max(1,Math.ceil(trs.length/np));
+    /* 1ページは最大20行。ページ数は3〜6の範囲で決め、行数はページ間で均等に配る
+       （例：97行 → 5ページ・20,20,19,19,19） */
+    const MAX_ROWS=20;
+    const np=Math.min(6, Math.max(1, Math.ceil(trs.length/MAX_ROWS)));   /* 行が少なければページも少なくてよい */
+    const base=Math.floor(trs.length/np), extra=trs.length%np;
+    const counts=Array.from({length:np},(_,i)=>base+(i<extra?1:0));
+    const per=Math.max(...counts);
     /* ① 各ページの行数は per で確定
        ② 用紙から余白・ページ見出し・表見出し（いずれもCSSで高さを固定）を引く
        ③ さらに5mmの安全余裕を引いて実際の描画範囲を出す
@@ -4585,14 +4586,16 @@ function buildPrintDoc(){
     const PGHEAD_MM=12;                  /* .pg-h を12mmで固定 */
     const THEAD_MM=8;                    /* 表の見出し行を8mmで固定 */
     const NOTE_MM=14;                    /* 最終ページの注記（全ページこの分を見込む） */
-    const SAFETY_MM=5;
+    const SAFETY_MM=2;                   /* 下側に残す余白 */
     const drawMM=PAGE_MM-MARGIN_MM-PGHEAD_MM-THEAD_MM-NOTE_MM-SAFETY_MM;
     const rowMM=Math.max(2.6, Math.min(12.0, drawMM/per));
     const fsPX=Math.max(6.0, Math.min(12.0, rowMM*3.7795*0.30));
     const detStyle=' style="--rowh:'+rowMM.toFixed(2)+'mm; --fs:'+fsPX.toFixed(1)+'px"';
-    for(let i=0;i<trs.length;i+=per){
-      const chunk=trs.slice(i,i+per);
-      const n=Math.floor(i/per)+1, tot=Math.ceil(trs.length/per);
+    let cursor=0;
+    for(let pi=0; pi<counts.length; pi++){
+      const chunk=trs.slice(cursor, cursor+counts[pi]);
+      cursor+=counts[pi];
+      const n=pi+1, tot=counts.length;
       const a0=chunk[0].cells[1].textContent.trim(), a1=chunk[chunk.length-1].cells[1].textContent.trim();
       P0.push(pdPage('年次明細（'+n+'/'+tot+'）　本人 '+a0+'〜'+a1+'　（単位：万円）', stamp,
         '<table class="pd-tbl pd-detail"'+detStyle+'>'+COLS+head+'<tbody>'+chunk.map(t=>t.outerHTML).join('')+'</tbody></table>'
