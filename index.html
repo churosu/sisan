@@ -658,6 +658,7 @@
     .pd-detail tbody td{font-size:var(--fs)!important; white-space:nowrap!important; min-width:0!important; max-width:none!important;
       height:var(--rowh)!important; line-height:var(--rowh)!important; padding:0 2px!important; overflow:hidden; text-overflow:clip}
     .pd-detail tbody td.ev{font-weight:600; color:#3A4658}
+    .pd-detail tr{break-inside:avoid; page-break-inside:avoid}
     .pd-detail .l{text-align:left}
     .pd-note{font-size:8.5px; color:#7A8899; line-height:1.65; margin-top:6px}
     .rankrow{display:flex; align-items:center; gap:9px; border:1.5px solid #111; border-radius:9px; padding:9px 12px; margin-bottom:9px}
@@ -4574,10 +4575,12 @@ function buildPrintDoc(){
       const chunk=trs.slice(i,i+per);
       const n=Math.floor(i/per)+1, tot=Math.ceil(trs.length/per);
       const a0=chunk[0].cells[1].textContent.trim(), a1=chunk[chunk.length-1].cells[1].textContent.trim();
-      /* A4縦（本文 約255mm）から見出しぶんを引き、行数で割って1行の高さを決める */
-      const availMM=(n===tot?238:246), headMM=7;   /* 最終ページは注記のぶんを残す */
-      const rowMM=Math.max(3.0, Math.min(11.0, (availMM-headMM)/chunk.length));
-      const fsPX=Math.max(6.4, Math.min(12.0, rowMM*3.7795*0.32));
+      /* A4縦の本文は273mm。ページ見出し（約10mm）と余裕を差し引き、表は最大200mm前後に収める。
+         ここを大きく取りすぎると表が次ページへあふれ、空白ページが生まれる。 */
+      const availMM=(n===tot?190:202);            /* 最終ページは注記のぶんを残す */
+      const headMM=11;                            /* 見出し行（2行に折り返す列がある） */
+      const rowMM=Math.max(2.6, Math.min(9.0, (availMM-headMM)/chunk.length));
+      const fsPX=Math.max(6.0, Math.min(11.0, rowMM*3.7795*0.32));
       const style=' style="--rowh:'+rowMM.toFixed(2)+'mm; --fs:'+fsPX.toFixed(1)+'px"';
       P0.push(pdPage('年次明細（'+n+'/'+tot+'）　本人 '+a0+'〜'+a1+'　（単位：万円）', stamp,
         '<table class="pd-tbl pd-detail"'+style+'>'+COLS+head+'<tbody>'+chunk.map(t=>t.outerHTML).join('')+'</tbody></table>'
