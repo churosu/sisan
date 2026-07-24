@@ -565,7 +565,9 @@
     /* 画面用の thead は sticky。印刷では見出しが紙面の途中に浮くため必ず解除する */
     #printDoc thead th, #printDoc th{position:static!important; top:auto!important}
     #printDoc thead{display:table-header-group}
-    .pg-h{display:flex; align-items:baseline; gap:8px; border-bottom:2px solid #0CA795; padding-bottom:5px; margin:0 0 10px}
+    /* 高さを固定して、本文に使える寸法を計算で確定できるようにする */
+    .pg-h{display:flex; align-items:baseline; gap:8px; border-bottom:2px solid #0CA795;
+          height:12mm; box-sizing:border-box; padding:0 0 3mm; margin:0}
     .pg-h .ph-t{font-size:15px; font-weight:800; color:#111}
     .pg-h .ph-s{font-size:9.5px; font-weight:700; color:#7A8899; margin-left:auto}
     .pd-lead{font-size:10px; color:#5A6672; line-height:1.65; margin:0 0 9px}
@@ -649,16 +651,20 @@
     .pd-tbl tr:nth-child(even) td{background:#FAFCFE}
     /* 年次明細：行数に応じて --rowh / --fs を決め、ページの縦を使い切る（行の高さは全行そろえる） */
     .pd-detail{letter-spacing:-.01em}
-    .pd-detail th{font-size:calc(var(--fs) * .94); padding:1px 2px; line-height:1.25; white-space:nowrap; overflow:hidden}
+    .pd-detail thead th{height:8mm; box-sizing:border-box; font-size:calc(var(--fs) * .90);
+      padding:0 2px; line-height:1.15; white-space:normal; overflow:hidden; vertical-align:middle}
     .pd-detail td>*{display:inline; white-space:nowrap}
     /* 画面用の td.ev（11px・折り返しあり・最小幅150px）を確実に打ち消す。
        ここを外すとライフイベント欄だけ文字が大きくなり、行の高さも揃わなくなる。 */
     .pd-detail tbody td.ev,
     .pd-detail tbody td.l,
     .pd-detail tbody td{font-size:var(--fs)!important; white-space:nowrap!important; min-width:0!important; max-width:none!important;
-      height:var(--rowh)!important; line-height:var(--rowh)!important; padding:0 2px!important; overflow:hidden; text-overflow:clip}
+      box-sizing:border-box!important; height:var(--rowh)!important; line-height:calc(var(--rowh) - 1px)!important;
+      padding:0 2px!important; overflow:hidden; text-overflow:clip}
     .pd-detail tbody td.ev{font-weight:600; color:#3A4658}
-    .pd-detail tr{break-inside:avoid; page-break-inside:avoid}
+    .pd-detail tr{break-inside:avoid; page-break-inside:avoid; height:var(--rowh)}
+    .pd-detail{border-collapse:collapse; border-spacing:0}
+    .pd-note.pd-detail-note{height:12mm; box-sizing:border-box; margin:2mm 0 0}
     .pd-detail .l{text-align:left}
     .pd-note{font-size:8.5px; color:#7A8899; line-height:1.65; margin-top:6px}
     .rankrow{display:flex; align-items:center; gap:9px; border:1.5px solid #111; border-radius:9px; padding:9px 12px; margin-bottom:9px}
@@ -4571,20 +4577,26 @@ function buildPrintDoc(){
     if(trs.length>=90){ np=5; }
     else { np=3; for(let k=3;k<=5;k++){ np=k; if(Math.ceil(trs.length/k)<=25) break; } }
     const per=Math.max(1,Math.ceil(trs.length/np));
+    /* ① 各ページの行数は per で確定
+       ② 用紙から余白・ページ見出し・表見出し（いずれもCSSで高さを固定）を引く
+       ③ さらに5mmの安全余裕を引いて実際の描画範囲を出す
+       ④ 描画範囲 ÷ 行数 で1行の高さを決める（全ページ共通にして見た目をそろえる） */
+    const PAGE_MM=297, MARGIN_MM=12*2;   /* @page: A4縦・上下12mm */
+    const PGHEAD_MM=12;                  /* .pg-h を12mmで固定 */
+    const THEAD_MM=8;                    /* 表の見出し行を8mmで固定 */
+    const NOTE_MM=14;                    /* 最終ページの注記（全ページこの分を見込む） */
+    const SAFETY_MM=5;
+    const drawMM=PAGE_MM-MARGIN_MM-PGHEAD_MM-THEAD_MM-NOTE_MM-SAFETY_MM;
+    const rowMM=Math.max(2.6, Math.min(12.0, drawMM/per));
+    const fsPX=Math.max(6.0, Math.min(12.0, rowMM*3.7795*0.30));
+    const detStyle=' style="--rowh:'+rowMM.toFixed(2)+'mm; --fs:'+fsPX.toFixed(1)+'px"';
     for(let i=0;i<trs.length;i+=per){
       const chunk=trs.slice(i,i+per);
       const n=Math.floor(i/per)+1, tot=Math.ceil(trs.length/per);
       const a0=chunk[0].cells[1].textContent.trim(), a1=chunk[chunk.length-1].cells[1].textContent.trim();
-      /* A4縦の本文は273mm。ページ見出し（約10mm）と余裕を差し引き、表は最大200mm前後に収める。
-         ここを大きく取りすぎると表が次ページへあふれ、空白ページが生まれる。 */
-      const availMM=(n===tot?190:202);            /* 最終ページは注記のぶんを残す */
-      const headMM=11;                            /* 見出し行（2行に折り返す列がある） */
-      const rowMM=Math.max(2.6, Math.min(9.0, (availMM-headMM)/chunk.length));
-      const fsPX=Math.max(6.0, Math.min(11.0, rowMM*3.7795*0.32));
-      const style=' style="--rowh:'+rowMM.toFixed(2)+'mm; --fs:'+fsPX.toFixed(1)+'px"';
       P0.push(pdPage('年次明細（'+n+'/'+tot+'）　本人 '+a0+'〜'+a1+'　（単位：万円）', stamp,
-        '<table class="pd-tbl pd-detail"'+style+'>'+COLS+head+'<tbody>'+chunk.map(t=>t.outerHTML).join('')+'</tbody></table>'
-        +(n===tot?'<div class="pd-note">※ 金額は各年末時点。総資産＝現預金＋NISA評価額＋教育資金＋確定拠出年金（税引後）。ローン残高は団信で消滅した場合0になります。</div>':'')));
+        '<table class="pd-tbl pd-detail"'+detStyle+'>'+COLS+head+'<tbody>'+chunk.map(t=>t.outerHTML).join('')+'</tbody></table>'
+        +(n===tot?'<div class="pd-note pd-detail-note">※ 金額は各年末時点。総資産＝現預金＋NISA評価額＋教育資金＋確定拠出年金（税引後）。ローン残高は団信で消滅した場合0になります。</div>':'')));
     }
   }
 
