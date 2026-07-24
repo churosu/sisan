@@ -4588,8 +4588,11 @@ function buildPrintDoc(){
     const NOTE_MM=14;                    /* 最終ページの注記（全ページこの分を見込む） */
     const SAFETY_MM=2;                   /* 下側に残す余白 */
     const drawMM=PAGE_MM-MARGIN_MM-PGHEAD_MM-THEAD_MM-NOTE_MM-SAFETY_MM;
-    const rowMM=Math.max(2.6, Math.min(12.0, drawMM/per));
-    const fsPX=Math.max(6.0, Math.min(12.0, rowMM*3.7795*0.30));
+    /* 行の高さの上限は10mm。12pxの文字は約3.2mmなので、10mmでも文字は上限の12pxのまま入る。
+       行を必要以上に高くしないことで、ブラウザの印刷ヘッダー・フッターや余白設定で
+       使える高さが数十mm減っても、決めた行数がそのまま1ページに収まる。 */
+    const rowMM=Math.max(2.6, Math.min(10.0, drawMM/per));
+    const fsPX=Math.max(6.0, Math.min(12.0, rowMM*3.7795*0.32));
     const detStyle=' style="--rowh:'+rowMM.toFixed(2)+'mm; --fs:'+fsPX.toFixed(1)+'px"';
     let cursor=0;
     for(let pi=0; pi<counts.length; pi++){
