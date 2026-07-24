@@ -551,7 +551,9 @@
 
   #printPlanCard{display:none}
   #printDoc{display:none}
-  @page{ size:A4 portrait; margin:12mm 11mm; }
+  /* 上下左右に必ず20mmの余白が生まれる前提で組む（ブラウザの印刷ヘッダー・フッターもこの中に入る）。
+     本文の高さ＝297−20−20＝257mm、幅＝210−20−20＝170mm。 */
+  @page{ size:A4 portrait; margin:20mm; }
   @media print{
     /* 画面用の要素はすべて隠し、印刷専用の組み版だけを出す */
     body>*{display:none!important}
@@ -4281,7 +4283,7 @@ function buildPrintDoc(){
     return {mm:FIXED1+head+fineMM+bsMM-(terse&&withBS?17:0), fs, lh, bfs, bpad, inline, terse};
   }
   /* まずバランスシート込みで1ページに収まるか試す。読める大きさで収まらなければ次ページへ回す。 */
-  const TARGET1=215;
+  const TARGET1=228;   /* 本文257mm − ページ見出し12 − 余裕17 */
   let squeeze=1, m1=page1Height(1, true);
   for(let k=0;k<40 && m1.mm>TARGET1;k++){ squeeze=Math.max(0.42, squeeze-0.02); m1=page1Height(squeeze, true); }
   const bsMoved=(m1.mm>TARGET1);                     /* 下限まで詰めても入らなかった */
@@ -4348,7 +4350,8 @@ function buildPrintDoc(){
     +'<td class="amt">'+manY(e.nw)+'</td></tr>').join('');
   const evCost=evs.reduce((a,e)=>a+(e.cost>0?e.cost:0),0);
   /* 件数に応じて行の高さと文字を決め、1ページを使い切る */
-  const evAvail=222, evHead=9;
+  /* 本文257mm − ページ見出し12 − 導入文12 − 注記11 ＝ 222mm */
+  const evAvail=212, evHead=9;
   const evRowMM=Math.max(4.2, Math.min(13.0, (evAvail-evHead)/Math.max(1,evs.length)));
   const evFS=Math.max(8.0, Math.min(13.5, evRowMM*3.7795*0.30));
   const evStyle=' style="--evrow:'+evRowMM.toFixed(2)+'mm; --evfs:'+evFS.toFixed(1)+'px"';
@@ -4430,13 +4433,14 @@ function buildPrintDoc(){
   const advTotal=advChars.reduce((a,b)=>a+b,0);
   const advEach=advHtml.length;
   function advHeight(fs,lh,pad){
-    const perLine=Math.floor(178/(fs*0.2646));   /* 本文幅178mmに入る全角の文字数 */
+    const perLine=Math.floor(170/(fs*0.2646));   /* 本文幅170mmに入る全角の文字数 */
     let mm=0;
     advChars.forEach(c=>{ mm+=(pad*2+ (fs+1.6)*1.35 + Math.max(1,Math.ceil(c/perLine))*fs*lh)/3.7795 + pad*0.7/3.7795; });
     return mm;
   }
   /* 1ページに載る量の上限（バランスシートを載せるページはその分を差し引く） */
-  const advBudget=(advEach>12?112:224);
+  /* 本文257mm − ページ見出し12 − 導入文12 ＝ 233mm（バランスシート同居時はその分を差し引く） */
+  const advBudget=(advEach>12?110:230);
   let advFS=12.5, advLH=1.95, advPad=13;
   for(let k=0;k<40 && advHeight(advFS,advLH,advPad)>advBudget;k++){
     advFS=Math.max(6.4, advFS-0.25);
@@ -4505,8 +4509,8 @@ function buildPrintDoc(){
   /* 診断・改善提案の分量を見積もる。ページの半分に満たなければ比較と1ページにまとめる。
      （印刷前に実寸は測れないため、文字数と行数からの概算） */
   const estMM=(function(){
-    /* 本文幅は約187mm。9pxの全角文字なら1行あたり約76字 */
-    const perLine=76;
+    /* 本文幅は170mm。9pxの全角文字なら1行あたり約71字 */
+    const perLine=71;
     let mm=14;                   /* 「プラン診断」の見出し */
     const dt=diagTxt?diagTxt.textContent.trim().length:0;
     mm+=Math.ceil(dt/perLine)*4.2;
@@ -4582,15 +4586,17 @@ function buildPrintDoc(){
     /* ② 用紙から余白・ページ見出し・表見出し（いずれもCSSで高さを固定）を引く
        ③ さらに安全余裕を引いて実際の描画範囲を出す
        ④ 描画範囲 ÷ 行数 で1行の高さを決める（全ページ共通にして見た目をそろえる） */
-    const PAGE_MM=297, MARGIN_MM=12*2;   /* @page: A4縦・上下12mm。ブラウザのヘッダー・フッターはこの余白に入る */
+    /* A4縦297mm − 上下の余白20mmずつ ＝ 本文257mm（ページ見出しとフッターを含む）
+       ここからページ見出し・表の見出し行・注記を引いた残りが、行を描ける正味の範囲。 */
+    const PAGE_MM=297, MARGIN_MM=20*2;   /* 上下に必ず生まれる余白 */
+    const BODY_MM=PAGE_MM-MARGIN_MM;     /* 257mm */
     const PGHEAD_MM=12;                  /* .pg-h を12mmで固定 */
     const THEAD_MM=8;                    /* 表の見出し行を8mmで固定 */
     const NOTE_MM=14;                    /* 最終ページだけに入る注記 */
-    const SAFETY_MM=7;                   /* 罫線の端数と、印刷フッターへの余裕 */
-    const USABLE_MM=PAGE_MM-MARGIN_MM-SAFETY_MM;
+    const SAFETY_MM=2;                   /* 罫線の端数ぶん */
     /* 行数が最も多いページと、注記が入る最終ページの両方が収まる高さにする */
-    const byMax =(USABLE_MM-PGHEAD_MM-THEAD_MM)/per;
-    const byLast=(USABLE_MM-PGHEAD_MM-THEAD_MM-NOTE_MM)/Math.max(1,lastRows);
+    const byMax =(BODY_MM-PGHEAD_MM-THEAD_MM-SAFETY_MM)/per;
+    const byLast=(BODY_MM-PGHEAD_MM-THEAD_MM-NOTE_MM-SAFETY_MM)/Math.max(1,lastRows);
     const rowMM=Math.max(2.6, Math.min(13.0, byMax, byLast));
     const fsPX=Math.max(6.0, Math.min(12.5, rowMM*3.7795*0.30));
     const detStyle=' style="--rowh:'+rowMM.toFixed(2)+'mm; --fs:'+fsPX.toFixed(1)+'px"';
