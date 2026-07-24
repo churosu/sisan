@@ -547,13 +547,14 @@
   .lead-note b{color:var(--slate)}
   .foot-danger{color:#C2183C}
   .foot-danger:hover{color:#8E1029}
+  .foot-ver{display:inline-block; font-size:10.5px; font-weight:800; color:var(--slate-2); background:#F0F4F8; border:1px solid var(--line); border-radius:99px; padding:1px 8px; margin-right:8px}
   .foot-copy{font-size:11px; color:var(--slate-2); margin-top:9px; line-height:1.6}
 
   #printPlanCard{display:none}
   #printDoc{display:none}
-  /* 上下左右に必ず20mmの余白が生まれる前提で組む（ブラウザの印刷ヘッダー・フッターもこの中に入る）。
-     本文の高さ＝297−20−20＝257mm、幅＝210−20−20＝170mm。 */
-  @page{ size:A4 portrait; margin:20mm; }
+  /* 余白は0として扱い、用紙の297mmをそのまま計算に使う。
+     左右だけは文字が端に寄らないよう、ページ側の内側余白で確保する。 */
+  @page{ size:A4 portrait; margin:0; }
   @media print{
     /* 画面用の要素はすべて隠し、印刷専用の組み版だけを出す */
     body>*{display:none!important}
@@ -561,7 +562,7 @@
     body{background:#fff; padding:0!important; margin:0!important; color:#111;
          font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;
          -webkit-print-color-adjust:exact; print-color-adjust:exact}
-    .pg{break-after:auto; page-break-after:auto}
+    .pg{break-after:auto; page-break-after:auto; padding:0 9mm; box-sizing:border-box}
     .pg + .pg{break-before:page; page-break-before:always}
     .pg{break-inside:auto}
     /* 画面用の thead は sticky。印刷では見出しが紙面の途中に浮くため必ず解除する */
@@ -1323,7 +1324,7 @@
     <button class="foot-link" id="footWiz">かんたん入力をやり直す</button><span class="foot-sep">・</span>
     <button class="foot-link foot-danger" id="resetBtn">すべて初期値に戻す</button>
   </div>
-  <div class="foot-copy">© <span id="footYear"></span> MiraiLog by Churosu ／ 本ツールは投資・税務の助言ではなく、将来を保証するものでもありません。税・社会保険は令和8年度の制度による試算です。</div>
+  <div class="foot-copy"><span class="foot-ver" id="footVer"></span>© <span id="footYear"></span> MiraiLog by Churosu ／ 本ツールは投資・税務の助言ではなく、将来を保証するものでもありません。税・社会保険は令和8年度の制度による試算です。</div>
 </footer>
 
 <div id="printDoc" aria-hidden="true"></div>
@@ -1359,6 +1360,7 @@ function eduTotalPerChild(P){ let t=0; for(let a=3;a<=21;a++) t+=eduAnnual(a,P);
 function insurance(age){ if(age<30)return 8; if(age<40)return 14; if(age<50)return 22; if(age<60)return 28; if(age<70)return 22; return 14; }
 /* 公的年金（令和7年度基準・概算）: 老齢基礎満額83.17万/年、報酬比例乗率5.481/1000（2003年4月〜）、標準報酬の年間上限概算1230万 */
 const CURRENT_YEAR=new Date().getFullYear();
+const APP_VERSION='0.0.1';   /* 更新するたびに末尾を増やす */
 const MAX_AGE=120;  /* 生活資金が尽きなかった場合の試算上限 */
 const PENSION_FULL=83.17, PENSION_RATE=5.481/1000, PENSION_CAP=1230, PENSION_NET=0.90;
 /* マクロ経済スライドの調整期間（2024年財政検証・過去30年投影ケース）
@@ -3950,6 +3952,7 @@ document.getElementById('footDisc').addEventListener('click',()=>openDisclaimer(
 document.getElementById('footProf').addEventListener('click',()=>document.getElementById('profMdl').classList.add('on'));
 document.getElementById('footWiz').addEventListener('click',()=>WZ.start());
 document.getElementById('footYear').textContent=new Date().getFullYear();
+document.getElementById('footVer').textContent='ver. '+APP_VERSION;
 
 /* ============ PDF用プランサマリーカード ============ */
 function buildPrintCard(P, rows, rk){
@@ -4176,7 +4179,7 @@ function buildPrintDoc(){
   const last=rows[rows.length-1];
   const busted=last.busted && last.age<MAX_AGE;
   const today=new Date().toLocaleDateString('ja-JP');
-  const stamp='MiraiLog ／ '+today+' 時点の試算';
+  const stamp='MiraiLog v'+APP_VERSION+' ／ '+today+' 時点の試算';
   const penTxt={growth:'楽観（成長型経済移行・継続）',past30:'標準（過去30年投影）',zero:'保守（ゼロ成長）'}[P.pensionCase]||'標準';
   const dcTxt = P.hasDC?({ideco:'iDeCo',corp:'企業型DC',both:'iDeCo＋企業型DC'})[P.dcType]||'あり':'なし';
   const home = P.buyAge!=null?(P.buyAge+'歳で'+man(P.price)+'万円の住宅を購入'):'ずっと賃貸';
@@ -4586,19 +4589,18 @@ function buildPrintDoc(){
     /* ② 用紙から余白・ページ見出し・表見出し（いずれもCSSで高さを固定）を引く
        ③ さらに安全余裕を引いて実際の描画範囲を出す
        ④ 描画範囲 ÷ 行数 で1行の高さを決める（全ページ共通にして見た目をそろえる） */
-    /* A4縦297mm − 上下の余白20mmずつ ＝ 本文257mm（ページ見出しとフッターを含む）
-       ここからページ見出し・表の見出し行・注記を引いた残りが、行を描ける正味の範囲。 */
-    const PAGE_MM=297, MARGIN_MM=20*2;   /* 上下に必ず生まれる余白 */
-    const BODY_MM=PAGE_MM-MARGIN_MM;     /* 257mm */
+    /* 用紙297mmから、ページ見出し・表の見出し行・注記を引いた残りが行に使える高さ。
+         297 − 12（ページ見出し） − 8（表の見出し行） − 14（注記） ＝ 263mm
+       これを最も行数の多いページの行数で割り、端数の余裕として0.5mm引いた値を
+       全ページ共通の行の高さにする（例：20行 → 263/20−0.5＝12.65mm）。 */
+    const PAGE_MM=297;
     const PGHEAD_MM=12;                  /* .pg-h を12mmで固定 */
     const THEAD_MM=8;                    /* 表の見出し行を8mmで固定 */
-    const NOTE_MM=14;                    /* 最終ページだけに入る注記 */
-    const SAFETY_MM=2;                   /* 罫線の端数ぶん */
-    /* 行数が最も多いページと、注記が入る最終ページの両方が収まる高さにする */
-    const byMax =(BODY_MM-PGHEAD_MM-THEAD_MM-SAFETY_MM)/per;
-    const byLast=(BODY_MM-PGHEAD_MM-THEAD_MM-NOTE_MM-SAFETY_MM)/Math.max(1,lastRows);
-    const rowMM=Math.max(2.6, Math.min(13.0, byMax, byLast));
-    const fsPX=Math.max(6.0, Math.min(12.5, rowMM*3.7795*0.30));
+    const NOTE_MM=14;                    /* 最終ページに入る注記 */
+    const AVAIL_MM=PAGE_MM-PGHEAD_MM-THEAD_MM-NOTE_MM;   /* 263mm */
+    const MARGIN_ROW_MM=0.5;             /* 端数のための余裕 */
+    const rowMM=Math.max(2.6, AVAIL_MM/per-MARGIN_ROW_MM);
+    const fsPX=Math.max(6.0, Math.min(13.0, rowMM*3.7795*0.30));
     const detStyle=' style="--rowh:'+rowMM.toFixed(2)+'mm; --fs:'+fsPX.toFixed(1)+'px"';
     let cursor=0;
     for(let pi=0; pi<counts.length; pi++){
@@ -4626,7 +4628,7 @@ function buildPrintDoc(){
     +'<div class="sec-t">免責事項</div>'
     +'<p class="disc-p">本ツールは<b>試算を目的としたもので、投資・税務・保険の助言ではありません</b>。将来の制度改正・運用成果・物価動向により実際の結果は大きく変わります。数値はあくまで目安としてご覧いただき、重要な意思決定の際は税理士・ファイナンシャルプランナー等の専門家にご相談ください。</p>'
     +'<p class="disc-p">本ツールは入力内容をサーバーに送信しません。すべての計算はご利用の端末内で完結します。</p>'
-    +'<div class="pd-note" style="margin-top:14px">MiraiLog ／ インフレに負けない資産形成　—　'+today+' 出力</div>'));
+    +'<div class="pd-note" style="margin-top:14px">MiraiLog v'+APP_VERSION+' ／ インフレに負けない資産形成　—　'+today+' 出力</div>'));
 
   host.innerHTML=P0.join('');
 }
