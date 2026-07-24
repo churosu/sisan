@@ -4571,28 +4571,28 @@ function buildPrintDoc(){
   if(tbl){
     const head=tbl.querySelector('thead') ? tbl.querySelector('thead').outerHTML : '';
     const trs=[...tbl.querySelectorAll('tbody tr')];
-    /* 1ページは最大20行。ページ数は3〜6の範囲で決め、行数はページ間で均等に配る
-       （例：97行 → 5ページ・20,20,19,19,19） */
-    const MAX_ROWS=20;
+    /* ① 1ページは最大22行。ページ数を決め、行数はページ間で均等に配る
+          （例：97行 → 5ページ・20,20,19,19,19／65行 → 3ページ・22,22,21） */
+    const MAX_ROWS=22;
     const np=Math.min(6, Math.max(1, Math.ceil(trs.length/MAX_ROWS)));   /* 行が少なければページも少なくてよい */
     const base=Math.floor(trs.length/np), extra=trs.length%np;
     const counts=Array.from({length:np},(_,i)=>base+(i<extra?1:0));
-    const per=Math.max(...counts);
-    /* ① 各ページの行数は per で確定
-       ② 用紙から余白・ページ見出し・表見出し（いずれもCSSで高さを固定）を引く
-       ③ さらに5mmの安全余裕を引いて実際の描画範囲を出す
+    const per=Math.max(...counts);        /* 最も行数が多いページ。ここを基準に行高を決める */
+    const lastRows=counts[counts.length-1];
+    /* ② 用紙から余白・ページ見出し・表見出し（いずれもCSSで高さを固定）を引く
+       ③ さらに安全余裕を引いて実際の描画範囲を出す
        ④ 描画範囲 ÷ 行数 で1行の高さを決める（全ページ共通にして見た目をそろえる） */
-    const PAGE_MM=297, MARGIN_MM=12*2;   /* @page: A4縦・上下12mm */
+    const PAGE_MM=297, MARGIN_MM=12*2;   /* @page: A4縦・上下12mm。ブラウザのヘッダー・フッターはこの余白に入る */
     const PGHEAD_MM=12;                  /* .pg-h を12mmで固定 */
     const THEAD_MM=8;                    /* 表の見出し行を8mmで固定 */
-    const NOTE_MM=14;                    /* 最終ページの注記（全ページこの分を見込む） */
-    const SAFETY_MM=2;                   /* 下側に残す余白 */
-    const drawMM=PAGE_MM-MARGIN_MM-PGHEAD_MM-THEAD_MM-NOTE_MM-SAFETY_MM;
-    /* 行の高さの上限は10mm。12pxの文字は約3.2mmなので、10mmでも文字は上限の12pxのまま入る。
-       行を必要以上に高くしないことで、ブラウザの印刷ヘッダー・フッターや余白設定で
-       使える高さが数十mm減っても、決めた行数がそのまま1ページに収まる。 */
-    const rowMM=Math.max(2.6, Math.min(10.0, drawMM/per));
-    const fsPX=Math.max(6.0, Math.min(12.0, rowMM*3.7795*0.32));
+    const NOTE_MM=14;                    /* 最終ページだけに入る注記 */
+    const SAFETY_MM=7;                   /* 罫線の端数と、印刷フッターへの余裕 */
+    const USABLE_MM=PAGE_MM-MARGIN_MM-SAFETY_MM;
+    /* 行数が最も多いページと、注記が入る最終ページの両方が収まる高さにする */
+    const byMax =(USABLE_MM-PGHEAD_MM-THEAD_MM)/per;
+    const byLast=(USABLE_MM-PGHEAD_MM-THEAD_MM-NOTE_MM)/Math.max(1,lastRows);
+    const rowMM=Math.max(2.6, Math.min(13.0, byMax, byLast));
+    const fsPX=Math.max(6.0, Math.min(12.5, rowMM*3.7795*0.30));
     const detStyle=' style="--rowh:'+rowMM.toFixed(2)+'mm; --fs:'+fsPX.toFixed(1)+'px"';
     let cursor=0;
     for(let pi=0; pi<counts.length; pi++){
