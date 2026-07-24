@@ -254,6 +254,22 @@
   .kabe-b b{color:var(--ink)}
   .cmp-h{font-size:14px; font-weight:800; color:var(--ink); margin:20px 0 6px; padding-left:9px; border-left:4px solid var(--teal)}
   .scn-dot{display:inline-block; width:8px; height:8px; border-radius:99px; margin-right:6px; vertical-align:middle}
+  .bs-box{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:12px}
+  .bs-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px}
+  @media(max-width:640px){ .bs-grid{grid-template-columns:1fr} }
+  .bs-h{font-size:12px; font-weight:800; padding:5px 9px; border-radius:8px; margin-bottom:6px}
+  .bs-a{background:#EAF7F2; color:#12855F}
+  .bs-l{background:#FDECF1; color:#C2183C}
+  .bs-tbl{width:100%; border-collapse:collapse; font-size:12px}
+  .bs-tbl td{padding:5px 7px; border-bottom:1px solid var(--line); text-align:right; color:var(--ink); font-weight:700}
+  .bs-tbl td.l{text-align:left; font-weight:600; color:var(--slate)}
+  .bs-note{font-size:10px; color:var(--slate-2); font-weight:600}
+  .bs-sum td{border-top:1.5px solid var(--ink); border-bottom:none; font-weight:800; color:var(--ink)}
+  .bs-net{display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-top:12px; padding:11px 14px; background:#F7FAFC; border:1.5px solid var(--ink); border-radius:11px}
+  .bs-net span{font-size:12.5px; font-weight:800; color:var(--slate)}
+  .bs-net b{font-size:21px; font-weight:800; color:var(--teal)}
+  .bs-net b.bs-neg{color:#C2183C}
+  .bs-disc{font-size:10.5px; color:var(--slate-2); line-height:1.7; margin-top:9px}
   .kf-box{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; margin-bottom:12px}
   .kf-h{font-size:12.5px; font-weight:800; color:var(--ink); margin-bottom:9px}
   .kf-row{display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding:6px 0; border-top:1px solid var(--line); font-size:12.5px; color:var(--slate)}
@@ -602,6 +618,19 @@
     .pd-cmp .th-sub{font-weight:600; opacity:.75}
     .pd-cmp .cmp-neg{color:#C2183C; font-weight:800}
     .pd-cmp tr.is-def td{background:#EAF7F2}
+    .bs-pd{gap:9px; margin-bottom:4px}
+    .bsh{font-size:9px; font-weight:800; padding:3px 7px; border-radius:5px; margin-bottom:3px}
+    .bsh-a{background:#EAF7F2; color:#12855F}
+    .bsh-l{background:#FDECF1; color:#C2183C}
+    .bstbl{width:100%; border-collapse:collapse; font-size:9px}
+    .bstbl td{padding:2.5px 6px; border-bottom:1px solid #E3EAF2; text-align:right; font-weight:700; color:#111}
+    .bstbl td.l{text-align:left; font-weight:600; color:#5A6672}
+    .bsn{display:block; font-size:7.5px; color:#8A98AB; font-weight:600}
+    .bstbl tr.bss td{border-top:1.2px solid #111; border-bottom:none; font-weight:800; color:#111}
+    .bsnet{display:flex; align-items:baseline; justify-content:space-between; margin-top:6px; padding:6px 11px; background:#F7FAFC; border:1.2px solid #111; border-radius:8px}
+    .bsnet span{font-size:10px; font-weight:800; color:#5A6672}
+    .bsnet b{font-size:16px; font-weight:800; color:#0CA795}
+    .bsnet b.bsneg{color:#C2183C}
     .pd-tbl{width:100%; border-collapse:collapse; font-size:8px; table-layout:fixed}
     .pd-tbl th{background:#F0F4F8; color:#5A6672; font-size:7.5px; font-weight:800; padding:3px 2px; border:1px solid #D5DEE7; text-align:right}
     .pd-tbl th:first-child,.pd-tbl th:last-child{text-align:left}
@@ -630,6 +659,10 @@
     .adv{border:1px solid #E3EAF2; border-left:3px solid #0CA795; border-radius:0 7px 7px 0; padding:7px 10px; margin-bottom:6px; break-inside:avoid}
     .adv-t{font-size:10.5px; font-weight:800; color:#111; margin-bottom:2px}
     .adv-b{font-size:9px; color:#5A6672; line-height:1.7}
+    /* 件数に応じて余白と文字を変え、ページの縦を使い切る */
+    .adv-wrap .adv{padding:var(--advpad,7px) calc(var(--advpad,7px) + 4px); margin-bottom:calc(var(--advpad,7px) * .7)}
+    .adv-wrap .adv-t{font-size:calc(var(--advfs,9px) + 1.6px)}
+    .adv-wrap .adv-b{font-size:var(--advfs,9px); line-height:var(--advlh,1.7)}
     .disc-p{font-size:9px; color:#444; line-height:1.85; margin:0 0 7px}
     .disc-p b{color:#111}
   }
@@ -743,6 +776,7 @@
     <button type="button" class="mn" data-target="sec-partner">相手</button>
     <button type="button" class="mn" data-target="sec-edu">子ども</button>
     <button type="button" class="mn" data-target="sec-invest">資産</button>
+    <button type="button" class="mn" data-target="sec-debt">借金</button>
     <button type="button" class="mn" data-target="sec-house">住宅</button>
     <button type="button" class="mn" data-target="sec-car">車</button>
     <button type="button" class="mn" data-target="sec-retire">退職</button>
@@ -912,6 +946,16 @@
       </div>
     </details>
 
+    <details class="grp" id="sec-debt">
+      <summary><span class="tag">借金</span>住宅ローン以外の借入<span class="chev">▶</span></summary>
+      <div class="body">
+        <div class="hint" style="margin-top:0">カーローン・奨学金・カードローンなど、<b>住宅ローン以外</b>の借入を入力します（住宅ローンは「住居」で設定します）。残債は<b>利息を含めた総支払残額</b>を入力してください。毎年「月々返済額×12」を現預金から返済し、残債が0になった時点で返済を終えます。</div>
+        <div id="debtList"></div>
+        <button type="button" class="addbtn" id="addDebt">＋ 借入を追加</button>
+        <div class="hint" style="margin-top:10px">「まとめて返す」にチェックを入れると、<b>生活防衛費を超える現預金がある年に一括返済</b>します。NISAへのスイープより優先します（利息のある借金を先に減らすほうが有利なため）。ただし取り崩しが始まっている年は行いません。</div>
+      </div>
+    </details>
+
     <details class="grp" id="sec-house">
       <summary><span class="tag">住居</span>賃貸・購入・ローン・修繕<span class="chev">▶</span></summary>
       <div class="body">
@@ -952,7 +996,8 @@
         <div class="field"><label>購入金額（現在価格）</label><div class="ig"><input type="number" id="carPrice" value="250"><span class="unit">万</span></div></div>
         <details class="subgrp"><summary>買い替え・下取りなどの詳細設定<span class="sg-chev">▶</span></summary><div class="sg-body">
           <div class="field"><label>買い替え周期</label><div class="ig"><input type="number" id="carCycle" value="8"><span class="unit">年</span></div></div>
-          <div class="field"><label>下取り率（前の車の）</label><div class="ig"><input type="number" id="carTradeIn" value="20"><span class="unit">%</span></div></div>
+          <div class="field"><label>下取り率（前の車の）</label><div class="ig"><input type="number" id="carTradeIn" value="25"><span class="unit">%</span></div></div>
+          <div class="hint" id="carTradeHint" style="margin-top:0"></div>
           <div class="field"><label>車体価格の上昇率（年）</label><div class="ig"><input type="number" id="carInflation" value="2.5" step="0.1"><span class="unit">%</span></div></div>
           <div class="field"><label>免許返納年齢</label><div class="ig"><input type="number" id="carReturnAge" value="70"><span class="unit">歳</span></div></div>
         </div></details>
@@ -1092,7 +1137,6 @@
         <button class="tab-btn" data-tab="tab-proposal">診断・改善提案 <span class="tb-badge" id="tabBadgeProposal"></span></button>
         <button class="tab-btn" data-tab="tab-snapshot">指定年齢の詳細</button>
         <button class="tab-btn" data-tab="tab-mc">資産運用のブレ</button>
-        <button class="tab-btn" data-tab="tab-pension">年金の受け取り方</button>
         <button class="tab-btn" data-tab="tab-compare">ライフプラン比較</button>
       </div>
 
@@ -1103,6 +1147,10 @@
         <div class="rank-overall" id="rankOverall"></div>
         <div class="rank-grid" id="rankGrid"></div>
         <div class="hint" id="rankNote"></div>
+        <details class="foldblock" id="bsFold" style="margin-top:14px">
+          <summary class="fold-sum">現在のバランスシート<span class="fold-hint">タップで開閉</span><span class="fold-chev">▶</span></summary>
+          <div class="bs-box" id="bsBody"></div>
+        </details>
       </div>
 
       <div class="tab-panel" id="tab-advice">
@@ -1148,19 +1196,6 @@
         </details>
       </div>
 
-      <div class="tab-panel" id="tab-pension">
-        <div class="eyebrow">Pension</div>
-        <h2>年金の受け取り方による資産の違い</h2>
-        <div class="hint" id="penIntro" style="margin-top:0"></div>
-        <div class="legend" id="penLegend"></div>
-        <div class="chartbox short"><canvas id="penChart"></canvas></div>
-        <div class="tablescroll" style="max-height:none; margin-top:12px">
-          <table id="penTbl"><thead><tr>
-            <th class="l">受け取り方</th><th>65歳の総資産</th><th>80歳の総資産</th><th>最終総資産</th><th class="l">結果</th>
-          </tr></thead><tbody id="penBody"></tbody></table>
-        </div>
-        <div class="hint" id="penNote"></div>
-      </div>
 
       <div class="tab-panel" id="tab-compare">
         <div class="eyebrow">Plan comparison</div>
@@ -1200,6 +1235,23 @@
         </tr></thead><tbody id="inflBody"></tbody></table>
       </div>
       <div class="hint" id="inflAdvice" style="margin-top:10px"></div>
+    </div>
+    </details>
+
+    <details class="foldblock">
+      <summary class="fold-sum">年金の受け取り方による資産の違い<span class="fold-hint">タップで開閉</span><span class="fold-chev">▶</span></summary>
+    <div class="block" id="penBlock">
+      <div class="eyebrow">Pension</div>
+      <h2>年金の受け取り方による資産の違い</h2>
+        <div class="hint" id="penIntro" style="margin-top:0"></div>
+        <div class="legend" id="penLegend"></div>
+        <div class="chartbox short"><canvas id="penChart"></canvas></div>
+        <div class="tablescroll" style="max-height:none; margin-top:12px">
+          <table id="penTbl"><thead><tr>
+            <th class="l">受け取り方</th><th>65歳の総資産</th><th>80歳の総資産</th><th>最終総資産</th><th class="l">結果</th>
+          </tr></thead><tbody id="penBody"></tbody></table>
+        </div>
+        <div class="hint" id="penNote"></div>
     </div>
     </details>
 
@@ -1696,7 +1748,9 @@ function simulate(P){
   if(P.marriageAgeEff==null) P.marriageAgeEff=(P.marriageRow>=0)?P.currentAge+P.marriageRow:P.marriageAge;
   const L=loanCalc(P); const rows=[];
   /* 子ども名義の積立口座（世帯の総資産には含めず、22歳時点の金額を別途表示する） */
-  const kidFunds=(P.children||[]).map(()=>({v:0,p:0,at22:null})); let cash=P.initCash, nisaP=P.initNisaP, nisaV=(P.initNisaV>0?P.initNisaV:P.initNisaP), dcValue=0;
+  const kidFunds=(P.children||[]).map(()=>({v:0,p:0,at22:null}));
+  /* 借金の残債は年をまたいで持ち越すので、シミュレーションの外側で持つ */
+  const debtState=(P.debts||[]).map(d=>({...d, bal:Math.max(0,d.bal||0)})); let cash=P.initCash, nisaP=P.initNisaP, nisaV=(P.initNisaV>0?P.initNisaV:P.initNisaP), dcValue=0;
   const eduTotalEach=eduTotalPerChild(P); const eduMonthlyEach=eduTotalEach/(EDU_SAVE_END*12); const totalEduAll=eduTotalEach*P.children.length; let eduFund=0, eduPaid=0, eduAccount=0; let lastCarPrice=0;
   let pcSelf=0, pcSpouse=0, pensionCalc=null, shortfallCum=0;
   const nY=Math.max(1,MAX_AGE-P.currentAge+1);
@@ -1975,6 +2029,19 @@ function simulate(P){
       if(ca===P.kidNisaTo && f.at22==null) f.at22=f.v;            /* 非課税なので運用益に課税しない */
       if(ca>=0 && ca<=P.kidNisaTo) kidFundNow+=f.v;
     });
+    /* 住宅ローン以外の借金の返済。年間返済額を現預金から支払い、残債を減らす。
+       「まとめて返す」は生活防衛費を超えた現預金から一括返済し、NISAへのスイープより先に行う。 */
+    let debtPay=0;
+    debtState.forEach(d=>{
+      if(d.bal<=0) return;
+      const yearly=Math.min(d.bal, d.mon*12);
+      if(yearly>0){ cash-=yearly; d.bal-=yearly; debtPay+=yearly; }
+      if(d.lump && d.bal>0 && shortfallCum<=0){
+        const spare=cash-emergency;
+        if(spare>0){ const pay=Math.min(spare, d.bal); cash-=pay; d.bal-=pay; debtPay+=pay; }
+      }
+    });
+    const debtBal=debtState.reduce((a,d)=>a+Math.max(0,d.bal),0);
     // スイープ：上限超過分をNISAへ（教育口座は別勘定なので主口座のみが対象）
     let sweep=0;
     if(P.sweepNisa && shortfallCum<=0){ const floor=Math.max(P.cashCap,emergency);
@@ -2017,7 +2084,7 @@ function simulate(P){
     const netWorth=busted?0:(cash+eduAccount+nisaV+dcValue*(1-P.dcTaxRate));
     const defl=Math.pow(1+P.inflation,i);
     const events=eventsFor(P,age,childAges,L);
-    rows.push({i,age,pAge,married,childAges,dep:dep.length,earners,emgMonths,emergency,pension:pensionNom,gross,bonus,pGross,net,taxSocial,taxIncome,taxResident,selfDead,widowed,survivorPen,survivorParts,deathBenefit,living,housing,edu,oneoff,oneoffLbl,saving,contrib,sweep,ded,dcContrib,dcCorp,dcDed,retireNet,dcLumpFree,dcValue,eduFund,sideInc,drawNisa,drawDc,drawEdu,dcTaxPaid,drawdown,shortfall,shortfallCum,liquid,busted,nisaV,nisaP,cash,netWorth,loanBal,kidFundNow,housingSubsidy,defl,livingBase,ins,trav,care,med,eduSave:eduSaveAnnual,eduTransfer,eduPayCash,eduAccount,incomeCash,expense,events});
+    rows.push({i,age,pAge,married,childAges,dep:dep.length,earners,emgMonths,emergency,pension:pensionNom,gross,bonus,pGross,net,taxSocial,taxIncome,taxResident,selfDead,widowed,survivorPen,survivorParts,deathBenefit,living,housing,edu,oneoff,oneoffLbl,saving,contrib,sweep,ded,dcContrib,dcCorp,dcDed,retireNet,dcLumpFree,dcValue,eduFund,sideInc,drawNisa,drawDc,drawEdu,dcTaxPaid,drawdown,shortfall,shortfallCum,liquid,busted,nisaV,nisaP,cash,netWorth,loanBal,kidFundNow,housingSubsidy,debtPay,debtBal,defl,livingBase,ins,trav,care,med,eduSave:eduSaveAnnual,eduTransfer,eduPayCash,eduAccount,incomeCash,expense,events});
     /* 生活資金が尽きた（＝支出をまかなえなくなった）時点で試算を終了する */
     if(selfDead && !married) break;   /* 世帯を継続する人がいないためここで終了 */
     if(busted) break;
@@ -2057,6 +2124,7 @@ function readParams(){
     rentMonthly:num('rentMonthly'), propertyTax:num('propertyTax'),
     repair1Year:num('repair1Year'), repair1Cost:num('repair1Cost'), repair2Year:num('repair2Year'), repair2Cost:num('repair2Cost'),
     creditYears:num('creditYears'), creditRate:num('creditRate')/100, creditCap:num('creditCap'),
+    debts:debts.map(d=>({name:d.name, bal:Math.max(0,d.bal||0), mon:Math.max(0,d.mon||0), lump:!!d.lump})),
     hasHousingSubsidy:document.getElementById('hasHousingSubsidy').checked, housingSubsidyMode:val('housingSubsidyMode'),
     housingSubsidyFixed:num('housingSubsidyFixed'), housingSubsidyRate:num('housingSubsidyRate')/100, housingSubsidyYears:num('housingSubsidyYears'),
     housingSubsidyTaxable:document.getElementById('housingSubsidyTaxable').checked,
@@ -2824,6 +2892,10 @@ function render(){
       const buys=rows.filter(r=>r.oneoffLbl.some(l=>l.startsWith('車')));
       const totalCar=buys.reduce((s,r)=>s+r.oneoffLbl.filter(l=>l.startsWith('車')).reduce((t,l)=>t+(parseInt(l.replace(/\D/g,''))||0),0),0);
       const firstPrice=Math.round(P.carPrice);
+      const th=document.getElementById('carTradeHint');
+      if(th){ const rr=Math.round(carResidualRate(P.carCycle)*100);
+        th.innerHTML='買い替え周期'+P.carCycle+'年に対する残価の目安は<b>'+rr+'%</b>です（1〜2年70〜60%、3〜4年55〜50%、5〜6年50〜40%、7〜8年30〜25%、9〜10年10〜0%）。'
+          +(Math.abs(P.carTradeIn*100-rr)>=5?'<br>いまの下取り率（'+Math.round(P.carTradeIn*100)+'%）とは差があります。':''); }
       carEl.innerHTML=`${P.carFirstAge}歳で初回購入（${man(firstPrice)}万）、以後${P.carCycle}年ごとに買い替え（車体は年${(P.carInflation*100).toFixed(1)}%上昇、買い替え時は前の車の${Math.round(P.carTradeIn*100)}%を下取り）。${P.carReturnAge}歳で免許返納し以降は買い替えなし。生涯の車関連支出は約 <b>${man(totalCar)}万円</b>（${buys.length}回）。`;
     } else { carEl.textContent='「車を保有する」をオンにすると、購入・買い替えの支出が資産に反映されます。'; }
   }
@@ -2951,6 +3023,7 @@ function render(){
     </tr>`;
   }).join('');
   const _mm=document.getElementById('mcMu'); if(_mm) _mm.textContent=(P.nisaYield*100).toFixed(1)+'%';
+  renderBalance(P);
   renderKidFunds(P,rows);
   renderPension(P,rows);
   renderCompare(P,rows);
@@ -3038,13 +3111,14 @@ function setDefaults(){
 }
 
 /* ============ 保存・共有 ============ */
-function getState(){ const o={}; STATIC_IDS.forEach(id=>{const el=document.getElementById(id); if(!el)return; o[id]=el.type==='checkbox'?el.checked:el.value;}); o.segs=segs; o.selfSegs=selfSegs; o.kids=kids; return o; }
+function getState(){ const o={}; STATIC_IDS.forEach(id=>{const el=document.getElementById(id); if(!el)return; o[id]=el.type==='checkbox'?el.checked:el.value;}); o.segs=segs; o.selfSegs=selfSegs; o.kids=kids; o.debts=debts; return o; }
 function applyState(s){
   STATIC_IDS.forEach(id=>{const el=document.getElementById(id); if(el&&s[id]!=null){ if(el.type==='checkbox')el.checked=!!s[id]; else el.value=s[id]; }});
   if(Array.isArray(s.segs)) segs=s.segs.map(x=>({...x}));
   if(Array.isArray(s.selfSegs)) selfSegs=s.selfSegs.map(x=>({...x}));
   if(Array.isArray(s.kids)) kids=s.kids.map(x=>({...x}));
-  renderSegs(); renderSelfSegs(); renderKids(); if(typeof updateSelfWorkUI==='function') updateSelfWorkUI(); if(typeof updatePartnerWorkUI==='function') updatePartnerWorkUI(); if(typeof updatePrefUI==='function') updatePrefUI(); if(typeof updateOptBoxUI==='function') updateOptBoxUI();
+  if(Array.isArray(s.debts)) debts=s.debts.map(x=>({...x}));
+  renderSegs(); renderSelfSegs(); renderKids(); if(typeof renderDebts==='function') renderDebts(); if(typeof updateSelfWorkUI==='function') updateSelfWorkUI(); if(typeof updatePartnerWorkUI==='function') updatePartnerWorkUI(); if(typeof updatePrefUI==='function') updatePrefUI(); if(typeof updateOptBoxUI==='function') updateOptBoxUI();
 }
 function b64e(str){ return btoa(unescape(encodeURIComponent(str))); }
 function b64d(b){ return decodeURIComponent(escape(atob(b))); }
@@ -4121,6 +4195,20 @@ function buildPrintDoc(){
   /* 途中で資金が尽きたときは内訳がすべて0になるため載せない */
   const brkBlock = busted ? '' : ('<div class="sec-t">最終資産の内訳（'+last.age+'歳時点）</div><div class="brk">'+brk+'</div>');
   /* 1ページ目：基本情報・設定内容・結果の要約 */
+  /* 現在のバランスシート（1ページ目の最後に載せる） */
+  const bsHtml=(function(){
+    const bs=balanceSheet(P);
+    const row=i=>'<tr><td class="l">'+pdEsc(i.k)+'<span class="bsn">'+pdEsc(i.note)+'</span></td><td>'+man(i.v)+'万円</td></tr>';
+    const la=bs.liabilities.length?bs.liabilities.map(row).join(''):'<tr><td class="l" colspan="2">借入はありません</td></tr>';
+    return '<div class="pd-2 bs-pd">'
+      +'<div><div class="bsh bsh-a">資産</div><table class="bstbl"><tbody>'+bs.assets.map(row).join('')
+        +'<tr class="bss"><td class="l">資産の合計</td><td>'+man(bs.aSum)+'万円</td></tr></tbody></table></div>'
+      +'<div><div class="bsh bsh-l">負債</div><table class="bstbl"><tbody>'+la
+        +'<tr class="bss"><td class="l">負債の合計</td><td>'+man(bs.lSum)+'万円</td></tr></tbody></table></div>'
+      +'</div>'
+      +'<div class="bsnet"><span>純資産（資産 − 負債）</span><b'+(bs.net<0?' class="bsneg"':'')+'>'+manY(bs.net)+'</b></div>'
+      +'<div class="pd-note" style="margin-top:4px">※ 車・建物・土地の評価額は<b>概算</b>です。車は購入からの経過年数、建物は築年数に応じた残価率で機械的に計算し、土地は購入時の価格のまま据え置いています。実際の売却価格は車種・立地・建物の状態・相場により大きく異なります。</div>';
+  })();
   /* 資産形成の評価（1ページ目に載せる） */
   let rankHtml='';
   if(rk){
@@ -4146,7 +4234,8 @@ function buildPrintDoc(){
     +brkBlock
     +'<div class="sec-t">資産形成の評価</div>'+rankHtml
     +'<div class="sec-t">主な設定</div><div class="cond-a">'+condA+'</div><div class="cond-b">'+condB+'</div>'
-    +'<div class="sec-t">細かな設定</div><div class="cond-c"'+condStyle+'>'+fine.join('')+'</div>'));
+    +'<div class="sec-t">細かな設定</div><div class="cond-c"'+condStyle+'>'+fine.join('')+'</div>'
+    +'<div class="sec-t">現在のバランスシート</div>'+bsHtml));
 
   /* 2ページ目：ライフイベントの年表（1ページを丸ごと使う） */
   const evFull=evs.map(e=>'<tr><td class="age">'+e.age+'歳</td>'
@@ -4231,13 +4320,24 @@ function buildPrintDoc(){
     if(title && body.startsWith(title)) body=body.slice(title.length).trim();
     return '<div class="adv"><div class="adv-t">'+pdEsc(title||'アドバイス')+'</div><div class="adv-b">'+pdEsc(body)+'</div></div>';
   });
-  const advPer=8;
+  /* 1件あたりの分量から1ページに載る件数を決め、余白が出ないよう文字と行間も調整する */
+  const advChars=advEls.map(el=>el.textContent.trim().length);
+  const avgLines=advChars.length?Math.max(1,Math.ceil((advChars.reduce((a,b)=>a+b,0)/advChars.length)/74)):2;
+  const advPer=Math.max(4, Math.min(9, Math.floor(30/(avgLines+1.6))));
+  const advPages=Math.max(1, Math.ceil(advHtml.length/advPer));
+  const advEach=Math.ceil(advHtml.length/advPages);
+  /* 1ページに入る件数が少ないほど、1件を大きく見せる */
+  const advFS=Math.max(9.0, Math.min(13.0, 15.5-advEach*0.55));
+  const advLH=Math.max(1.75, Math.min(2.30, 2.55-advEach*0.055));
+  const advPad=Math.max(7, Math.min(17, 21-advEach*1.5));
+  const advStyle=' style="--advfs:'+advFS.toFixed(1)+'px; --advlh:'+advLH.toFixed(2)+'; --advpad:'+advPad.toFixed(0)+'px"';
   if(advHtml.length){
-    for(let i=0;i<advHtml.length;i+=advPer){
-      const part=advHtml.slice(i,i+advPer).join('');
-      const n=Math.floor(i/advPer)+1, tot=Math.ceil(advHtml.length/advPer);
+    for(let i=0;i<advHtml.length;i+=advEach){
+      const part=advHtml.slice(i,i+advEach).join('');
+      const n=Math.floor(i/advEach)+1, tot=advPages;
       P0.push(pdPage('ライフイベントに備えるアドバイス'+(tot>1?'（'+n+'/'+tot+'）':''), stamp,
-        (n===1?'<div class="pd-lead">これから訪れるライフイベントごとに、試算結果をもとにした準備額の目安と注意点をまとめています。</div>':'')+part));
+        (n===1?'<div class="pd-lead">これから訪れるライフイベントごとに、試算結果をもとにした準備額の目安と注意点をまとめています。</div>':'')
+        +'<div class="adv-wrap"'+advStyle+'>'+part+'</div>'));
     }
   } else {
     P0.push(pdPage('ライフイベントに備えるアドバイス', stamp,'<div class="pd-note">表示できるアドバイスがありません。</div>'));
@@ -4445,6 +4545,109 @@ function renderPension(P, baseRows){
       +`<td class="l ${bust?'neg':''}">${bust?last.age+'歳ごろ枯渇':last.age+'歳まで維持'}</td></tr>`;
   }).join('');
   document.getElementById('penNote').innerHTML='※ 繰下げ受給は、受け取りを待つあいだの生活費を資産でまかなえるかが判断材料になります。長生きするほど繰下げが有利になりますが、途中で資産が尽きては意味がないため、上の表で65歳・80歳時点の残高もあわせてご確認ください。';
+}
+
+/* ============ 現在のバランスシート ============
+   車・建物・土地の評価は市場価格ではなく、経過年数から機械的に見積もった概算。
+   ・車：1〜2年 70〜60%、3〜4年 55〜50%、5〜6年 50〜40%、7〜8年 30〜25%、9〜10年 10〜0%
+   ・住宅：購入額の6割を建物、4割を土地とみなす。土地は購入時のまま、建物は
+     築5年まで70%、10年まで60%、15年まで45%、20年まで30%、21年以上は0% */
+const CAR_RESIDUAL=[[1,0.70],[2,0.60],[3,0.55],[4,0.50],[5,0.50],[6,0.40],[7,0.30],[8,0.25],[9,0.10],[10,0.00]];
+function carResidualRate(years){
+  const y=Math.max(0,Math.round(years));
+  if(y<=0) return 1.00;
+  for(const [t,r] of CAR_RESIDUAL){ if(y<=t) return r; }
+  return 0;
+}
+const BLDG_RESIDUAL=[[5,0.70],[10,0.60],[15,0.45],[20,0.30]];
+function buildingResidualRate(years){
+  const y=Math.max(0,Math.round(years));
+  if(y<=0) return 1.00;
+  for(const [t,r] of BLDG_RESIDUAL){ if(y<=t) return r; }
+  return 0;
+}
+const HOUSE_BUILDING_SHARE=0.6;   /* 購入額のうち建物とみなす割合 */
+const HOUSE_LAND_SHARE=0.4;
+
+function balanceSheet(P){
+  const now=P.currentAge;
+  const A=[], L=[];
+  A.push({k:'現預金', v:Math.max(0,P.initCash||0), note:'入力値'});
+  const nisa=(P.initNisaV>0?P.initNisaV:P.initNisaP)||0;
+  A.push({k:'NISA評価額', v:Math.max(0,nisa), note:'入力値（元本 '+man(P.initNisaP||0)+'万円）'});
+
+  /* 車：直近の購入からの経過年数で見積もる */
+  if(P.hasCar && now>=P.carFirstAge){
+    const cyc=Math.max(1,P.carCycle);
+    const since=(now-P.carFirstAge)%cyc;              /* 直近の購入から何年たったか */
+    const rate=carResidualRate(since);
+    A.push({k:'車の価値', v:Math.max(0,P.carPrice*rate),
+      note:'購入から'+since+'年・残価'+Math.round(rate*100)+'%（概算）'});
+  }
+  /* 住宅：すでに購入している場合のみ */
+  if(P.buyAge!=null && now>=P.buyAge){
+    const age=now-P.buyAge;
+    const bRate=buildingResidualRate(age);
+    A.push({k:'建物の評価額', v:Math.max(0,P.price*HOUSE_BUILDING_SHARE*bRate),
+      note:'築'+age+'年・購入額の6割×'+Math.round(bRate*100)+'%（概算）'});
+    A.push({k:'土地の評価額', v:Math.max(0,P.price*HOUSE_LAND_SHARE),
+      note:'購入額の4割・購入時のまま（概算）'});
+    /* 住宅ローン残債 */
+    const Lo=loanCalc(P);
+    const k=now-P.buyAge;
+    const bal=(k<P.loanYears)?Math.max(0,balAfter(Lo,k)):0;
+    if(bal>0) L.push({k:'住宅ローン残債', v:bal, note:'返済'+k+'年目'});
+  }
+  (P.debts||[]).forEach(d=>{ if(d.bal>0) L.push({k:d.name||'借入', v:d.bal, note:'月'+d.mon+'万円ずつ返済'}); });
+
+  const aSum=A.reduce((x,i)=>x+i.v,0), lSum=L.reduce((x,i)=>x+i.v,0);
+  return {assets:A, liabilities:L, aSum, lSum, net:aSum-lSum};
+}
+function renderBalance(P){
+  const el=document.getElementById('bsBody'); if(!el) return;
+  const bs=balanceSheet(P);
+  const rowsA=bs.assets.map(i=>'<tr><td class="l">'+i.k+'<br><span class="bs-note">'+i.note+'</span></td><td>'+man(i.v)+'万円</td></tr>').join('');
+  const rowsL=bs.liabilities.length
+    ? bs.liabilities.map(i=>'<tr><td class="l">'+i.k+'<br><span class="bs-note">'+i.note+'</span></td><td>'+man(i.v)+'万円</td></tr>').join('')
+    : '<tr><td class="l" colspan="2">借入はありません</td></tr>';
+  el.innerHTML=
+     '<div class="bs-grid">'
+    +'<div class="bs-col"><div class="bs-h bs-a">資産</div><table class="bs-tbl"><tbody>'+rowsA
+    +'<tr class="bs-sum"><td class="l">資産の合計</td><td>'+man(bs.aSum)+'万円</td></tr></tbody></table></div>'
+    +'<div class="bs-col"><div class="bs-h bs-l">負債</div><table class="bs-tbl"><tbody>'+rowsL
+    +'<tr class="bs-sum"><td class="l">負債の合計</td><td>'+man(bs.lSum)+'万円</td></tr></tbody></table></div>'
+    +'</div>'
+    +'<div class="bs-net"><span>純資産（資産 − 負債）</span><b class="'+(bs.net<0?'bs-neg':'')+'">'+manY(bs.net)+'</b></div>'
+    +'<div class="bs-disc">※ <b>車・建物・土地の評価額は概算</b>です。車は購入からの経過年数、建物は築年数に応じた残価率で機械的に計算しています。土地は購入時の価格のまま据え置いています。実際の売却価格は、車種・立地・建物の状態・相場によって大きく異なります。</div>';
+}
+
+/* ============ 借金（住宅ローン以外） ============ */
+const DEBT_PRESETS=[
+  {name:'カーローン', bal:150, mon:3.0},
+  {name:'奨学金',       bal:240, mon:1.4},
+  {name:'カードローン（キャッシング）', bal:50, mon:1.5},
+  {name:'その他ローン', bal:50, mon:1.0},
+];
+let debts=[];
+function renderDebts(){
+  const host=document.getElementById('debtList'); if(!host) return;
+  host.innerHTML=debts.map((d,i)=>`
+    <div class="seg debt-row" data-i="${i}">
+      <div class="seg-head"><b>借入 ${i+1}</b><button type="button" class="mini" data-del="${i}">削除</button></div>
+      <div class="field"><label>名前</label><input type="text" class="dbt-name" value="${(d.name||'').replace(/"/g,'&quot;')}" placeholder="カーローンなど"></div>
+      <div class="field"><label>残債（利息込み）</label><div class="ig"><input type="number" class="dbt-bal" value="${d.bal}" step="1"><span class="unit">万</span></div></div>
+      <div class="field"><label>月々の返済額</label><div class="ig"><input type="number" class="dbt-mon" value="${d.mon}" step="0.1"><span class="unit">万/月</span></div></div>
+      <div class="field"><label>まとめて返す（一括返済）</label><input type="checkbox" class="dbt-lump" ${d.lump?'checked':''}></div>
+      <div class="hint" style="margin-top:0">${d.mon>0?('この条件なら完済まで約'+Math.ceil(d.bal/(d.mon*12)*10)/10+'年'):'月々の返済額を入力してください'}</div>
+    </div>`).join('') || '<div class="hint" style="margin-top:0">登録されている借入はありません。</div>';
+  host.querySelectorAll('.debt-row').forEach(row=>{
+    const i=+row.dataset.i;
+    row.querySelector('.dbt-name').addEventListener('input',e=>{ debts[i].name=e.target.value; render(); });
+    row.querySelector('.dbt-bal').addEventListener('input',e=>{ debts[i].bal=parseFloat(e.target.value)||0; renderDebts(); render(); });
+    row.querySelector('.dbt-mon').addEventListener('input',e=>{ debts[i].mon=parseFloat(e.target.value)||0; renderDebts(); render(); });
+    row.querySelector('.dbt-lump').addEventListener('change',e=>{ debts[i].lump=e.target.checked; render(); });
+  });
+  host.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>{ debts.splice(+b.dataset.del,1); renderDebts(); render(); }));
 }
 
 /* ============ ライフプラン比較：結婚のしかた・子どもの人数 ============
@@ -4762,6 +4965,12 @@ document.getElementById('addSeg').addEventListener('click',()=>{ segs.push({from
 var _asb=document.getElementById('addSelfSeg'); if(_asb) _asb.addEventListener('click',()=>{ selfSegs.push({from:30,to:60,base:21,allow:3,raise:0.3,cap:30,bonusMonths:3.0,kind:'work'}); renderSelfSegs(); render(); });
 var _swmSel=document.getElementById('selfWorkMode'); if(_swmSel) _swmSel.addEventListener('change',()=>{ updateSelfWorkUI(); render(); });
 var _pwmSel=document.getElementById('partnerWorkMode'); if(_pwmSel) _pwmSel.addEventListener('change',()=>{ updatePartnerWorkUI(); render(); });
+var _addDebt=document.getElementById('addDebt');
+if(_addDebt) _addDebt.addEventListener('click',function(){
+  var pre=DEBT_PRESETS[Math.min(debts.length,DEBT_PRESETS.length-1)];
+  debts.push({name:pre.name, bal:pre.bal, mon:pre.mon, lump:false});
+  renderDebts(); render();
+});
 var _prefSel=document.getElementById('pref'); if(_prefSel) _prefSel.addEventListener('change',()=>{ updatePrefUI(); render(); });
 ['hasPartnerNisa','hasKidNisa','hasHousingSubsidy'].forEach(function(id){ var cb=document.getElementById(id);
   if(cb) cb.addEventListener('change',function(){ updateOptBoxUI(); render(); }); });
