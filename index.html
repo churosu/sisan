@@ -573,6 +573,25 @@
           height:12mm; box-sizing:border-box; padding:0 0 3mm; margin:0}
     .pg-h .ph-t{font-size:15px; font-weight:800; color:#111}
     .pg-h .ph-s{font-size:9.5px; font-weight:700; color:#7A8899; margin-left:auto}
+    /* 表紙（1ページ目） */
+    .cover{min-height:238mm; display:flex; align-items:center; justify-content:center; text-align:center}
+    .cv-wrap{width:100%; padding:0 6mm}
+    .cv-brand{font-size:46px; font-weight:800; letter-spacing:3px; color:#0CA795; line-height:1}
+    .cv-rule{width:56px; height:3px; background:#0CA795; border-radius:2px; margin:15px auto 24px}
+    .cv-title{font-size:27px; font-weight:800; color:#111; margin-bottom:9px}
+    .cv-sub{font-size:12px; font-weight:700; color:#7A8899; letter-spacing:1px; margin-bottom:42px}
+    .cv-meta{text-align:left; max-width:132mm; margin:0 auto; border:1px solid #E3EAF2; border-radius:11px; padding:4px 18px}
+    .cv-line{display:flex; gap:14px; align-items:baseline; font-size:11px; padding:9px 0; border-bottom:1px dashed #E8EDF3}
+    .cv-line:last-child{border-bottom:none}
+    .cv-line>span{color:#7A8899; font-weight:700; flex:0 0 78px}
+    .cv-line>b{color:#111; font-weight:700; line-height:1.5}
+    .cv-foot{margin-top:44px; font-size:9.5px; color:#9AA7B4; font-weight:700}
+    /* 目次（2ページ目） */
+    .toc{margin-top:6px}
+    .toc-row{display:flex; align-items:baseline; gap:6px; padding:8px 2px; font-size:12px}
+    .toc-t{font-weight:700; color:#111; white-space:nowrap}
+    .toc-dot{flex:1 1 auto; border-bottom:1.5px dotted #C7D2DE; transform:translateY(-3px)}
+    .toc-p{font-weight:800; color:#0CA795; white-space:nowrap; font-variant-numeric:tabular-nums}
     .pd-lead{font-size:10px; color:#5A6672; line-height:1.65; margin:0 0 9px}
     /* --- 見出しの階層（優先度が高いほど大きく） --- */
     .hero{display:grid; grid-template-columns:1.25fr 1fr; gap:10px; margin-bottom:11px}
@@ -622,14 +641,18 @@
     .pd-pair{margin-top:4px}
     .pd-pair .sec-t{margin-top:6px}
     .pd-wide{width:100%}
-    .pd-cmp{font-size:9px; table-layout:auto; margin-bottom:2px}
-    .pd-cmp th{font-size:8px; padding:4px 5px; text-align:center}
-    .pd-cmp td{padding:4px 5px; height:auto; white-space:normal}
+    .pd-cmp{font-size:8.5px; table-layout:auto; margin-bottom:1px; line-height:1.25}
+    .pd-cmp th{font-size:7.5px; padding:1.8px 5px; text-align:center; line-height:1.2}
+    .pd-cmp td{padding:1.8px 5px; height:auto; white-space:normal; line-height:1.25}
     .pd-cmp td.plan{text-align:left; font-weight:700; width:34%}
     .pd-cmp .cmp-badge{font-size:7px; background:#0CA795; color:#fff; border-radius:4px; padding:1px 4px; margin-left:4px}
     .pd-cmp .th-sub{font-weight:600; opacity:.75}
     .pd-cmp .cmp-neg{color:#C2183C; font-weight:800}
     .pd-cmp tr.is-def td{background:#EAF7F2}
+    /* ライフプラン比較だけ縦を詰める（他ページの見出し・注記・導入文には影響させない） */
+    .cmp-wrap .pd-lead{margin:0 0 4px; line-height:1.4; font-size:9px}
+    .cmp-wrap .sec-t{margin:5px 0 2px}
+    .cmp-wrap .pd-note{margin-top:2px; line-height:1.35; font-size:8px}
     .bs-block{break-inside:avoid; page-break-inside:avoid}
     .bs-pd{gap:9px; margin-bottom:3px}
     .bsh{font-size:calc(var(--bsfs,9px) * .95); font-weight:800; padding:2.5px 7px; border-radius:5px; margin-bottom:2px}
@@ -683,6 +706,10 @@
     .adv-wrap .adv{padding:var(--advpad,7px) calc(var(--advpad,7px) + 4px); margin-bottom:calc(var(--advpad,7px) * .7)}
     .adv-wrap .adv-t{font-size:calc(var(--advfs,9px) + 1.6px)}
     .adv-wrap .adv-b{font-size:var(--advfs,9px); line-height:var(--advlh,1.7)}
+    /* 改善提案：比較と同じページに載せるため、件数が多いときだけ縮める */
+    .prop-wrap .adv{padding:var(--proppad,7px) calc(var(--proppad,7px) + 4px); margin-bottom:calc(var(--proppad,7px) * .6)}
+    .prop-wrap .adv-t{font-size:calc(var(--propfs,9px) + 1.5px)}
+    .prop-wrap .adv-b{font-size:var(--propfs,9px); line-height:var(--proplh,1.6)}
     .disc-p{font-size:9px; color:#444; line-height:1.85; margin:0 0 7px}
     .disc-p b{color:#111}
   }
@@ -1361,7 +1388,7 @@ function eduTotalPerChild(P){ let t=0; for(let a=3;a<=21;a++) t+=eduAnnual(a,P);
 function insurance(age){ if(age<30)return 8; if(age<40)return 14; if(age<50)return 22; if(age<60)return 28; if(age<70)return 22; return 14; }
 /* 公的年金（令和7年度基準・概算）: 老齢基礎満額83.17万/年、報酬比例乗率5.481/1000（2003年4月〜）、標準報酬の年間上限概算1230万 */
 const CURRENT_YEAR=new Date().getFullYear();
-const APP_VERSION='0.0.7';   /* 更新するたびに末尾を増やす */
+const APP_VERSION='0.0.9';   /* 更新するたびに末尾を増やす */
 const MAX_AGE=120;  /* 生活資金が尽きなかった場合の試算上限 */
 const PENSION_FULL=83.17, PENSION_RATE=5.481/1000, PENSION_CAP=1230, PENSION_NET=0.90;
 /* マクロ経済スライドの調整期間（2024年財政検証・過去30年投影ケース）
@@ -4464,11 +4491,10 @@ function buildPrintDoc(){
   }
   const ADV_PAGE_MM=297, ADV_SAFE_MARGIN_MM=75, ADV_PGHEAD_MM=12, ADV_LEAD_MM=14;
   const advBudget=ADV_PAGE_MM-ADV_SAFE_MARGIN_MM-ADV_PGHEAD_MM-ADV_LEAD_MM;   /* 1ページに載せられる高さ：196mm */
-  /* 文字・行間・余白の可動域。上限（AFS/ALH/APAD_MAX）から始めて、範囲に収まるまで
-     単調に縮小する。これにより①必ず1ページに収まり、②件数が少ないときは上限に近い
-     大きめのサイズ・間隔のまま＝余白が増えすぎない、③件数が多いときだけ小さくなる。
-     文字は大きくしすぎると不自然なので上限を控えめにし、余りは主に行間・余白で埋める。 */
-  const AFS_MIN=7.0, AFS_MAX=15.0, ALH_MIN=1.32, ALH_MAX=2.35, APAD_MIN=2.5, APAD_MAX=30;
+  /* 文字・行間・余白の可動域。他ページの本文（.adv-b＝9px/行間1.7）と揃うよう上限を
+     文書標準サイズに抑える。上限から始め、収まらないときだけ縮める。件数が少なくても
+     文字・行間・余白が大きくなりすぎず、他ページと同じ見た目になる（下部の余白は許容）。 */
+  const AFS_MIN=6.4, AFS_MAX=9.5, ALH_MIN=1.32, ALH_MAX=1.75, APAD_MIN=2.5, APAD_MAX=9;
   let advFS=AFS_MAX, advLH=ALH_MAX, advPad=APAD_MAX;
   /* 収まるまで「余白 → 行間 → 文字」の順に段階的に縮小する。文字は最後に縮めるため、
      読みやすい大きさをできるだけ保ったまま、必要な分だけ小さくなる。 */
@@ -4507,10 +4533,9 @@ function buildPrintDoc(){
   const cmpKidsT=document.querySelector('#cmpKids table');
   const note=id=>{ const e=document.getElementById(id); return e?'<div class="pd-note" style="margin:0 0 5px">'+pdEsc(e.textContent.trim())+'</div>':''; };
 
-  const diagHtml='<div class="sec-t">プラン診断</div>'
-    +(diagTxt?'<div class="adv-b">'+pdEsc(diagTxt.textContent.trim())+'</div>':'<div class="pd-note">—</div>')
-    +'<div class="sec-t">改善提案</div>'+(propHtml||'<div class="pd-note">—</div>');
-  const cmpHtml='<div class="pd-lead">ほかの前提はそのままに、大きな選択だけを入れ替えるとどうなるかを比べています。'
+  const diagTextHtml='<div class="sec-t">プラン診断</div>'
+    +(diagTxt?'<div class="adv-b">'+pdEsc(diagTxt.textContent.trim())+'</div>':'<div class="pd-note">—</div>');
+  const cmpHtml='<div class="cmp-wrap"><div class="pd-lead">ほかの前提はそのままに、大きな選択だけを入れ替えるとどうなるかを比べています。'
     +'「規定値」がいま設定している条件です。金額は最終資産の実質額（今日の物価に換算）です。</div>'
     +'<div class="sec-t">住まいの選び方</div>'
     +(cmpTbl?'<table class="pd-tbl pd-cmp">'+cmpTbl.innerHTML+'</table>':'<div class="pd-note">—</div>')
@@ -4519,35 +4544,50 @@ function buildPrintDoc(){
     +(cmpMarryT?'<table class="pd-tbl pd-cmp">'+cmpMarryT.innerHTML+'</table>':'<div class="pd-note">—</div>')
     +'<div class="sec-t">子どもの人数</div>'
     +note('cmpKidsNote')
-    +(cmpKidsT?'<table class="pd-tbl pd-cmp">'+cmpKidsT.innerHTML+'</table>':'<div class="pd-note">—</div>');
+    +(cmpKidsT?'<table class="pd-tbl pd-cmp">'+cmpKidsT.innerHTML+'</table>':'<div class="pd-note">—</div>')
+    +'</div>';
 
-  /* 診断・改善提案 と 比較 の分量をそれぞれ概算し、合算が1ページ（安全側の描画可能高さ）に
-     収まるときだけ1ページにまとめる。収まらなければ2ページに分けて次ページへの溢れを防ぐ。
-     （印刷前に実寸は測れないため、文字数・行数・表の行数からの概算。安全側にやや多めに見積もる） */
+  /* 改善提案 と ライフプラン比較（＋プラン診断）を1ページにまとめる。
+     比較表と診断はほぼ固定の高さなので、残りの高さに改善提案が収まるよう、
+     提案が多いときだけ提案ブロックの文字サイズ・行間・余白を段階的に縮めて1ページに収める。
+     （印刷前に実寸は測れないため、文字数・行数・表の行数からの概算。実測に近づくよう校正） */
   const perLine=70;   /* 本文幅170mm・9pxの全角で1行あたり約70字 */
-  const estDiag=(function(){
-    let mm=12;                                    /* 「プラン診断」見出し */
-    const dt=diagTxt?diagTxt.textContent.trim().length:0;
-    mm+=Math.ceil(dt/perLine)*4.6;                /* 診断本文 */
-    mm+=12;                                        /* 「改善提案」見出し */
-    propEls.forEach(el=>{ mm+=8+Math.ceil(el.textContent.trim().length/perLine)*4.4; });  /* 提案1件：枠＋本文 */
-    return mm;
-  })();
+  const estDiagText=(function(){ let mm=7; const dt=diagTxt?diagTxt.textContent.trim().length:0; mm+=Math.ceil(dt/perLine)*4.4; return mm; })();
   const estCmp=(function(){
-    let mm=13;                                    /* 導入文（.pd-lead） */
-    [cmpTbl,cmpMarryT,cmpKidsT].forEach(t=>{ mm+=10 + (t?(8+t.querySelectorAll('tr').length*6.2):4); });  /* 各見出し＋表（ヘッダ＋行） */
-    mm+=2*9;                                       /* 結婚・子どもの注記 */
+    let mm=10;                                    /* 導入文（.pd-lead・詰め後） */
+    [cmpTbl,cmpMarryT,cmpKidsT].forEach(t=>{ mm+=7 + (t?(5+t.querySelectorAll('tr').length*5.0):4); });  /* 各見出し＋表（ヘッダ＋行・詰め後） */
+    mm+=2*7;                                       /* 結婚・子どもの注記 */
     return mm;
   })();
-  const CMP_HEADING=14;             /* まとめる場合に追加される「ライフプラン比較」見出し */
-  /* この概算合計が下の値以下＝実寸で約222mm（安全側の1ページ）に収まると判断できるときだけ1ページにまとめる。
-     概算は安全側に多めに出るため、実測とのずれ（+16〜29mm）を見込んでしきい値を240に置く。 */
-  const COMBINE_MAX=240;
-  if(estDiag + CMP_HEADING + estCmp <= COMBINE_MAX){
-    P0.push(pdPage('プラン診断・改善提案とライフプラン比較', stamp, diagHtml+'<div class="sec-t">ライフプラン比較</div>'+cmpHtml));
-  } else {
-    P0.push(pdPage('プラン診断・改善提案', stamp, diagHtml));
+  const HEAD_PROP=7, HEAD_CMP=7;                   /* 「改善提案」「ライフプラン比較」の見出し */
+  /* 1ページに使える本文高さ（A4 297mm − 端＋印刷ヘッダ/フッタ 75mm − ページ見出し 12mm） */
+  const PAGE_CONTENT_MM=297-75-12;                 /* 210mm */
+  const propBudget=PAGE_CONTENT_MM-(estDiagText+HEAD_PROP+HEAD_CMP+estCmp);   /* 改善提案に使える高さ */
+  const propChars=propEls.map(el=>el.textContent.trim().length);
+  function propHeight(fs,lh,pad){
+    const pl=Math.floor(170/(fs*0.2646));
+    let mm=0;
+    propChars.forEach(c=>{ mm+=(pad*2+ (fs+1.5)*1.3 + Math.max(1,Math.ceil(c/pl))*fs*lh)/3.7795 + pad*0.6/3.7795; });
+    return mm;
+  }
+  /* 文書標準（本文9px）に近い上限から、収まるまで「余白 → 行間 → 文字」の順に縮める */
+  const PFS_MIN=6.0, PFS_MAX=9.0, PLH_MIN=1.30, PLH_MAX=1.65, PPAD_MIN=2.0, PPAD_MAX=7;
+  let pFS=PFS_MAX, pLH=PLH_MAX, pPad=PPAD_MAX;
+  for(let k=0;k<400 && propHeight(pFS,pLH,pPad)>propBudget;k++){
+    if(pPad>PPAD_MIN)      pPad=Math.max(PPAD_MIN, pPad-0.4);
+    else if(pLH>PLH_MIN)   pLH=Math.max(PLH_MIN, pLH-0.02);
+    else if(pFS>PFS_MIN)   pFS=Math.max(PFS_MIN, pFS-0.2);
+    else break;
+  }
+  const propStyle=' style="--propfs:'+pFS.toFixed(1)+'px; --proplh:'+pLH.toFixed(2)+'; --proppad:'+pPad.toFixed(0)+'px"';
+  const propBlock='<div class="sec-t">改善提案</div><div class="prop-wrap"'+propStyle+'>'+(propHtml||'<div class="pd-note">—</div>')+'</div>';
+  /* 最小サイズにしても改善提案が入りきらないほど多い場合のみ、溢れを防ぐため2ページに分ける */
+  if(propEls.length && propHeight(PFS_MIN,PLH_MIN,PPAD_MIN)>propBudget){
+    P0.push(pdPage('プラン診断・改善提案', stamp, diagTextHtml+propBlock));
     P0.push(pdPage('ライフプラン比較', stamp, cmpHtml));
+  } else {
+    P0.push(pdPage('プラン診断・改善提案とライフプラン比較', stamp,
+      diagTextHtml+propBlock+'<div class="sec-t">ライフプラン比較</div>'+cmpHtml));
   }
 
   /* ---------- 6ページ目：インフレ・年金パターン・年次キャッシュフロー ---------- */
@@ -4657,7 +4697,39 @@ function buildPrintDoc(){
     +'<p class="disc-p">本ツールは入力内容をサーバーに送信しません。すべての計算はご利用の端末内で完結します。</p>'
     +'<div class="pd-note" style="margin-top:14px">MiraiLog v'+APP_VERSION+' ／ インフレに負けない資産形成　—　'+today+' 出力</div>'));
 
-  host.innerHTML=P0.join('');
+  /* ---------- 表紙（1ページ目）と目次（2ページ目）を先頭に追加する ----------
+     目次のページ番号は、実際に生成された各ページ（P0）の並びから自動で算出する。
+     表紙＝1ページ目・目次＝2ページ目なので、本文は3ページ目から始まる。 */
+  const decodeEnt=s=>String(s).replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"');
+  const toc=[];
+  P0.forEach((html,i)=>{
+    const m=html.match(/class="ph-t">([^<]*)</);
+    const title=decodeEnt(m?m[1]:'');
+    const page=i+3;                               /* 表紙(1)＋目次(2) のぶんを加算 */
+    const bm=title.match(/^(.+?)（\d+\/\d+）/);     /* 「年次明細（1/5）…」などは1項目にまとめる */
+    const base=bm?bm[1].trim():null;
+    if(base && toc.length && toc[toc.length-1].base===base){ toc[toc.length-1].end=page; }
+    else { toc.push({label:base||title, start:page, end:page, base:base||null}); }
+  });
+  const tocRows=toc.map(t=>{
+    const pg=(t.start===t.end)?('p.'+t.start):('p.'+t.start+'–'+t.end);
+    return '<div class="toc-row"><span class="toc-t">'+pdEsc(t.label)+'</span><span class="toc-dot"></span><span class="toc-p">'+pg+'</span></div>';
+  }).join('');
+  const totalPages=P0.length+2;
+  const coverPage='<section class="pg cover"><div class="cv-wrap">'
+    +'<div class="cv-brand">MiraiLog</div>'
+    +'<div class="cv-rule"></div>'
+    +'<div class="cv-title">ライフプラン試算レポート</div>'
+    +'<div class="cv-sub">インフレに負けない資産形成シミュレーション</div>'
+    +'<div class="cv-meta">'
+      +'<div class="cv-line"><span>作成日</span><b>'+pdEsc(today)+'</b></div>'
+      +'<div class="cv-line"><span>ライフプラン</span><b>'+pdEsc(married+'／'+kidsTxt+'／'+home)+'</b></div>'
+      +'<div class="cv-line"><span>年金の前提</span><b>'+pdEsc(penTxt)+'</b></div>'
+    +'</div>'
+    +'<div class="cv-foot">MiraiLog v'+APP_VERSION+'　全'+totalPages+'ページ　（表紙・目次を含む）</div>'
+    +'</div></section>';
+  const tocPage=pdPage('目次', stamp, '<div class="toc">'+tocRows+'</div>');
+  host.innerHTML=coverPage+tocPage+P0.join('');
 }
 
 /* ============ 年金の受け取り方による資産の違い ============
