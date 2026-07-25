@@ -1361,7 +1361,7 @@ function eduTotalPerChild(P){ let t=0; for(let a=3;a<=21;a++) t+=eduAnnual(a,P);
 function insurance(age){ if(age<30)return 8; if(age<40)return 14; if(age<50)return 22; if(age<60)return 28; if(age<70)return 22; return 14; }
 /* 公的年金（令和7年度基準・概算）: 老齢基礎満額83.17万/年、報酬比例乗率5.481/1000（2003年4月〜）、標準報酬の年間上限概算1230万 */
 const CURRENT_YEAR=new Date().getFullYear();
-const APP_VERSION='0.0.6';   /* 更新するたびに末尾を増やす */
+const APP_VERSION='0.0.7';   /* 更新するたびに末尾を増やす */
 const MAX_AGE=120;  /* 生活資金が尽きなかった場合の試算上限 */
 const PENSION_FULL=83.17, PENSION_RATE=5.481/1000, PENSION_CAP=1230, PENSION_NET=0.90;
 /* マクロ経済スライドの調整期間（2024年財政検証・過去30年投影ケース）
@@ -4521,21 +4521,29 @@ function buildPrintDoc(){
     +note('cmpKidsNote')
     +(cmpKidsT?'<table class="pd-tbl pd-cmp">'+cmpKidsT.innerHTML+'</table>':'<div class="pd-note">—</div>');
 
-  /* 診断・改善提案の分量を見積もる。ページの半分に満たなければ比較と1ページにまとめる。
-     （印刷前に実寸は測れないため、文字数と行数からの概算） */
-  const estMM=(function(){
-    /* 本文幅は170mm。9pxの全角文字なら1行あたり約71字 */
-    const perLine=71;
-    let mm=14;                   /* 「プラン診断」の見出し */
+  /* 診断・改善提案 と 比較 の分量をそれぞれ概算し、合算が1ページ（安全側の描画可能高さ）に
+     収まるときだけ1ページにまとめる。収まらなければ2ページに分けて次ページへの溢れを防ぐ。
+     （印刷前に実寸は測れないため、文字数・行数・表の行数からの概算。安全側にやや多めに見積もる） */
+  const perLine=70;   /* 本文幅170mm・9pxの全角で1行あたり約70字 */
+  const estDiag=(function(){
+    let mm=12;                                    /* 「プラン診断」見出し */
     const dt=diagTxt?diagTxt.textContent.trim().length:0;
-    mm+=Math.ceil(dt/perLine)*4.2;
-    mm+=14;                      /* 「改善提案」の見出し */
-    /* 1件あたり：枠の余白＋見出し行＋本文の行数 */
-    propEls.forEach(el=>{ mm+=6.8+Math.ceil(el.textContent.trim().length/perLine)*3.6; });
+    mm+=Math.ceil(dt/perLine)*4.6;                /* 診断本文 */
+    mm+=12;                                        /* 「改善提案」見出し */
+    propEls.forEach(el=>{ mm+=8+Math.ceil(el.textContent.trim().length/perLine)*4.4; });  /* 提案1件：枠＋本文 */
     return mm;
   })();
-  const HALF_PAGE=126;           /* A4本文の約半分 */
-  if(estMM<=HALF_PAGE){
+  const estCmp=(function(){
+    let mm=13;                                    /* 導入文（.pd-lead） */
+    [cmpTbl,cmpMarryT,cmpKidsT].forEach(t=>{ mm+=10 + (t?(8+t.querySelectorAll('tr').length*6.2):4); });  /* 各見出し＋表（ヘッダ＋行） */
+    mm+=2*9;                                       /* 結婚・子どもの注記 */
+    return mm;
+  })();
+  const CMP_HEADING=14;             /* まとめる場合に追加される「ライフプラン比較」見出し */
+  /* この概算合計が下の値以下＝実寸で約222mm（安全側の1ページ）に収まると判断できるときだけ1ページにまとめる。
+     概算は安全側に多めに出るため、実測とのずれ（+16〜29mm）を見込んでしきい値を240に置く。 */
+  const COMBINE_MAX=240;
+  if(estDiag + CMP_HEADING + estCmp <= COMBINE_MAX){
     P0.push(pdPage('プラン診断・改善提案とライフプラン比較', stamp, diagHtml+'<div class="sec-t">ライフプラン比較</div>'+cmpHtml));
   } else {
     P0.push(pdPage('プラン診断・改善提案', stamp, diagHtml));
