@@ -573,8 +573,9 @@
           height:12mm; box-sizing:border-box; padding:0 0 3mm; margin:0}
     .pg-h .ph-t{font-size:15px; font-weight:800; color:#111}
     .pg-h .ph-s{font-size:9.5px; font-weight:700; color:#7A8899; margin-left:auto}
-    /* 表紙（1ページ目） */
-    .cover{min-height:238mm; display:flex; align-items:center; justify-content:center; text-align:center}
+    /* 表紙（1ページ目）。高さを固定すると環境によっては2ページ目に溢れて空白が生じるため、
+       上パディングで配置し、内容ぶんだけの高さにして必ず1ページに収める。 */
+    .cover{padding-top:48mm; text-align:center}
     .cv-wrap{width:100%; padding:0 6mm}
     .cv-brand{font-size:46px; font-weight:800; letter-spacing:3px; color:#0CA795; line-height:1}
     .cv-rule{width:56px; height:3px; background:#0CA795; border-radius:2px; margin:15px auto 24px}
@@ -637,6 +638,10 @@
     .pd-img{width:100%; height:auto; display:block; border:1px solid #E3EAF2; border-radius:7px}
     .pd-2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
     .pd-wide-img{width:100%; aspect-ratio:3.4/1; object-fit:contain; display:block; border:1px solid #E3EAF2; border-radius:7px; margin-bottom:5px}
+    /* インフレ／年金比較：上下を1:1で使い、グラフを縦に大きく表示する */
+    .pd-halfimg{width:100%; aspect-ratio:1560/830; object-fit:contain; display:block; border:1px solid #E3EAF2; border-radius:7px; margin:2px 0 0}
+    .ip-half{margin-bottom:8px}
+    .ip-half .sec-t{margin:2px 0 3px}
     .pd-half{width:100%; aspect-ratio:4/3; object-fit:contain; display:block; border:1px solid #E3EAF2; border-radius:7px}
     .pd-pair{margin-top:4px}
     .pd-pair .sec-t{margin-top:6px}
@@ -1388,7 +1393,7 @@ function eduTotalPerChild(P){ let t=0; for(let a=3;a<=21;a++) t+=eduAnnual(a,P);
 function insurance(age){ if(age<30)return 8; if(age<40)return 14; if(age<50)return 22; if(age<60)return 28; if(age<70)return 22; return 14; }
 /* 公的年金（令和7年度基準・概算）: 老齢基礎満額83.17万/年、報酬比例乗率5.481/1000（2003年4月〜）、標準報酬の年間上限概算1230万 */
 const CURRENT_YEAR=new Date().getFullYear();
-const APP_VERSION='0.0.9';   /* 更新するたびに末尾を増やす */
+const APP_VERSION='0.0.10';   /* 更新するたびに末尾を増やす */
 const MAX_AGE=120;  /* 生活資金が尽きなかった場合の試算上限 */
 const PENSION_FULL=83.17, PENSION_RATE=5.481/1000, PENSION_CAP=1230, PENSION_NET=0.90;
 /* マクロ経済スライドの調整期間（2024年財政検証・過去30年投影ケース）
@@ -4046,12 +4051,20 @@ function pdLineChart(o){
   const F=(w,px)=>`${w} ${px*S}px system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans JP",sans-serif`;
   if(o.title){ g.font=F(800,14); g.fillStyle='#2E363B'; g.textAlign='left'; g.textBaseline='alphabetic'; g.fillText(o.title,padL,20*S); }
   const xMin=o.xMin, xMax=o.xMax, yMin=o.yMin||0;
-  /* きりのよい刻みに合わせて上端を決め直す */
-  let step=pdNiceStep((o.yMax||1)-yMin, o.yTarget||5);
-  let yTicks=Math.ceil(((o.yMax||1)-yMin)/step);
-  if(yTicks<3){ step=pdNiceStep((o.yMax||1)-yMin, 5); yTicks=Math.max(3, Math.ceil(((o.yMax||1)-yMin)/step)); }
-  while(yTicks>10){ step*=2; yTicks=Math.ceil(((o.yMax||1)-yMin)/step); }
-  const yMax=yMin+step*yTicks;
+  /* きりのよい刻みに合わせて上端を決め直す。ただし yMaxHard 指定時は、上端を渡された値
+     （＝データ最大＋10% など）に固定し、余分な上方向の余白を作らない。 */
+  let step, yTicks, yMax;
+  if(o.yMaxHard){
+    yMax=Math.max(yMin+1, o.yMax||1);
+    step=pdNiceStep(yMax-yMin, o.yTarget||5);
+    yTicks=Math.max(1, Math.floor((yMax-yMin)/step - 1e-9));   /* 目盛線は上端より内側に置く */
+  } else {
+    step=pdNiceStep((o.yMax||1)-yMin, o.yTarget||5);
+    yTicks=Math.ceil(((o.yMax||1)-yMin)/step);
+    if(yTicks<3){ step=pdNiceStep((o.yMax||1)-yMin, 5); yTicks=Math.max(3, Math.ceil(((o.yMax||1)-yMin)/step)); }
+    while(yTicks>10){ step*=2; yTicks=Math.ceil(((o.yMax||1)-yMin)/step); }
+    yMax=yMin+step*yTicks;
+  }
   const X=v=>padL+(v-xMin)/Math.max(1e-9,xMax-xMin)*iw;
   const Y=v=>padT+ih-(v-yMin)/Math.max(1e-9,yMax-yMin)*ih;
   /* grid */
@@ -4590,11 +4603,10 @@ function buildPrintDoc(){
       diagTextHtml+propBlock+'<div class="sec-t">ライフプラン比較</div>'+cmpHtml));
   }
 
-  /* ---------- 6ページ目：インフレ・年金パターン・年次キャッシュフロー ---------- */
-  const inflT=document.getElementById('inflTbl');
-  const WIDE_W=1560, WIDE_H=460;   /* 横いっぱい・縦は半分 */
+  /* ---------- 6ページ目：インフレ・年金パターン（上下1:1・グラフ縦伸ばし） ---------- */
+  const WIDE_W=1560, WIDE_H=830;   /* 横いっぱい・縦を大きく取り、上下を1:1で使う */
 
-  /* 左上：インフレ率ごとの総資産 */
+  /* 上半分：インフレ率ごとの総資産 */
   const inflPcts=[...INFL_SCENARIOS]; const basePct=+(P.inflation*100).toFixed(2);
   if(!inflPcts.some(v=>Math.abs(v-basePct)<0.001)){ inflPcts.push(basePct); inflPcts.sort((a,b)=>a-b); }
   const inflCols=['#0CA795','#3AA0E0','#8E6FC4','#E8A54B','#C2183C','#77828F'];
@@ -4604,31 +4616,27 @@ function buildPrintDoc(){
             width:Math.abs(pct-basePct)<0.001?2.6:1.6, dash:Math.abs(pct-basePct)>=0.001,
             data:rs.map(r=>({x:r.age,y:r.netWorth}))};
   });
-  const inflMax=Math.ceil(Math.max(1,...inflSeries.flatMap(sr=>sr.data.map(d=>d.y)))*1.1/100)*100;
+  const inflMax=Math.max(1,...inflSeries.flatMap(sr=>sr.data.map(d=>d.y)))*1.1;   /* 最大描画範囲＝データ最大＋10% */
   const inflImg=pdLineChart({w:WIDE_W,h:WIDE_H,xMin:rows[0].age,xMax:P.endAge,
-    yMin:0,yMax:inflMax,legend:true,series:inflSeries});
+    yMin:0,yMax:inflMax,yMaxHard:true,legend:true,series:inflSeries});
 
-  /* 右上：年金の受け取り方ごとの総資産（60歳から） */
+  /* 下半分：年金の受け取り方ごとの総資産（60歳から） */
   const penPats=(typeof pensionPatterns==='function'?pensionPatterns(P):[]).map((pt,i)=>({
     ...pt, rows:simulate({...P, ...pt.o}), color:PEN_COLORS[i%PEN_COLORS.length]
   }));
   const penSeries=penPats.map(pt=>({label:pt.label.replace(/ケース・/,' '), color:pt.color,
     width:pt.current?2.6:1.6, dash:!pt.current,
     data:pt.rows.filter(r=>r.age>=60).map(r=>({x:r.age,y:r.netWorth}))}));
-  const penMax=Math.ceil(Math.max(1,...penSeries.flatMap(sr=>sr.data.map(d=>d.y)))*1.1/100)*100;
+  const penMax=Math.max(1,...penSeries.flatMap(sr=>sr.data.map(d=>d.y)))*1.1;   /* 最大描画範囲＝データ最大＋10% */
   const penImg=pdLineChart({w:WIDE_W,h:WIDE_H,xMin:60,xMax:P.endAge,
-    yMin:0,yMax:penMax,legend:true,series:penSeries});
+    yMin:0,yMax:penMax,yMaxHard:true,legend:true,series:penSeries});
 
-  /* 左下：65歳時点の資産内訳 */
-  const penT=document.getElementById('penTbl');
   P0.push(pdPage('インフレ率と年金による資産の変化', stamp,
-    '<div class="sec-t">インフレ率による資産の変化</div>'
-    +'<img class="pd-wide-img" src="'+inflImg+'">'
-    +(inflT?'<table class="pd-tbl pd-wide">'+inflT.innerHTML+'</table>':'')
-    +'<div class="sec-t">年金の受け取り方による資産の変化（60歳〜）</div>'
-    +'<img class="pd-wide-img" src="'+penImg+'">'
-    +(penT?'<table class="pd-tbl pd-wide">'+penT.innerHTML+'</table>':'')
-    +'<div class="pd-note">※ グラフはいずれも名目額です。年金の比較は、受給開始年齢（繰上げ・基準・繰下げ）と財政検証のケース（楽観・保守）を入れ替えたものです。</div>'));
+    '<div class="ip-half"><div class="sec-t">インフレ率による資産の変化</div>'
+    +'<img class="pd-halfimg" src="'+inflImg+'"></div>'
+    +'<div class="ip-half"><div class="sec-t">年金の受け取り方による資産の変化（60歳〜）</div>'
+    +'<img class="pd-halfimg" src="'+penImg+'"></div>'
+    +'<div class="pd-note" style="margin-top:6px">※ グラフはいずれも名目額です。縦軸はデータの最大値＋10%までを表示しています。年金の比較は、受給開始年齢（繰上げ・基準・繰下げ）と財政検証のケース（楽観・保守）を入れ替えたものです。</div>'));
 
   /* ---------- 7〜9ページ目：年次明細 ---------- */
   const tbl=document.getElementById('tbl');
