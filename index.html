@@ -1404,7 +1404,7 @@ function eduTotalPerChild(P){ let t=0; for(let a=3;a<=21;a++) t+=eduAnnual(a,P);
 function insurance(age){ if(age<30)return 8; if(age<40)return 14; if(age<50)return 22; if(age<60)return 28; if(age<70)return 22; return 14; }
 /* 公的年金（令和7年度基準・概算）: 老齢基礎満額83.17万/年、報酬比例乗率5.481/1000（2003年4月〜）、標準報酬の年間上限概算1230万 */
 const CURRENT_YEAR=new Date().getFullYear();
-const APP_VERSION='0.0.16';   /* 更新するたびに末尾を増やす */
+const APP_VERSION='0.0.17';   /* 更新するたびに末尾を増やす */
 const MAX_AGE=120;  /* 生活資金が尽きなかった場合の試算上限 */
 const PENSION_FULL=83.17, PENSION_RATE=5.481/1000, PENSION_CAP=1230, PENSION_NET=0.90;
 /* マクロ経済スライドの調整期間（2024年財政検証・過去30年投影ケース）
@@ -4935,9 +4935,10 @@ function renderDebts(){
     </div>`).join('') || '<div class="hint" style="margin-top:0">登録されている借入はありません。</div>';
   host.querySelectorAll('.debt-row').forEach(row=>{
     const i=+row.dataset.i;
+    const updHint=()=>{ const h=row.querySelector('.hint'); if(h) h.textContent=(debts[i].mon>0?('この条件なら完済まで約'+Math.ceil(debts[i].bal/(debts[i].mon*12)*10)/10+'年'):'月々の返済額を入力してください'); };
     row.querySelector('.dbt-name').addEventListener('input',e=>{ debts[i].name=e.target.value; render(); });
-    row.querySelector('.dbt-bal').addEventListener('input',e=>{ debts[i].bal=parseFloat(e.target.value)||0; renderDebts(); render(); });
-    row.querySelector('.dbt-mon').addEventListener('input',e=>{ debts[i].mon=parseFloat(e.target.value)||0; renderDebts(); render(); });
+    row.querySelector('.dbt-bal').addEventListener('input',e=>{ debts[i].bal=parseFloat(e.target.value)||0; updHint(); render(); });
+    row.querySelector('.dbt-mon').addEventListener('input',e=>{ debts[i].mon=parseFloat(e.target.value)||0; updHint(); render(); });
     row.querySelector('.dbt-lump').addEventListener('change',e=>{ debts[i].lump=e.target.checked; render(); });
   });
   host.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>{ debts.splice(+b.dataset.del,1); renderDebts(); render(); }));
