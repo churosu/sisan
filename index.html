@@ -1402,7 +1402,7 @@ function eduTotalPerChild(P){ let t=0; for(let a=3;a<=21;a++) t+=eduAnnual(a,P);
 function insurance(age){ if(age<30)return 8; if(age<40)return 14; if(age<50)return 22; if(age<60)return 28; if(age<70)return 22; return 14; }
 /* 公的年金（令和7年度基準・概算）: 老齢基礎満額83.17万/年、報酬比例乗率5.481/1000（2003年4月〜）、標準報酬の年間上限概算1230万 */
 const CURRENT_YEAR=new Date().getFullYear();
-const APP_VERSION='0.0.12';   /* 更新するたびに末尾を増やす */
+const APP_VERSION='0.0.13';   /* 更新するたびに末尾を増やす */
 const MAX_AGE=120;  /* 生活資金が尽きなかった場合の試算上限 */
 const PENSION_FULL=83.17, PENSION_RATE=5.481/1000, PENSION_CAP=1230, PENSION_NET=0.90;
 /* マクロ経済スライドの調整期間（2024年財政検証・過去30年投影ケース）
@@ -3663,8 +3663,8 @@ document.getElementById('reopenWiz').onclick=()=>WZ.start(true);   /* 現在の�
                    :`最終総資産 ${manY(last.netWorth)}（実質 ${manY(last.netWorth/last.defl)}）`,
         92*S,by0+68*S,F(600,15),ok?'#2E8B6B':'#C2526B');
     if(rank&&rank.overall){
-      const rw=150*S; box(W-64*S-rw,by0+14*S,rw,58*S,10*S,'#fff',bd);
-      txt('総合評価',W-64*S-rw+18*S,by0+48*S,F(700,14),SLATE);
+      const rw=200*S; box(W-64*S-rw,by0+14*S,rw,58*S,10*S,'#fff',bd);
+      txt('資産形成の評価',W-64*S-rw+18*S,by0+48*S,F(700,14),SLATE);
       txt(rank.overall,W-64*S-20*S,by0+50*S,F(800,26),fg,'right');
     }
 
@@ -3680,8 +3680,8 @@ document.getElementById('reopenWiz').onclick=()=>WZ.start(true);   /* 現在の�
       if(win.length) partnerReq=win.reduce((a,r)=>a+(r.pGross||0),0)/win.length;
     }
     const kpis=[['ピーク総資産',manY(peak.v),`${peak.age}歳`],
-     ['最も少ない現預金',manY(minC.v),`${minC.age}歳ごろ`],
-     ['生涯の手取り収入',manY(lifeNet),`${rows[0].age}〜${last.age}歳`],
+     ['最低現預金',manY(minC.v),`${minC.age}歳ごろ`],
+     ['生涯 手取り収入',manY(lifeNet),`${rows[0].age}〜${last.age}歳`],
      ['最終総資産',manY(last.netWorth),`${last.age}歳時点`]];
     if(partnerReq!=null) kpis.splice(3,0,['パートナーに求める年収',manY(partnerReq),'出産前後・額面']);
     const kn=kpis.length, ky=222*S, kh=86*S, kgap=14*S, kw=(W-128*S-kgap*(kn-1))/kn;
@@ -3791,9 +3791,11 @@ document.getElementById('reopenWiz').onclick=()=>WZ.start(true);   /* 現在の�
       txt(lab,bx+bw/2,ly2+3*S,F(700,13),INK,'center');
     });
 
-    /* --- 前提（下部） --- */
+    /* --- 試算の前提（この画像に含まれる設定内容） --- */
     const fy=cy0+ch+18*S;
     box(64*S,fy,W-128*S,H-fy-44*S,10*S,'#F7FAFC',LINE);
+    txt('試算の前提',92*S,fy+30*S,F(700,15),SLATE);
+    txt('※ 年齢・世帯構成・住まいなど、設定した内容がこの画像に含まれます。共有の際はご注意ください',W-92*S,fy+30*S,F(500,12.5),SLATE2,'right');
     const nk=P.children.length;
     const items=[['現在',`${P.currentAge}歳`],
       ['世帯',(P.marriageRow>=0?`結婚 ${P.marriageAgeEff}歳`:'単身')+(nk?` ・ 子${nk}人`:'')],
@@ -3804,8 +3806,8 @@ document.getElementById('reopenWiz').onclick=()=>WZ.start(true);   /* 現在の�
       ['受給',`${P.pensionStartAge||65}歳から`]];
     const iw=(W-128*S-56*S)/items.length;
     items.forEach((it,i)=>{ const x=92*S+i*iw;
-      txt(it[0],x,fy+30*S,F(600,13),SLATE2);
-      txt(it[1],x,fy+58*S,F(800,18),INK); });
+      txt(it[0],x,fy+64*S,F(600,13),SLATE2);
+      txt(it[1],x,fy+90*S,F(800,18),INK); });
     txt('※ 税・社会保険は令和8年度の制度にもとづく試算ですが、健保組合の料率差や未反映の控除などにより実際とは差が生じます。将来を保証するものではありません。',W-64*S,H-30*S,F(400,12),SLATE2,'right');
     txt('※ 本ツールは一般的な情報提供を目的としたもので、投資・税務の助言ではありません。判断はご自身の責任でお願いします。',W-64*S,H-12*S,F(400,12),SLATE2,'right');
     return cv;
@@ -3847,83 +3849,93 @@ document.getElementById('reopenWiz').onclick=()=>WZ.start(true);   /* 現在の�
   }
   function postImage(){
     const d=postSummary(); if(!d) return null;
-    /* 16:9（1600×900）。SNSのタイムラインで切り取られにくく、横長でも読める配置にする */
+    /* 16:9（1600×900）。SNSのタイムラインで映える、求心力のあるサマリーカード。個人情報は含めない。 */
     const W=1600,H=900,S=W/1600;
     const cv=document.createElement('canvas'); cv.width=W; cv.height=H;
     const g=cv.getContext('2d');
-    const TEAL='#0CA795', INK='#2E363B', SLATE='#5A6672', SLATE2='#8A98AB', LINE='#E3EAF2';
+    const TEAL='#0CA795', INK='#1E2A32', SLATE='#5A6672', SLATE2='#93A0AE', LINE='#E3EAF2';
     const F=(w,px)=>`${w} ${px*S}px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif`;
     const txt=(t,x,y,font,color,align)=>{g.font=font;g.fillStyle=color;g.textAlign=align||'left';g.textBaseline='alphabetic';g.fillText(t,x,y);};
-    const box=(x,y,w,h,r,fill,stroke)=>{g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();
-      if(fill){g.fillStyle=fill;g.fill();} if(stroke){g.strokeStyle=stroke;g.lineWidth=1.5*S;g.stroke();}};
-
-    g.fillStyle='#fff'; g.fillRect(0,0,W,H);
-    g.fillStyle=TEAL; g.fillRect(0,0,W,9*S);
-
-    const M=64*S;                       /* 左右の余白 */
-
-    /* ---- ヘッダー（1行にまとめて上部を圧縮） ---- */
-    txt('MiraiLog',M,84*S,F(800,38),INK);
-    const wLogo=g.measureText('MiraiLog').width;
-    txt('インフレに負けない資産形成',M+wLogo+18*S,84*S,F(700,17),TEAL);
-    txt('試算結果',W-M,84*S,F(700,18),SLATE2,'right');
-    g.strokeStyle=LINE; g.lineWidth=1.5*S;
-    g.beginPath(); g.moveTo(M,108*S); g.lineTo(W-M,108*S); g.stroke();
-
-    /* ---- 左：スコア（最も伝えたい情報を大きく） ---- */
-    const bodyY=140*S, bodyH=610*S;
-    const colL=470*S, gap=26*S;
-    const gradFor=(r)=>({SS:['#E4B53C','#C8901A'],S:['#8E6FC4','#6C4EA6'],A:['#3AA0E0','#1C74B4'],
-      B:['#3FB98B','#1E8A62'],C:['#E8A54B','#C97C1B'],D:['#9AA7B4','#77828F']})[r]||['#9AA7B4','#77828F'];
-    const gp=gradFor(d.overall);
-    box(M,bodyY,colL,bodyH,20*S,'#F7FAFC',LINE);
-    txt('資産形成スコア',M+34*S,bodyY+52*S,F(700,20),SLATE);
-    const lg=g.createLinearGradient(M+34*S,bodyY+72*S,M+34*S+230*S,bodyY+72*S+230*S);
-    lg.addColorStop(0,gp[0]); lg.addColorStop(1,gp[1]);
-    box(M+34*S,bodyY+72*S,colL-68*S,236*S,18*S,lg,null);
-    txt(d.overall,M+colL/2,bodyY+72*S+164*S,F(800,112),'#fff','center');
-    txt('SS・S・A・B・C・D の6段階',M+34*S,bodyY+346*S,F(600,15),SLATE2);
-    /* 判定 */
-    const ok=!d.ran;
-    box(M+34*S,bodyY+372*S,colL-68*S,92*S,14*S,ok?'#EAF7F2':'#FDECF1',ok?'#9FD4C0':'#F1A9BC');
-    txt(ok?'最後まで資産を維持':'途中で資産が尽きる試算',M+colL/2,bodyY+412*S,F(800,24),ok?'#12855F':'#C2183C','center');
-    txt(ok?(d.keptTo+'歳まで生活資金が残る計算です'):(d.keptTo+'歳ごろに生活資金が不足します'),
-        M+colL/2,bodyY+444*S,F(600,14),ok?'#2E8B6B':'#C2526B','center');
-    txt('※ 令和8年度の税・社会保険制度にもとづく試算です',M+34*S,bodyY+bodyH-22*S,F(400,12.5),SLATE2);
-
-    /* ---- 右：金額と前提 ---- */
-    const rx=M+colL+gap, rw=W-M-rx;
+    const box=(x,y,w,h,r,fill,stroke,lw)=>{g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();
+      if(fill){g.fillStyle=fill;g.fill();} if(stroke){g.strokeStyle=stroke;g.lineWidth=(lw||1.5)*S;g.stroke();}};
     const money=(v)=>{ const a=Math.round(v); return Math.abs(a)>=10000 ? (a/10000).toFixed(1).replace(/\.0$/,'')+'億円' : a.toLocaleString('ja-JP')+'万円'; };
-    /* 主要2指標を横並び */
-    const cW=(rw-18*S)/2, cH=196*S;
-    box(rx,bodyY,cW,cH,16*S,'#fff',LINE);
-    txt('最終総資産',rx+26*S,bodyY+46*S,F(700,17),SLATE);
-    txt(money(d.netWorth),rx+26*S,bodyY+120*S,F(800,50),INK);
-    txt(d.keptTo+'歳時点',rx+26*S,bodyY+160*S,F(600,15),SLATE2);
-    box(rx+cW+18*S,bodyY,cW,cH,16*S,'#fff',LINE);
-    txt('資産を維持できた年齢',rx+cW+18*S+26*S,bodyY+46*S,F(700,17),SLATE);
-    txt(d.keptTo+'歳',rx+cW+18*S+26*S,bodyY+120*S,F(800,50),d.ran?'#C2183C':INK);
-    txt(d.ran?'ここで資金が尽きる':'最後まで維持',rx+cW+18*S+26*S,bodyY+160*S,F(600,15),SLATE2);
+    const ok=!d.ran;
 
-    /* 前提（縦積み・行間を広めに） */
-    const ay=bodyY+cH+24*S;
-    txt('試算の前提',rx,ay+2*S,F(700,18),SLATE);
-    const rowsD=[['インフレ率', d.inflation.toFixed(1)+'%／年'],
+    /* ---- 背景：淡いグラデーション＋上向きの成長カーブ（装飾。個人情報は含まない） ---- */
+    const bg=g.createLinearGradient(0,0,W,H); bg.addColorStop(0,'#F1FBF8'); bg.addColorStop(1,'#FFFFFF');
+    g.fillStyle=bg; g.fillRect(0,0,W,H);
+    const curveY=(x)=>H*0.90 - Math.pow(x/W,1.45)*H*0.40;   /* 左下から右上へ伸びる曲線 */
+    g.beginPath(); g.moveTo(0,curveY(0)); for(let x=0;x<=W;x+=W/48) g.lineTo(x,curveY(x));
+    g.lineTo(W,H); g.lineTo(0,H); g.closePath();
+    const cg=g.createLinearGradient(0,H*0.5,0,H); cg.addColorStop(0,'rgba(12,167,149,.10)'); cg.addColorStop(1,'rgba(12,167,149,.015)');
+    g.fillStyle=cg; g.fill();
+    g.beginPath(); g.moveTo(0,curveY(0)); for(let x=0;x<=W;x+=W/48) g.lineTo(x,curveY(x));
+    g.strokeStyle='rgba(12,167,149,.34)'; g.lineWidth=3.4*S; g.lineJoin='round'; g.stroke();
+    g.fillStyle=TEAL; g.fillRect(0,0,W,10*S);
+
+    const M=70*S;
+    /* ---- ヘッダー ---- */
+    txt('MiraiLog',M,92*S,F(800,40),INK);
+    const wLogo=g.measureText('MiraiLog').width;
+    txt('インフレに負けない資産形成',M+wLogo+20*S,92*S,F(700,18),TEAL);
+    txt('試算結果',W-M,92*S,F(700,18),SLATE2,'right');
+    g.strokeStyle=LINE; g.lineWidth=1.5*S; g.beginPath(); g.moveTo(M,118*S); g.lineTo(W-M,118*S); g.stroke();
+
+    /* ---- 左：資産形成の評価（大きな円バッジ） ---- */
+    const gradFor=(r)=>({SS:['#E9C04F','#C8901A'],S:['#9A7BD0','#6C4EA6'],A:['#4BAAE6','#1C74B4'],
+      B:['#46C295','#1E8A62'],C:['#EDAE58','#C97C1B'],D:['#A6B2BE','#77828F']})[r]||['#A6B2BE','#77828F'];
+    const gp=gradFor(d.overall);
+    const cxg=M+156*S, cyg=326*S, rg=140*S;
+    txt('資産形成の評価',cxg,cyg-rg-26*S,F(800,21),SLATE,'center');
+    /* 外側のやわらかいリング */
+    g.beginPath(); g.arc(cxg,cyg,rg+9*S,0,7); g.fillStyle='rgba(12,167,149,.08)'; g.fill();
+    const rad=g.createLinearGradient(cxg-rg,cyg-rg,cxg+rg,cyg+rg); rad.addColorStop(0,gp[0]); rad.addColorStop(1,gp[1]);
+    g.beginPath(); g.arc(cxg,cyg,rg,0,7); g.fillStyle=rad; g.fill();
+    g.beginPath(); g.arc(cxg,cyg,rg-9*S,0,7); g.strokeStyle='rgba(255,255,255,.5)'; g.lineWidth=3*S; g.stroke();
+    const big=d.overall.length>1?92:128;
+    txt(d.overall,cxg,cyg+ (d.overall.length>1?34*S:44*S),F(800,big),'#fff','center');
+    txt('SS・S・A・B・C・D の6段階',cxg,cyg+rg+42*S,F(600,15),SLATE2,'center');
+
+    /* ---- 右：判定ピル＋見出し＋最終総資産 ---- */
+    const rx=M+346*S;
+    const pillTxt=ok?'最後まで資産を維持':'途中で資産が尽きる試算';
+    const pillY=158*S, pillH=56*S;
+    g.font=F(800,21); const ptw=g.measureText(pillTxt).width;
+    box(rx,pillY,ptw+70*S,pillH,pillH/2,ok?'#EAF7F2':'#FDECF1',ok?'#9FD4C0':'#F1A9BC');
+    g.beginPath(); g.arc(rx+32*S,pillY+pillH/2,9*S,0,7); g.fillStyle=ok?'#12855F':'#C2183C'; g.fill();
+    txt(pillTxt,rx+54*S,pillY+37*S,F(800,21),ok?'#12855F':'#C2183C');
+    /* 見出し：資産が続く年齢 */
+    txt(d.keptTo+'歳',rx,pillY+150*S,F(800,92),ok?INK:'#C2183C'); const wAge=g.measureText(d.keptTo+'歳').width;
+    txt(ok?'まで資産が続く試算':'で資金が不足する試算',rx+wAge+16*S,pillY+150*S,F(700,30),SLATE);
+    /* 最終総資産 */
+    const faY=pillY+236*S;
+    txt('最終総資産',rx,faY,F(700,20),SLATE);
+    txt(money(d.netWorth),rx,faY+62*S,F(800,60),TEAL); const wMoney=g.measureText(money(d.netWorth)).width;
+    txt('（'+d.keptTo+'歳時点）',rx+wMoney+18*S,faY+62*S,F(600,18),SLATE2);
+
+    /* ---- 前提チップ（インフレ率・年金・マクロ経済スライド） ---- */
+    const chips=[['インフレ率', d.inflation.toFixed(1)+'%／年'],
                  ['年金の見通し', d.pensionCase],
-                 ['マクロ経済スライド', d.macro?'反映する':'反映しない']];
-    rowsD.forEach((r,i)=>{
-      const y=ay+26*S+i*72*S;
-      box(rx,y,rw,60*S,12*S,'#F7FAFC',LINE);
-      txt(r[0],rx+22*S,y+38*S,F(700,17),SLATE);
-      txt(r[1],rx+rw-22*S,y+38*S,F(800,17),INK,'right');
+                 ['マクロ経済スライド', d.macro?'反映':'なし']];
+    const chipY=560*S, chipH=58*S; let chx=M;
+    chips.forEach(c=>{
+      g.font=F(700,15.5); const lw=g.measureText(c[0]).width; g.font=F(800,18); const vw=g.measureText(c[1]).width;
+      const cw=lw+vw+64*S;
+      box(chx,chipY,cw,chipH,chipH/2,'#fff',LINE);
+      txt(c[0],chx+24*S,chipY+37*S,F(700,15.5),SLATE2);
+      txt(c[1],chx+24*S+lw+16*S,chipY+37*S,F(800,18),INK);
+      chx+=cw+16*S;
     });
 
-    /* ---- フッター（URLを目立たせる） ---- */
-    const fy=H-108*S;
-    box(M,fy,W-M*2,64*S,14*S,'#EAF7F2','#9FD4C0');
-    txt('あなたの家計も試算できます',M+26*S,fy+40*S,F(700,19),'#12855F');
-    txt(TOOL_URL,W-M-26*S,fy+41*S,F(800,22),INK,'right');
-    txt('※ この画像に個人情報（年齢・年収・家族構成など）は含まれません。将来を保証するものではありません。',M,H-24*S,F(400,13),SLATE2);
+    /* ---- CTA ---- */
+    const ctaY=668*S, ctaH=82*S;
+    const cta=g.createLinearGradient(M,ctaY,W-M,ctaY); cta.addColorStop(0,'#0CA795'); cta.addColorStop(1,'#0A8C7E');
+    box(M,ctaY,W-M*2,ctaH,18*S,cta,null);
+    txt('あなたの家計も試算できます',M+34*S,ctaY+51*S,F(800,24),'#fff');
+    txt(TOOL_URL,W-M-34*S,ctaY+51*S,F(800,25),'#fff','right');
+
+    /* ---- 注記（個人情報の有無） ---- */
+    txt('※ この画像に個人情報（年齢・年収・家族構成など）は含まれません。将来を保証するものではありません。',M,H-30*S,F(500,14),SLATE2);
     return cv;
   }
   window.postImage=postImage;   /* 検証用に公開 */
@@ -3931,7 +3943,7 @@ document.getElementById('reopenWiz').onclick=()=>WZ.start(true);   /* 現在の�
   function postText(){
     const d=postSummary(); if(!d) return '';
     return ['MiraiLog で家計を試算しました。',
-      '資産形成スコア：'+d.overall,
+      '資産形成の評価：'+d.overall,
       '最終総資産：'+(Math.round(d.netWorth).toLocaleString('ja-JP'))+'万円'+(d.ran?'（'+d.keptTo+'歳で資金不足）':'（'+d.keptTo+'歳まで維持）'),
       'インフレ率：'+d.inflation.toFixed(1)+'%／年',
       '年金の見通し：'+d.pensionCase,
@@ -4434,8 +4446,8 @@ function buildPrintDoc(){
   const lifeEdu=rows.reduce((a,r)=>a+r.edu,0);
   const lifeHouse=rows.reduce((a,r)=>a+r.housing,0);
   const kpi=[
-    ['最も少ない現預金', manY(minC.v), minC.age+'歳ごろ'],
-    ['生涯の手取り収入', manY(lifeNet), rows[0].age+'〜'+last.age+'歳の累計'],
+    ['最低現預金', manY(minC.v), minC.age+'歳ごろ'],
+    ['生涯 手取り収入', manY(lifeNet), rows[0].age+'〜'+last.age+'歳の累計'],
     ['生涯の税・社会保険', manY(lifeTax), '同期間の累計'],
     ['生涯の住居費', manY(lifeHouse), '家賃・ローン・維持費'],
     ['生涯の教育費', manY(lifeEdu), P.children.length+'人分'],
