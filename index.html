@@ -646,10 +646,19 @@
     .pd-pair{margin-top:4px}
     .pd-pair .sec-t{margin-top:6px}
     .pd-wide{width:100%}
-    .pd-cmp{font-size:8.5px; table-layout:auto; margin-bottom:1px; line-height:1.25}
+    .pd-cmp{font-size:8.5px; table-layout:fixed; width:100%; margin-bottom:1px; line-height:1.25}
     .pd-cmp th{font-size:7.5px; padding:1.8px 5px; text-align:center; line-height:1.2}
-    .pd-cmp td{padding:1.8px 5px; height:auto; white-space:normal; line-height:1.25}
-    .pd-cmp td.plan{text-align:left; font-weight:700; width:34%}
+    .pd-cmp td{padding:1.8px 5px; height:auto; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.25}
+    /* 列幅：金額列（最終資産・最低現預金・生涯費）は6文字程度に絞り、資産の持続は
+       「生涯維持（120歳上限）」が収まる幅に。余った幅はすべてプラン列へ回し、
+       プラン列は折り返してプラン名が見切れないようにする。生涯費は左寄せ。 */
+    .pd-cmp th:nth-child(1), .pd-cmp td:nth-child(1){width:51%}
+    .pd-cmp th:nth-child(2), .pd-cmp td:nth-child(2){width:10%}
+    .pd-cmp th:nth-child(3), .pd-cmp td:nth-child(3){width:16%}
+    .pd-cmp th:nth-child(4), .pd-cmp td:nth-child(4){width:11.5%}
+    .pd-cmp th:nth-child(5), .pd-cmp td:nth-child(5){width:11.5%; text-align:left}
+    .pd-cmp td.plan{text-align:left; font-weight:700; white-space:normal; overflow:visible; text-overflow:clip; overflow-wrap:anywhere}
+    .pd-cmp td.plan br + span{font-size:7.5px!important; line-height:1.2}
     .pd-cmp .cmp-badge{font-size:7px; background:#0CA795; color:#fff; border-radius:4px; padding:1px 4px; margin-left:4px}
     .pd-cmp .th-sub{font-weight:600; opacity:.75}
     .pd-cmp .cmp-neg{color:#C2183C; font-weight:800}
@@ -1393,7 +1402,7 @@ function eduTotalPerChild(P){ let t=0; for(let a=3;a<=21;a++) t+=eduAnnual(a,P);
 function insurance(age){ if(age<30)return 8; if(age<40)return 14; if(age<50)return 22; if(age<60)return 28; if(age<70)return 22; return 14; }
 /* 公的年金（令和7年度基準・概算）: 老齢基礎満額83.17万/年、報酬比例乗率5.481/1000（2003年4月〜）、標準報酬の年間上限概算1230万 */
 const CURRENT_YEAR=new Date().getFullYear();
-const APP_VERSION='0.0.10';   /* 更新するたびに末尾を増やす */
+const APP_VERSION='0.0.12';   /* 更新するたびに末尾を増やす */
 const MAX_AGE=120;  /* 生活資金が尽きなかった場合の試算上限 */
 const PENSION_FULL=83.17, PENSION_RATE=5.481/1000, PENSION_CAP=1230, PENSION_NET=0.90;
 /* マクロ経済スライドの調整期間（2024年財政検証・過去30年投影ケース）
@@ -3934,25 +3943,16 @@ document.getElementById('reopenWiz').onclick=()=>WZ.start(true);   /* 現在の�
     const label=btn?btn.textContent:'';
     const text=postText();
     const intent='https://twitter.com/intent/tweet?text='+encodeURIComponent(text)+'&url='+encodeURIComponent(TOOL_URL);
-    const blob=await new Promise(res=>cv.toBlob(res,'image/png'));
-    /* 画像つきで共有できる端末は共有シートへ（送信は利用者が確認してから） */
-    try{
-      if(blob && navigator.canShare && navigator.share){
-        const file=new File([blob],'mirailog-result.png',{type:'image/png'});
-        if(navigator.canShare({files:[file]})){
-          await navigator.share({files:[file], text:text, url:TOOL_URL});
-          return;
-        }
-      }
-    }catch(e){ if(e && e.name==='AbortError') return; }
-    /* 共有シートが使えない場合：画像を保存してから投稿画面を開く（自動投稿はしない） */
+    /* OSの共有シート（どのアプリで共有するかを尋ねる画面）は経由せず、X の投稿画面を直接開く。
+       テキストと URL は自動入力される。X の投稿画面 URL には画像を添付できないため、
+       結果画像は端末に保存し、投稿画面で手動添付できるようにする。 */
+    window.open(intent,'_blank','noopener');
     try{
       const a=document.createElement('a');
       a.href=cv.toDataURL('image/png'); a.download='mirailog-result.png';
       document.body.appendChild(a); a.click(); a.remove();
+      if(btn){ btn.textContent='画像を保存しました'; btn.classList.add('done'); setTimeout(()=>{btn.textContent=label;btn.classList.remove('done');},2600); }
     }catch(e){}
-    window.open(intent,'_blank','noopener');
-    if(btn){ btn.textContent='画像を保存しました'; btn.classList.add('done'); setTimeout(()=>{btn.textContent=label;btn.classList.remove('done');},2600); }
   }
   const _pbd=document.getElementById('postBtnDock'); if(_pbd) _pbd.addEventListener('click',()=>doPost(_pbd));
   /* 画面下部の固定バー：本体のボタンと同じ動作 */
