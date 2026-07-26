@@ -432,6 +432,28 @@
   tbody td.l{text-align:left}
   tbody td.ev{text-align:left; font-weight:600; color:#3A4658; white-space:normal; min-width:150px; max-width:230px; font-size:11px}
   tbody tr:hover td{background:rgba(14,124,115,.06)!important}
+  /* --- スマホ：年次明細の要約表（本人年齢・年収・年間支出・総資産）と全画面詳細 --- */
+  .tbl-sum-wrap{display:none}
+  #tblSum{width:100%; border-collapse:collapse; border:1px solid var(--line); border-radius:12px; overflow:hidden}
+  #tblSum thead th{position:sticky; top:0; background:var(--ink); color:#fff; font-weight:600; padding:9px 8px; text-align:right; font-size:12px; z-index:1}
+  #tblSum thead th:first-child{text-align:left}
+  #tblSum tbody td{padding:11px 8px; text-align:right; border-bottom:1px solid #EAEEF3; font-variant-numeric:tabular-nums; font-size:13px}
+  #tblSum tbody td:first-child{text-align:left; font-weight:700}
+  #tblSum tbody tr{cursor:pointer}
+  #tblSum tbody tr:active td{background:rgba(14,124,115,.14)!important}
+  .tbl-sum-note{font-size:11.5px; color:var(--slate-2); margin-top:8px; text-align:center}
+  .tblfull{position:fixed; inset:0; z-index:3000; background:#fff; display:flex; flex-direction:column}
+  .tblfull[hidden]{display:none}
+  .tblfull-bar{display:flex; align-items:center; gap:10px; padding:12px 14px; background:var(--ink); color:#fff; flex:0 0 auto}
+  .tblfull-bar b{font-size:14px}
+  .tblfull-hint{font-size:11px; color:#B9C4D0}
+  .tblfull-close{margin-left:auto; background:#fff; color:var(--ink); border:none; border-radius:8px; padding:8px 14px; font-weight:800; font-size:13px; cursor:pointer}
+  .tblfull-body{flex:1 1 auto; overflow:auto; -webkit-overflow-scrolling:touch; touch-action:pan-x pan-y pinch-zoom}
+  .tbl-full-clone{border-collapse:collapse; width:max-content; min-width:100%}
+  @media(max-width:640px){
+    .tbl-full-wrap{display:none}
+    .tbl-sum-wrap{display:block}
+  }
   td.neg{color:var(--rose)}
   .legend{display:flex; gap:14px; flex-wrap:wrap; font-size:11.5px; color:var(--slate); margin-bottom:8px}
   .legend i{display:inline-block; width:12px; height:3px; border-radius:2px; vertical-align:middle; margin-right:5px}
@@ -1332,7 +1354,7 @@
     <div class="block">
       <div class="eyebrow">Year by year</div>
       <h2>年次明細<span class="h2-unit">（単位：万円）</span></h2>
-      <div class="tablescroll">
+      <div class="tablescroll tbl-full-wrap">
         <table id="tbl"><thead><tr>
           <th class="l">経過</th><th>本人</th><th>相手</th><th class="l">子</th>
           <th class="l">ライフイベント</th>
@@ -1340,6 +1362,16 @@
           <th>年間貯蓄</th><th>NISA積立</th><th>NISA評価</th><th>NISA元本</th><th>ローン残高</th>
           <th>現預金</th><th>総資産</th><th class="l">イベント費用（備考）</th>
         </tr></thead><tbody id="tbody"></tbody></table>
+      </div>
+      <!-- スマホ用の要約表（本人年齢・年収・年間支出・総資産）。行をタップすると全項目を全画面表示 -->
+      <div class="tbl-sum-wrap">
+        <table id="tblSum"><thead><tr><th class="l">本人</th><th>年収</th><th>年間支出</th><th>総資産</th></tr></thead><tbody id="tbodySum"></tbody></table>
+        <div class="tbl-sum-note">行をタップすると全項目を全画面で表示します（ピンチでズーム）。</div>
+      </div>
+      <!-- 全項目の全画面表示（ズーム可） -->
+      <div id="tblFull" class="tblfull" hidden>
+        <div class="tblfull-bar"><b>年次明細（全項目・単位：万円）</b><span class="tblfull-hint">ピンチでズーム／スワイプでスクロール</span><button type="button" id="tblFullClose" class="tblfull-close">✕ 閉じる</button></div>
+        <div class="tblfull-body"><div class="tablescroll" style="max-height:none;border:none;border-radius:0" id="tblFullBody"></div></div>
       </div>
       <p class="footnote" style="margin-top:10px">
         ※ 金額はすべて<b>万円</b>。<b>給与の入力は額面</b>（税・社会保険料を引く前）で、手取りは<b>実額計算</b>です（社会保険は標準報酬月額の等級表と標準賞与額の上限を適用し、所得税は給与所得控除→各種所得控除→超過累進税率＋復興特別所得税2.1%、住民税は所得割10%＋均等割5,000円に調整控除・非課税限度額を反映）。ただし<b>再雇用の年収は手取り</b>、<b>退職金は額面</b>での入力です。年次明細の「額面年収」は額面、「月手取り」以降の収支・資産はすべて手取りベースで表示しています。配偶者・扶養控除、iDeCoの小規模企業共済等掛金控除、退職所得の分離課税（退職所得控除→1/2→累進税率＋住民税10%）も法定額で計算します。健康保険料率は協会けんぽの都道府県別料率（令和8年度）を使い、「基本」欄の都道府県で切り替わります。制度は将来変わりうるため、令和8年分（2026年）の税制・料率を将来も据え置いて試算しています（厚生年金の標準報酬月額上限の段階引上げは反映済み）。死亡を見込むと、その年から収入が止まり、世帯人数に応じて生活費が下がり、<b>遺族基礎年金（基本額84.73万＋子の加算）・遺族厚生年金（報酬比例の3/4・300月みなし）・中高齢寡婦加算63.55万</b>（いずれも非課税）と、埋葬料・葬祭費5万、死亡一時金、死亡保険金、葬儀費用を反映します。団信に加入している場合は本人の死亡で住宅ローンの残債がなくなります。2028年4月施行の遺族厚生年金の見直し（子のない60歳未満の配偶者は原則5年の有期給付・約1.3倍）は、女性の段階的な対象年齢引上げを「死亡時40歳未満の妻」で近似しています。学費は授業料無償化を反映し、公立小中高は授業料0で給食・教材・制服等の実費のみ（私立高校は就学支援金で授業料をほぼ相殺した実費目安、大学はMEXT等の平均）。多子世帯の大学無償化として、扶養中の子が3人以上いる間は第3子以降（扶養中）の大学授業料相当を免除（仕送りは対象外）。兄姉が独立年齢に達して扶養数が3人未満になると適用は外れます。塾・習い事は任意で別途加算。保険・固定資産税は自動概算です。生活費は「現在の世帯人数・月額」を基準に等価尺度（本人1.0／配偶者0.5／子0.3・14歳以上0.5）で世帯人数に応じて自動算出（家賃・教育・保険・旅行は別項目）。総資産は現預金＋教育積立（別口座）＋NISA評価額＋確定拠出年金（DCは「枠内一時金」をオンにすると受給時に退職所得控除の枠まで非課税で受取り超過分は運用継続、退職金との控除枠重複は10年／19年ルールを簡易調整した概算。DC残りは将来課税のため実効税率を引いた税引後で計上）。教育費を別口座で積立をオンにすると、毎年「教育積立費」を現預金から別口座へ振替（＝現預金の支出として計上）し、学費はその別口座から支払います（不足分のみ現預金から）。別口座は安全資産（利回りなし）として扱うため、その分をNISA等で運用する場合に比べ最終資産はやや低めに出ます。NISAは引き出しても運用益が非課税。NISA積立は「その年が黒字」かつ「生活防衛費を超える現預金がある」場合のみ行い、赤字の年や取り崩す年は入金しません（入金と取り崩しの往復を回避）。なお、挙式・新生活の特別費（結婚年）と住宅購入諸費用（物件価格に対する率で購入年に一括）は、いずれも現金支出として資産推移に反映しています。月住宅費は、購入前は家賃、購入後はローンの月々返済（元利）＋固定資産税・管理費の月割で、ローン完済後は固定資産税・管理費のみになります（頭金・諸費用・修繕はイベント費用の列に別途計上）。<br><br><b>■ 初期値の根拠</b>（すべて公的統計の最新値・2026年7月時点。ご自身の数字に置き換えてお使いください）<br>
@@ -1404,7 +1436,7 @@ function eduTotalPerChild(P){ let t=0; for(let a=3;a<=21;a++) t+=eduAnnual(a,P);
 function insurance(age){ if(age<30)return 8; if(age<40)return 14; if(age<50)return 22; if(age<60)return 28; if(age<70)return 22; return 14; }
 /* 公的年金（令和7年度基準・概算）: 老齢基礎満額83.17万/年、報酬比例乗率5.481/1000（2003年4月〜）、標準報酬の年間上限概算1230万 */
 const CURRENT_YEAR=new Date().getFullYear();
-const APP_VERSION='0.0.17';   /* 更新するたびに末尾を増やす */
+const APP_VERSION='0.0.18';   /* 更新するたびに末尾を増やす */
 const MAX_AGE=120;  /* 生活資金が尽きなかった場合の試算上限 */
 const PENSION_FULL=83.17, PENSION_RATE=5.481/1000, PENSION_CAP=1230, PENSION_NET=0.90;
 /* マクロ経済スライドの調整期間（2024年財政検証・過去30年投影ケース）
@@ -2628,7 +2660,7 @@ function renderInflation(P, baseRows){
 
   document.getElementById('inflIntro').innerHTML=`現在の設定（年${basePct}%）を基準に、インフレ率が変わった場合の総資産の推移を比較します。日銀の物価安定目標は<b>2%</b>で、近年は2%前後の物価上昇が続いています。「現在価値換算」は最終資産を今のお金の価値に割り引いた実質額です。<br><span style="color:var(--slate-2)">※本モデルでインフレの影響を受けるのは生活費・保険・旅行費です（教育費・住宅費・修繕費は固定額、車は別途上昇率を設定）。実際にはこれらも上昇しうるため、差異はここでの表示より大きくなる可能性があります。</span>`;
 
-  /* chart */
+  /* chart（横軸は設定値プランが資産の尽きる年まで＝baseRowsの範囲。縦軸はその範囲内の最高値＋10%） */
   const labels=baseRows.map(r=>r.age);
   const dsets=scns.map((s,i)=>({
     label:`インフレ${s.pct}%`+(s.isBase?'（設定値）':''),
@@ -2637,8 +2669,9 @@ function renderInflation(P, baseRows){
     borderWidth:s.isBase?3:1.8, borderDash:s.isBase?[]:[5,4],
     fill:false, tension:.25, pointRadius:0
   }));
-  const inflPeak=Math.max(1,...scns.map(s=>Math.max(...s.rows.map(r=>r.netWorth))));
-  const inflYMax=Math.ceil(inflPeak*1.1/100)*100;
+  const inflEnd=baseRows[baseRows.length-1].age;   /* 設定値プランが尽きる年（生存時は120） */
+  const inflPeak=Math.max(1,...scns.flatMap(s=>s.rows.filter(r=>r.age<=inflEnd).map(r=>r.netWorth)));
+  const inflYMax=inflPeak*1.1;   /* 範囲内の最高値＋10% */
   document.getElementById('inflLegend').innerHTML=scns.map((s,i)=>`<span><i style="background:${INFL_COLORS[i%INFL_COLORS.length]}"></i>${s.pct}%${s.isBase?'（設定値）':''}${Math.abs(s.pct-2.0)<0.001?'（日銀目標）':''}</span>`).join('');
   if(inflChart) inflChart.destroy();
   inflChart=new Chart(document.getElementById('inflChart'),{type:'line',data:{labels,datasets:dsets},options:{
@@ -3093,6 +3126,16 @@ function render(){
       <td class="${cashCls}">${man(r.cash)}</td><td><b>${man(r.netWorth)}</b></td><td class="ev">${cost}</td>
     </tr>`;
   }).join('');
+  /* スマホ用の要約表（本人年齢・年収・年間支出・総資産）。行に data-i を持たせ、タップで全画面詳細へ */
+  const tbs=document.getElementById('tbodySum');
+  if(tbs){
+    tbs.innerHTML=rows.map(r=>{
+      const st=stageOf(P,r); const bg=ROWBG[st.key];
+      return `<tr data-i="${r.i}" style="background:${bg}">
+        <td>${r.age}歳</td><td>${man(r.gross)}</td><td>${man(r.expense)}</td><td><b>${man(r.netWorth)}</b></td>
+      </tr>`;
+    }).join('');
+  }
   const _mm=document.getElementById('mcMu'); if(_mm) _mm.textContent=(P.nisaYield*100).toFixed(1)+'%';
   renderBalance(P);
   renderKidFunds(P,rows);
@@ -4810,9 +4853,13 @@ function renderPension(P, baseRows){
     return {...pt, rows, color:PEN_COLORS[i%PEN_COLORS.length]};
   });
   const at=(rows,age)=>{ const r=rows.find(x=>x.age===age); return r?r.netWorth:null; };
-  const ages=[]; for(let a=FROM;a<=P.endAge;a++) ages.push(a);
-  const peak=Math.max(1,...pats.map(p=>Math.max(0,...p.rows.filter(r=>r.age>=FROM).map(r=>r.netWorth))));
-  const yMax=Math.ceil(peak*1.1/100)*100;
+  /* 横軸は設定値（現在の受け取り方）プランが資産の尽きる年まで。縦軸はその範囲内の最高値＋10%。 */
+  const penCur=pats.find(p=>p.current)||pats[0];
+  let penEnd=(penCur&&penCur.rows.length)?penCur.rows[penCur.rows.length-1].age:P.endAge;
+  if(penEnd<62) penEnd=P.endAge;   /* 設定値が60歳前に尽きる稀なケースは全体表示にフォールバック */
+  const ages=[]; for(let a=FROM;a<=penEnd;a++) ages.push(a);
+  const peak=Math.max(1,...pats.map(p=>Math.max(0,...p.rows.filter(r=>r.age>=FROM&&r.age<=penEnd).map(r=>r.netWorth))));
+  const yMax=peak*1.1;   /* 範囲内の最高値＋10% */
   const dsets=pats.map(p=>({
     label:p.label,
     data:ages.map(a=>{ const r=p.rows.find(x=>x.age===a); return r?r.netWorth:null; }),
@@ -5266,6 +5313,24 @@ if(_addDebt) _addDebt.addEventListener('click',function(){
   renderDebts(); render();
 });
 var _prefSel=document.getElementById('pref'); if(_prefSel) _prefSel.addEventListener('change',()=>{ updatePrefUI(); render(); });
+/* 年次明細（スマホ）：要約行タップで全項目を全画面表示。ピンチでズーム可（viewportで拡大許可済み）。 */
+(function(){
+  var sum=document.getElementById('tblSum'), full=document.getElementById('tblFull'),
+      body=document.getElementById('tblFullBody'), closeBtn=document.getElementById('tblFullClose');
+  if(!sum||!full||!body) return;
+  function openFull(scrollToI){
+    var src=document.getElementById('tbl'); if(!src) return;
+    /* 現状の年次明細（全項目）をそのまま複製して全画面に表示（id重複を避けるためclassのみ付与） */
+    body.innerHTML='<table class="tbl-full-clone">'+src.innerHTML+'</table>';
+    full.hidden=false; document.body.style.overflow='hidden';
+    if(scrollToI!=null){ var rowsEl=body.querySelectorAll('tbody tr'); var t=rowsEl[Math.max(0,Math.min(rowsEl.length-1,scrollToI-1))];
+      if(t) setTimeout(function(){ t.scrollIntoView({block:'center'}); },30); }
+  }
+  function closeFull(){ full.hidden=true; body.innerHTML=''; document.body.style.overflow=''; }
+  sum.addEventListener('click',function(e){ var tr=e.target.closest('tr[data-i]'); if(!tr) return; openFull(+tr.dataset.i); });
+  if(closeBtn) closeBtn.addEventListener('click',closeFull);
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape' && !full.hidden) closeFull(); });
+})();
 ['hasFamAllow','hasPartnerNisa','hasKidNisa','hasHousingSubsidy'].forEach(function(id){ var cb=document.getElementById(id);
   if(cb) cb.addEventListener('change',function(){ updateOptBoxUI(); render(); }); });
 var _hsm=document.getElementById('housingSubsidyMode'); if(_hsm) _hsm.addEventListener('change',function(){ updateOptBoxUI(); render(); });
