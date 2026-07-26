@@ -639,9 +639,10 @@
     .pd-2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
     .pd-wide-img{width:100%; aspect-ratio:3.4/1; object-fit:contain; display:block; border:1px solid #E3EAF2; border-radius:7px; margin-bottom:5px}
     /* インフレ／年金比較：グラフ＋表を1セットにして、上下の用紙比率を1:1にする。
-       グラフは表のぶん低め（幅192mmで約60mm）にし、各セットは等高（min-height）で揃える。 */
-    .pd-halfimg{width:100%; aspect-ratio:1560/488; object-fit:fill; display:block; border:1px solid #E3EAF2; border-radius:7px; margin:2px 0 4px}
-    .ip-half{min-height:107mm; margin-bottom:6mm}
+       iOS Safari など印刷ヘッダ/フッタで用紙が狭くなる環境でも次ページへ溢れないよう、
+       セクション全体を他ページ（年次明細）と同程度に抑えるため、グラフは低め（約49mm）にする。 */
+    .pd-halfimg{width:100%; aspect-ratio:1560/400; object-fit:fill; display:block; border:1px solid #E3EAF2; border-radius:7px; margin:2px 0 3px}
+    .ip-half{min-height:96mm; margin-bottom:4mm}
     .ip-half .sec-t{margin:2px 0 3px}
     .pd-half{width:100%; aspect-ratio:4/3; object-fit:contain; display:block; border:1px solid #E3EAF2; border-radius:7px}
     .pd-pair{margin-top:4px}
@@ -1403,7 +1404,7 @@ function eduTotalPerChild(P){ let t=0; for(let a=3;a<=21;a++) t+=eduAnnual(a,P);
 function insurance(age){ if(age<30)return 8; if(age<40)return 14; if(age<50)return 22; if(age<60)return 28; if(age<70)return 22; return 14; }
 /* 公的年金（令和7年度基準・概算）: 老齢基礎満額83.17万/年、報酬比例乗率5.481/1000（2003年4月〜）、標準報酬の年間上限概算1230万 */
 const CURRENT_YEAR=new Date().getFullYear();
-const APP_VERSION='0.0.14';   /* 更新するたびに末尾を増やす */
+const APP_VERSION='0.0.16';   /* 更新するたびに末尾を増やす */
 const MAX_AGE=120;  /* 生活資金が尽きなかった場合の試算上限 */
 const PENSION_FULL=83.17, PENSION_RATE=5.481/1000, PENSION_CAP=1230, PENSION_NET=0.90;
 /* マクロ経済スライドの調整期間（2024年財政検証・過去30年投影ケース）
@@ -4617,31 +4618,43 @@ function buildPrintDoc(){
   }
 
   /* ---------- 6ページ目：インフレ・年金パターン（上下1:1・グラフ縦伸ばし） ---------- */
-  const WIDE_W=1560, WIDE_H=488;   /* 横いっぱい。グラフと表をセットにして上下1:1に収める高さ */
+  const WIDE_W=1560, WIDE_H=400;   /* 横いっぱい。グラフと表をセットにして上下1:1・1ページに収める高さ */
 
-  /* 上半分：インフレ率ごとの総資産 */
+  /* 上半分：インフレ率ごとの総資産。
+     設定値プランは資産が尽きた年で試算が止まる（rowsの最終年）。生き残るパターンだけ120歳まで
+     伸びて縦軸がそのピークに引っ張られるのを避けるため、グラフの描画範囲（横軸）を
+     「設定値プランが資産の尽きる年（尽きなければ120歳）」までに揃え、その範囲内の最大値＋10%を縦軸上限にする。
+     （表は従来どおり120歳までの試算） */
   const inflPcts=[...INFL_SCENARIOS]; const basePct=+(P.inflation*100).toFixed(2);
   if(!inflPcts.some(v=>Math.abs(v-basePct)<0.001)){ inflPcts.push(basePct); inflPcts.sort((a,b)=>a-b); }
   const inflCols=['#0CA795','#3AA0E0','#8E6FC4','#E8A54B','#C2183C','#77828F'];
+  let inflBaseEnd=P.endAge;
   const inflSeries=inflPcts.map((pct,i)=>{
-    const rs=Math.abs(pct-basePct)<0.001?rows:simulate({...P,inflation:pct/100});
-    return {label:pct+'%'+(Math.abs(pct-basePct)<0.001?'（設定）':''), color:inflCols[i%inflCols.length],
-            width:Math.abs(pct-basePct)<0.001?2.6:1.6, dash:Math.abs(pct-basePct)>=0.001,
+    const isBase=Math.abs(pct-basePct)<0.001;
+    const rs=isBase?rows:simulate({...P,inflation:pct/100});
+    if(isBase && rs.length) inflBaseEnd=rs[rs.length-1].age;   /* 設定値プランが尽きる年（生存時は120） */
+    return {label:pct+'%'+(isBase?'（設定）':''), color:inflCols[i%inflCols.length],
+            width:isBase?2.6:1.6, dash:!isBase,
             data:rs.map(r=>({x:r.age,y:r.netWorth}))};
   });
-  const inflMax=Math.max(1,...inflSeries.flatMap(sr=>sr.data.map(d=>d.y)))*1.1;   /* 最大描画範囲＝データ最大＋10% */
-  const inflImg=pdLineChart({w:WIDE_W,h:WIDE_H,xMin:rows[0].age,xMax:P.endAge,
-    yMin:0,yMax:inflMax,yMaxHard:true,legend:true,series:inflSeries});
+  const inflVis=inflSeries.map(s=>({...s, data:s.data.filter(d=>d.x<=inflBaseEnd)}));   /* 全系列を設定値プランの終了年まで */
+  const inflMax=Math.max(1,...inflVis.flatMap(sr=>sr.data.map(d=>d.y)))*1.1;
+  const inflImg=pdLineChart({w:WIDE_W,h:WIDE_H,xMin:rows[0].age,xMax:inflBaseEnd,
+    yMin:0,yMax:inflMax,yMaxHard:true,legend:true,series:inflVis});
 
-  /* 下半分：年金の受け取り方ごとの総資産（60歳から） */
+  /* 下半分：年金の受け取り方ごとの総資産（60歳〜、設定値プランの終了年まで） */
   const penPats=(typeof pensionPatterns==='function'?pensionPatterns(P):[]).map((pt,i)=>({
     ...pt, rows:simulate({...P, ...pt.o}), color:PEN_COLORS[i%PEN_COLORS.length]
   }));
+  let penBaseEnd=P.endAge;
+  const penCur=penPats.find(pt=>pt.current);
+  if(penCur && penCur.rows.length) penBaseEnd=penCur.rows[penCur.rows.length-1].age;
+  if(penBaseEnd<62) penBaseEnd=P.endAge;   /* 設定値が60歳前に尽きる稀なケースは全体表示にフォールバック */
   const penSeries=penPats.map(pt=>({label:pt.label.replace(/ケース・/,' '), color:pt.color,
     width:pt.current?2.6:1.6, dash:!pt.current,
-    data:pt.rows.filter(r=>r.age>=60).map(r=>({x:r.age,y:r.netWorth}))}));
-  const penMax=Math.max(1,...penSeries.flatMap(sr=>sr.data.map(d=>d.y)))*1.1;   /* 最大描画範囲＝データ最大＋10% */
-  const penImg=pdLineChart({w:WIDE_W,h:WIDE_H,xMin:60,xMax:P.endAge,
+    data:pt.rows.filter(r=>r.age>=60 && r.age<=penBaseEnd).map(r=>({x:r.age,y:r.netWorth}))}));
+  const penMax=Math.max(1,...penSeries.flatMap(sr=>sr.data.map(d=>d.y)))*1.1;
+  const penImg=pdLineChart({w:WIDE_W,h:WIDE_H,xMin:60,xMax:penBaseEnd,
     yMin:0,yMax:penMax,yMaxHard:true,legend:true,series:penSeries});
 
   const inflT=document.getElementById('inflTbl');
@@ -4655,7 +4668,7 @@ function buildPrintDoc(){
     +'<img class="pd-halfimg" src="'+penImg+'">'
     +(penT?'<table class="pd-tbl pd-wide">'+penT.innerHTML+'</table>':'')
     +'</div>'
-    +'<div class="pd-note" style="margin-top:4px">※ グラフはいずれも名目額です。縦軸はデータの最大値＋10%までを表示しています。年金の比較は、受給開始年齢（繰上げ・基準・繰下げ）と財政検証のケース（楽観・保守）を入れ替えたものです。</div>'));
+    +'<div class="pd-note" style="margin-top:4px">※ グラフはいずれも名目額で、横軸は<b>設定値プランの資産が尽きる年（尽きなければ120歳）</b>まで、縦軸はその範囲の最大値＋10%を表示しています（表は120歳までの試算）。年金の比較は、受給開始年齢（繰上げ・基準・繰下げ）と財政検証のケース（楽観・保守）を入れ替えたものです。</div>'));
 
   /* ---------- 7〜9ページ目：年次明細 ---------- */
   const tbl=document.getElementById('tbl');
