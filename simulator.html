@@ -306,6 +306,53 @@
 
   /* tabs */
   .tabs{display:flex; gap:4px; border-bottom:1px solid var(--line); margin-bottom:14px; flex-wrap:wrap}
+  .alloc-row{border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:10px; background:#FBFDFE}
+  .alloc-row .ar-h{display:flex; align-items:center; gap:10px; margin-bottom:8px}
+  .alloc-row .ar-h b{font-size:13px}
+  .alloc-row .ar-del{margin-left:auto; border:1px solid var(--line); background:#fff; color:var(--rose); border-radius:8px; padding:5px 10px; font-size:12px; font-weight:700; cursor:pointer}
+  .alloc-row .ar-lump{display:flex; align-items:flex-start; gap:7px; margin-top:9px; font-size:12.5px; font-weight:700; color:var(--ink); cursor:pointer; line-height:1.6}
+  .alloc-row .ar-lump>span{flex:1 1 auto}
+  .alloc-row .ar-lump input{margin-top:2px; flex:0 0 auto}
+  .alloc-row .ar-lumpnote{font-size:11px; color:var(--slate-2); margin-top:4px; padding-left:21px; line-height:1.6}
+  .alloc-row .ar-pie{max-width:190px; margin:10px auto 4px}
+  .alloc-row .ar-pie canvas{max-height:170px}
+  .alc-det{margin-top:12px; border:1px solid var(--line); border-radius:12px; background:#FBFDFE}
+  .alc-det>summary{cursor:pointer; padding:11px 14px; font-size:12.5px; font-weight:800; color:var(--ink); list-style:none}
+  .alc-det>summary::-webkit-details-marker{display:none}
+  .alc-det>summary::before{content:'▶ '; color:var(--teal); font-size:11px}
+  .alc-det[open]>summary::before{content:'▼ '}
+  .alc-det .ad-in{padding:0 14px 14px}
+  .alloc-row .ar-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:8px}
+  .alloc-row .ar-sum{font-size:11.5px; font-weight:700; margin-top:8px}
+  .alloc-row .ar-sum.ng{color:var(--rose)}
+  .alloc-row .ar-sum.ok{color:var(--teal)}
+  .alloc-params{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:0 14px; margin-top:14px; padding-top:12px; border-top:1px solid var(--line)}
+  .alloc-charts{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-top:16px}
+  .alloc-charts .ac-box{border:1px solid var(--line); border-radius:12px; padding:10px; background:#fff}
+  .alloc-charts .ac-t{font-size:12px; font-weight:800; text-align:center; margin-bottom:6px}
+  .alloc-charts canvas{max-height:190px}
+  .chip-sub{font-size:10.5px; font-weight:700; color:var(--slate-2); margin-left:3px}
+  .chip-diff{font-size:10.5px; font-weight:700; margin-left:4px}
+  .chip-diff.up{color:#12855F}
+  .chip-diff.dn{color:var(--rose)}
+  .snap-pie-wrap{display:grid; grid-template-columns:minmax(180px,260px) 1fr; gap:16px; align-items:center; margin:14px 0 4px}
+  @media(max-width:560px){ .snap-pie-wrap{grid-template-columns:1fr} }
+  .snap-pie{position:relative}
+  .snap-pie canvas{max-height:230px}
+  .snap-legend{display:flex; flex-direction:column; gap:6px}
+  .snap-legend .sl-row{display:flex; align-items:center; gap:8px; font-size:12.5px}
+  .snap-legend .sl-sw{width:12px; height:12px; border-radius:3px; flex:0 0 auto}
+  .snap-legend .sl-n{color:var(--slate)}
+  .snap-legend .sl-v{margin-left:auto; font-weight:800; font-variant-numeric:tabular-nums}
+  .snap-legend .sl-p{width:52px; text-align:right; color:var(--slate-2); font-weight:700; font-variant-numeric:tabular-nums}
+  .snap-det{margin-top:12px; border:1px solid var(--line); border-radius:12px; background:#FBFDFE}
+  .snap-det>summary{cursor:pointer; padding:11px 14px; font-size:13px; font-weight:800; color:var(--ink); list-style:none}
+  .snap-det>summary::-webkit-details-marker{display:none}
+  .snap-det>summary::before{content:'▶ '; color:var(--teal); font-size:11px}
+  .snap-det[open]>summary::before{content:'▼ '}
+  .snap-det .sd-in{padding:0 12px 14px; overflow-x:auto; -webkit-overflow-scrolling:touch}
+  .bud-chart{max-width:100%; overflow:hidden}
+  .bud-chart canvas{max-width:100%!important; height:auto!important}
   .tab-btn{border:none; background:none; padding:9px 14px; font-size:13px; font-weight:700; color:var(--slate); cursor:pointer;
     border-bottom:2px solid transparent; margin-bottom:-1px; border-radius:8px 8px 0 0; display:flex; align-items:center; gap:6px;}
   .tab-btn:hover{color:var(--ink); background:#F4F7FA}
@@ -334,8 +381,16 @@
   .loannote.warn{background:#FDF6F8; border:1px solid #F1C9D2; border-radius:8px; padding:8px 10px; margin-top:6px}
   .loannote.warn b,.loannote.warn .ln-ratio,.loannote.warn .ln-warn{color:var(--rose)}
   .loannote .ln-warn{font-weight:800}
-  .snap-tbl{width:100%; border-collapse:collapse; margin-top:6px}
-  .snap-tbl td{padding:7px 4px; border-bottom:1px solid var(--line); font-size:12.5px; font-variant-numeric:tabular-nums}
+  .snap-tbl{width:100%; max-width:100%; border-collapse:collapse; margin-top:6px; table-layout:fixed}
+  .snap-tbl td{padding:7px 4px; border-bottom:1px solid var(--line); font-size:12.5px; font-variant-numeric:tabular-nums;
+    overflow-wrap:anywhere; word-break:break-word}
+  /* 1列目（項目名）を優先し、金額列は等幅。スマホでも横にはみ出さないようにする */
+  .snap-tbl td:first-child{width:44%}
+  .snap-tbl td:nth-child(2),.snap-tbl td:nth-child(3){width:28%}
+  @media(max-width:420px){
+    .snap-tbl td{padding:7px 3px; font-size:11.5px}
+    .snap-tbl thead td{font-size:9.5px; letter-spacing:0}
+  }
   .snap-tbl td:first-child{color:var(--slate); text-align:left}
   .snap-tbl td:nth-child(2),.snap-tbl td:nth-child(3){text-align:right; color:var(--ink)}
   .snap-tbl thead td{color:var(--slate-2); font-weight:800; font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; border-bottom:1.5px solid var(--line)}
@@ -992,6 +1047,7 @@
       <div class="body">
         <div class="field"><label>パートナーの働き方</label><select id="partnerWorkMode"><option value="segments">区間で指定（就職・転職・育休・産休）</option><option value="single">基本の給与カーブ（通常勤務）</option><option value="none">専業主婦(夫)・収入なし</option></select></div>
         <div class="hint" id="partnerWorkModeHint" style="margin-top:0">産休・復職などを区間で指定します（既定）。</div>
+        <div class="field"><label>扶養内で働く場合の「年収の壁」</label><select id="kabeMode"><option value="h106">106万円（勤務先の社会保険に加入する働き方）</option><option value="h130">130万円（週20時間未満・加入しない働き方）</option></select></div>
         <details class="kabe"><summary>「年収の壁」の扱い（2026年改正対応）</summary><div class="kabe-b">2025〜2026年は年収の壁が大きく変わりました。本ツールは<b>令和8年（2026年）分</b>の制度で、壁の前後を<b>自動で判定</b>します。金額はすべて額面年収です。<br><b>・106万円の壁（社会保険）</b>…配偶者に扶養されうる側（世帯で収入の少ない側）が対象。年収106万円未満なら第3号被保険者とみなし、<b>本人負担の社会保険料は0</b>で試算します。これを超えると健康保険料・厚生年金保険料の本人負担が生じ、手取りが一時的に下がります（いわゆる働き損）。<br>　<b>2026年10月にこの賃金要件（月8.8万円）は撤廃</b>されますが、これは壁が上がるのではなく、<b>賃金が低くても週20時間以上働いていれば加入対象になる（適用が広がる）</b>改正です。本ツールは労働時間を入力しないため、撤廃後も106万円を目安に判定します（時給1,000〜1,100円なら年収106万円がおおむね週20時間に相当するため）。週20時間未満で働く場合は次の130万円が壁になります。<br><b>・130万円の壁（扶養）</b>…週20時間未満などで勤務先の社会保険に加入しない場合、この額まで被扶養者でいられます（超えると国民年金・国民健康保険に自分で加入）。壁自体は残ります。<br><b>・178万円の壁（所得税）</b>…給与所得控除（最低保障74万円）＋基礎控除（104万円）で、<b>年収178万円までは本人の所得税が0</b>（令和8・7年の時限措置。かつての103万→2025年160万→2026年178万）。年収665万円を超えると特例が縮小します。<br><b>・110万円台の壁（住民税）</b>…住民税の基礎控除は43万円のままなので、所得税より早く（おおむね年収110万円台から）住民税がかかりはじめます。<br><b>・136万円／169万円／207万円の壁（配偶者控除）</b>…2026年分から、配偶者控除の対象は給与年収<b>136万円以下</b>、配偶者特別控除の<b>満額は169万円まで</b>に拡大し、<b>約207万円で0</b>になります。本ツールは法定の逓減どおりに計算し、<b>控除は収入の多い側</b>に適用します。</div></details>
         <div id="partnerSingleFields" style="display:none">
           <div class="hint" style="margin-top:0">本人と同じくひとつの給与カーブで試算します（通常勤務）。金額は<b>額面</b>。結婚前の期間は世帯収入に含みません。</div>
@@ -1052,6 +1108,7 @@
         <div id="kidNisaFields" class="optbox" style="display:none">
         <div class="field"><label>　└ 積立額（子1人あたり）</label><div class="ig"><input type="number" id="kidNisaMonthly" value="1" step="0.5" max="5"><span class="unit">万/月</span></div></div>
         <div class="field"><label>　└ 受け渡す年齢</label><div class="ig"><input type="number" id="kidNisaTo" value="22"><span class="unit">歳</span></div></div>
+        <div class="hint" id="kidNisaNote" style="margin-top:0"></div>
         <div class="hint" style="margin-top:0"><b>こどもNISA</b>は、令和8年度税制改正大綱で創設が決まった<b>2027年1月開始予定</b>の新制度です（0〜17歳の子ども名義でNISA口座を開設でき、運用益は<b>非課税</b>）。2023年末に終了したジュニアNISA以降、18歳未満が使える非課税制度がなかった空白を埋めるものです。<br>・年間投資枠は<b>60万円（月5万円）</b>まで。入力がこれを超えても60万円で頭打ちにします。<br>・非課税保有限度額は<b>600万円</b>（元本ベース）。上限に達したら積立を止めます。<br>・非課税保有期間は無期限で、18歳になると成人のNISAへ引き継がれます。本ツールでは17歳まで積み立て、その後も非課税のまま運用を続ける前提です。<br>・払出しができるのは原則<b>12歳以降</b>（本人のための資金であることなどの要件あり）です。<br>この資産は<b>世帯の総資産には含めず</b>、指定した年齢時点の金額を結果に表示します（生活防衛費を下回らない範囲で毎年拠出し、2027年より前の年は積み立てません）。制度の詳細は2026年中に公表される予定のため、変更される可能性があります。</div>
         </div>
         <div class="field"><label>現預金の上限超過分をNISAへ</label><input type="checkbox" id="sweepNisa"></div>
@@ -1234,6 +1291,14 @@
         <div class="field"><label>　└ 法定相続人の人数（本人を含む）</label><div class="ig"><input type="number" id="inheritHeirs" value="2" min="1" max="10"><span class="unit">人</span></div></div>
         <div class="field"><label>　└ 本人の取得割合</label><div class="ig"><input type="number" id="inheritShare" value="50" min="0" max="100" step="5"><span class="unit">%</span></div></div>
         <div class="field"><label>　└ 本人は配偶者として相続する</label><input type="checkbox" id="inheritIsSpouse"></div>
+        <div class="sec-sub">生前贈与（親などから受け取る場合）</div>
+        <div class="field"><label>生前贈与を受ける予定がある</label><input type="checkbox" id="hasGift"></div>
+        <div class="field"><label>　└ 1年あたりの贈与額</label><div class="ig"><input type="number" id="giftAnnual" value="110" step="10"><span class="unit">万</span></div></div>
+        <div class="field"><label>　└ 開始（本人年齢）</label><div class="ig"><input type="number" id="giftFrom" value="35"><span class="unit">歳</span></div></div>
+        <div class="field"><label>　└ 終了（本人年齢）</label><div class="ig"><input type="number" id="giftTo" value="45"><span class="unit">歳</span></div></div>
+        <div class="field"><label>　└ 課税方式</label><select id="giftMode"><option value="reki">暦年課税</option><option value="seisan">相続時精算課税</option></select></div>
+        <div class="field"><label>　└ 父母・祖父母からの贈与（18歳以上）</label><input type="checkbox" id="giftSpecial" checked></div>
+        <div class="hint" style="margin-top:0"><b>暦年課税</b>は年<b>110万円の基礎控除</b>があり、超えた分に10〜55%の超過累進税率がかかります。父母・祖父母から18歳以上の子・孫への贈与は<b>特例贈与財産</b>として税率が緩和されます（チェックを外すと一般税率）。<br><b>相続時精算課税</b>は年110万円の基礎控除に加えて<b>特別控除2,500万円（累計）</b>があり、使い切るまで税金はかかりません。超えた分は一律20%です（いったん選ぶと暦年課税には戻せません。将来の相続時に贈与分が相続財産へ加算されます）。<br>贈与税は<b>その年に現金で納付</b>するものとして計上し、税引後の金額が現預金に加わります。贈与財産は<b>所得税・住民税の対象外</b>のため、住民税・社会保険料・配偶者控除の判定には影響しません。<br>暦年課税の<b>生前贈与加算</b>（相続開始前7年以内の贈与を相続財産に加算）は未考慮です。</div>
         <div class="hint" style="margin-top:0"><b>遺産の総額</b>は、被相続人（亡くなった方）の財産の合計（債務・葬式費用を差し引いたあとの課税価格）を入力してください。<b>基礎控除＝3,000万円＋600万円×法定相続人の数</b>を超えた部分に相続税がかかります。税額は法定相続分であん分して超過累進税率（10〜55%）で計算し、本人の取得割合に応じた負担額を算出します。<br><b>本人が配偶者として相続する場合</b>はチェックを入れてください。<b>配偶者の税額軽減</b>（法定相続分または1億6,000万円までのいずれか多い金額まで非課税）を適用します。<br>相続税は<b>その年に現金で納付</b>するものとして計上し、税引後の手取りが現預金に加わります。<br><b>相続財産は所得税・住民税の対象外</b>（相続税と二重課税されないため）で、翌年の住民税・社会保険料・配偶者控除の判定にも影響しません。</div>
         </div></details>
       </div>
@@ -1265,6 +1330,7 @@
         <button class="tab-btn" data-tab="tab-snapshot">指定年齢の詳細</button>
         <button class="tab-btn" data-tab="tab-mc">資産運用のブレ</button>
         <button class="tab-btn" data-tab="tab-compare">ライフプラン比較</button>
+        <button class="tab-btn" data-tab="tab-alloc">資産比率の変更</button>
       </div>
 
       <div class="kf-box" id="kidFundBox" style="display:none"></div>
@@ -1309,7 +1375,7 @@
       <div class="tab-panel" id="tab-mc">
         <div class="eyebrow">Monte Carlo</div>
         <h2>資産運用のブレを考慮</h2>
-        <div class="hint" style="margin-top:0">NISA・確定拠出年金の利回りは毎年変動します。想定利回り（<b id="mcMu">—</b>）を中心に運用成果が上下に振れた場合を多数回シミュレーションし、資産が何歳まで残るかの<b>幅</b>を見ます。基準は「想定利回りを固定した現状の試算」です。</div>
+        <div class="hint" style="margin-top:0">NISA・確定拠出年金の利回りは毎年変動します。想定利回り（<b id="mcMu">—</b>）を中心に運用成果が上下に振れた場合を多数回シミュレーションし、資産が何歳まで残るかの<b>幅</b>を見ます。基準は「想定利回りを固定した現状の試算」です。<br>「資産比率の変更」を設定している場合は、<b>資産ごとに異なるブレ幅と相関</b>を反映します（年率の標準偏差：投資信託18%・ゴールド15%・不動産7%・債券4%・現預金0%）。株式とゴールドの相関は<b>−0.15</b>で、<b>投資信託が下がる年にゴールドが上がりやすい</b>動きを再現します。債券は+0.10というごく低い連動と小さいブレ幅で安定的に働き、不動産は株式と<b>+0.45</b>の中程度の連動で、家賃収入もその年の市況に応じて増減します。これにより、分散したポートフォリオほど不調時の落ち込みが浅くなる様子を確認できます。実現利回りは<b>その年に実際に適用された配分の加重平均（現預金を含む総資産ベース）</b>で集計するため、債券や現預金を厚くした配分ほど結果の散らばりが小さく出ます。あわせて<b>想定利回りの達成率</b>も表示します。資産比率の変更を設定している場合、達成率の基準は「資産形成」タブの想定利回りではなく、<b>その配分から決まる期待利回り</b>（現預金を含む）です。</div>
         <div class="mc-run"><button id="mcRun">この設定で分析する</button><span id="mcStatus" class="mc-status"></span></div>
         <div id="mcResult"></div>
         <details class="mc-set" id="mcSet">
@@ -1337,6 +1403,43 @@
         <h3 class="cmp-h">子どもの人数</h3>
         <div class="hint" id="cmpKidsNote" style="margin-top:0"></div>
         <div id="cmpKids"></div>
+      </div>
+
+      <div class="tab-panel" id="tab-alloc">
+        <div class="eyebrow">Asset allocation</div>
+        <h2>資産比率の変更</h2>
+        <div id="allocRows"></div>
+        <button type="button" class="btn-sub" id="allocAdd" style="margin-top:8px">＋ 変更を追加（最大3つ）</button>
+
+        <details class="alc-det"><summary>この機能の説明</summary><div class="ad-in">
+          <div class="hint" style="margin-top:0">指定した年齢で、<b>総資産（現預金＋運用資産）に対する配分</b>を切り替えます。合計が100%になるように入力してください（100%でない場合は自動で正規化します）。<br>
+          <b>「一括で入れ替える」にチェックしない場合</b>：既存の資産は売却せず（利確せず）、指定年齢以降に<b>新しく投資する分の配分</b>を変えることで、時間をかけて目標比率に近づけます（1年で入れ替えるのは非現実的なため）。現預金が目標比率より少ない年は積立を抑えて現金を厚くし、多い年は多めに投資へ回します。<br>
+          <b>チェックした場合</b>：その年にまとめて売買して目標比率を目指します。特定口座は売買のたびに<b>売却益へ20.315%が課税</b>されます。<b>NISA口座の中身を入れ替える場合も、売却→買い直しに年間投資枠（1人360万円）が必要</b>で、売却した簿価分の生涯投資枠が復活するのは<b>翌年</b>です。しかも買い直しは<b>時価</b>で生涯投資枠を消費するため、<b>含み益が大きいほど枠を余分に使います</b>。そのため1年で入れ替えられるのは<b>特定口座の全額＋その年に残っているNISAの年間枠・生涯枠まで</b>で、残りは翌年以降に順次入れ替わります（NISAの比重が大きいほど、目標比率に到達するまで数年かかります）。消費する枠は<b>実際に入れ替えた金額のぶんだけ</b>なので、あと少しで目標に届く年に枠を使い切ってしまうことはありません。<br><b>現預金の比率</b>も同じ設定で維持しますが、毎年こまかく売買するのは現実的でないため、開始年をのぞいては<b>総資産の5%を超えてズレたときだけ</b>売買します。<br>
+          <b>現預金</b>は値動きのない安全資産として扱い、普通預金の金利のみを見込みます。元本は変動しませんが、インフレが続くと実質的な価値は目減りします。<br><b>毎年の投資額</b>：「NISA」欄の積立額は、資産比率の変更を設定している間は<b>投資に回せる余剰資金の総額</b>として扱い、この比率に応じて各資産へ配分します（例：積立が月10万円で現預金40%なら、投資に回るのは月6万円ぶん）。設定していない間は、これまでどおり全額を投資信託（NISA）へ積み立てます。「NISAスイープ」をオンにしている場合も、余った現金は目標比率に合わせて配分します（目標の現預金ぶんは現金のまま残します）。投資先はNISAの年間枠・生涯枠を優先し、枠を超えた分と<b>NISA対象外の不動産</b>は特定口座で購入します。<br><b>買い付け先の決め方</b>：新しい資金は「目標比率どおり」ではなく、<b>目標に対して不足している資産から優先して</b>買い付けます（例：投資信託50%・現預金50%から、投資信託30%・現預金40%・ゴールド30%へ変える場合、ゴールドが0なので新規資金はまずゴールドに集中します）。不足をすべて埋めてもなお余る場合は、目標比率どおりに配分します。なお比率の分母は<b>現預金＋運用資産</b>で、<b>教育積立（別口座）や確定拠出年金は対象外</b>です。<br>
+          <b>不動産</b>は<b>1件単位</b>でしか売買できないものとし、配分額が1件あたりの価格に満たない年は購入しません（<b>ローンは組まない前提</b>）。購入時は<b>取得諸費用</b>（仲介手数料・登記・不動産取得税）、売却時は<b>譲渡費用</b>がかかり、売却益には所有5年超で20.315%、5年以下で39.63%の<b>譲渡所得税</b>がかかります。買付の原資は特定口座の投資信託等を売って用意するため、その含み益にも課税されます。毎年<b>減価償却</b>（建物割合÷耐用年数の定額法）を不動産所得から差し引くので、赤字になる年は<b>損益通算</b>で給与などの税が戻ります（そのぶん取得費が減り、売却時の譲渡所得は増えます）。売買のたびに費用がかかるため、目標が1件ぶんの1/4程度上下しても入れ替えません。現物不動産は<b>NISAの対象外</b>のため、特定口座の残高の範囲内でのみ保有し、買えないぶんは<b>目標・実績とも投資信託に振り替えて</b>表示します（円グラフに実在しない不動産が出ないようにするため）。したがって<b>NISA・確定拠出年金・こどもNISAには不動産の値動きは反映されず</b>、投資信託・ゴールド・債券だけの利回りで運用します。家賃収入は<b>空室リスク</b>と経費を差し引き、<b>課税所得</b>にもとづく限界税率で税引後の金額を計上します。</div>
+        </div></details>
+
+        <details class="alc-det"><summary>利回り・不動産の詳細設定</summary><div class="ad-in">
+          <div class="alloc-params">
+          <div class="field"><label>投資信託（インデックス）の想定利回り</label><div class="ig"><input type="number" id="alcYieldIndex" value="4.0" step="0.1"><span class="unit">%/年</span></div></div>
+          <div class="field"><label>ゴールドの想定利回り</label><div class="ig"><input type="number" id="alcYieldGold" value="2.5" step="0.1"><span class="unit">%/年</span></div></div>
+          <div class="field"><label>債券の想定利回り（分配・再投資）</label><div class="ig"><input type="number" id="alcYieldBond" value="1.5" step="0.1"><span class="unit">%/年</span></div></div>
+          <div class="field"><label>現預金の金利</label><div class="ig"><input type="number" id="alcYieldCash" value="0.2" step="0.05"><span class="unit">%/年</span></div></div>
+          <div class="field"><label>不動産の表面利回り（家賃収入）</label><div class="ig"><input type="number" id="alcRealGross" value="6.0" step="0.1"><span class="unit">%/年</span></div></div>
+          <div class="field"><label>　└ 空室率（空き家リスク）</label><div class="ig"><input type="number" id="alcVacancy" value="18" step="1"><span class="unit">%</span></div></div>
+          <div class="field"><label>　└ 経費率（管理費・修繕・税など）</label><div class="ig"><input type="number" id="alcRealCost" value="20" step="1"><span class="unit">%</span></div></div>
+          <div class="field"><label>　└ 物件価格の変動（値上がり率）</label><div class="ig"><input type="number" id="alcRealAppr" value="0" step="0.1"><span class="unit">%/年</span></div></div>
+          <div class="field"><label>　└ 1件あたりの価格</label><div class="ig"><input type="number" id="alcRealMin" value="1000" step="100"><span class="unit">万</span></div></div>
+          <div class="field"><label>　└ 取得諸費用（仲介手数料・登記・不動産取得税）</label><div class="ig"><input type="number" id="alcRealAcq" value="7" step="0.5"><span class="unit">%</span></div></div>
+          <div class="field"><label>　└ 譲渡費用（売却時の仲介手数料など）</label><div class="ig"><input type="number" id="alcRealSell" value="4" step="0.5"><span class="unit">%</span></div></div>
+          <div class="field"><label>　└ 建物の割合（減価償却の対象）</label><div class="ig"><input type="number" id="alcRealBldg" value="60" step="5"><span class="unit">%</span></div></div>
+          <div class="field"><label>　└ 建物の耐用年数</label><div class="ig"><input type="number" id="alcRealLife" value="47" step="1"><span class="unit">年</span></div></div>
+          <div class="field"><label>現物不動産を保有する</label><input type="checkbox" id="alcRealEnable" checked></div>
+          <div class="field"><label>NISA枠を超えたら特定口座で投資を続ける</label><input type="checkbox" id="alcUseTaxable" checked></div>
+          <div class="field"><label>　└ 譲渡益・分配金への税率</label><div class="ig"><input type="number" id="alcTaxRate" value="20.315" step="0.001"><span class="unit">%</span></div></div>
+          <div class="hint" style="margin-top:6px">不動産の<b>手取り利回り</b>＝表面利回り×(1−空室率)×(1−経費率)。初期値の空室率18%は総務省「住宅・土地統計調査」の全国の空き家率に近い水準、経費率20%は管理委託・修繕積立・固定資産税などの一般的な目安です。家賃収入は<b>不動産所得として総合課税</b>（所得税＋住民税）の対象になるため、税引後の金額を現預金に計上します。<br>ゴールドは利息・配当を生まないため、値上がりのみを見込みます。債券は満期保有で元本が戻る前提とし、利子を再投資します。</div>
+          <div id="allocResult"></div>
+        </div></details>
       </div>
 
     </div>
@@ -1401,7 +1504,7 @@
           <th class="l">経過</th><th>本人</th><th>相手</th><th class="l">子</th>
           <th class="l">ライフイベント</th>
           <th>額面年収</th><th>月手取り</th><th>月生活費</th><th>月住宅費</th><th>ボーナス</th>
-          <th>年間貯蓄</th><th>NISA積立</th><th>NISA評価</th><th>NISA元本</th><th>ローン残高</th>
+          <th>年間貯蓄</th><th>NISA積立</th><th id="thNisaV">NISA評価</th><th>NISA元本</th><th>ローン残高</th>
           <th>現預金</th><th>総資産</th><th class="l">イベント費用（備考）</th>
         </tr></thead><tbody id="tbody"></tbody></table>
       </div>
@@ -1417,7 +1520,7 @@
         <div class="tblfull-zoom" id="tblFullZoom"><span class="tz-ic">−</span><input type="range" id="tblFullZoomRange" min="0" max="100" value="0" aria-label="拡大率"><span class="tz-ic">＋</span></div>
       </div>
       <p class="footnote" style="margin-top:10px">
-        ※ 金額はすべて<b>万円</b>。<b>給与の入力は額面</b>（税・社会保険料を引く前）で、手取りは<b>実額計算</b>です（社会保険は標準報酬月額の等級表と標準賞与額の上限を適用し、所得税は給与所得控除→各種所得控除→超過累進税率＋復興特別所得税2.1%、住民税は所得割10%＋均等割5,000円に調整控除・非課税限度額を反映）。ただし<b>再雇用の年収は手取り</b>、<b>退職金は額面</b>での入力です。年次明細の「額面年収」は額面、「月手取り」以降の収支・資産はすべて手取りベースで表示しています。配偶者・扶養控除、iDeCoの小規模企業共済等掛金控除、退職所得の分離課税（退職所得控除→1/2→累進税率＋住民税10%）も法定額で計算します。健康保険料率は協会けんぽの都道府県別料率（令和8年度）を使い、「基本」欄の都道府県で切り替わります。制度は将来変わりうるため、令和8年分（2026年）の税制・料率を将来も据え置いて試算しています（厚生年金の標準報酬月額上限の段階引上げは反映済み）。死亡を見込むと、その年から収入が止まり、世帯人数に応じて生活費が下がり、<b>遺族基礎年金（基本額84.73万＋子の加算）・遺族厚生年金（報酬比例の3/4・300月みなし）・中高齢寡婦加算63.55万</b>（いずれも非課税）と、埋葬料・葬祭費5万、死亡一時金、死亡保険金、葬儀費用を反映します。団信に加入している場合は本人の死亡で住宅ローンの残債がなくなります。<b>遺産の相続</b>を入力すると、基礎控除（3,000万円＋600万円×法定相続人の数）を超えた部分について、法定相続分であん分した超過累進税率（10〜55%）で相続税の総額を求め、取得割合に応じた税額を相続年に現金納付として計上します（配偶者として相続する場合は「配偶者の税額軽減」で法定相続分または1億6,000万円まで非課税）。<b>相続財産は所得税・住民税の課税対象外</b>のため、翌年の住民税・社会保険料・配偶者控除の判定には影響しません（小規模宅地等の特例や生前贈与加算は未考慮）。2028年4月施行の遺族厚生年金の見直し（子のない60歳未満の配偶者は原則5年の有期給付・約1.3倍）は、女性の段階的な対象年齢引上げを「死亡時40歳未満の妻」で近似しています。学費は授業料無償化を反映し、公立小中高は授業料0で給食・教材・制服等の実費のみ（私立高校は就学支援金で授業料をほぼ相殺した実費目安、大学はMEXT等の平均）。多子世帯の大学無償化として、扶養中の子が3人以上いる間は第3子以降（扶養中）の大学授業料相当を免除（仕送りは対象外）。兄姉が独立年齢に達して扶養数が3人未満になると適用は外れます。塾・習い事は任意で別途加算。保険・固定資産税は自動概算です。生活費は「現在の世帯人数・月額」を基準に等価尺度（本人1.0／配偶者0.5／子0.3・14歳以上0.5）で世帯人数に応じて自動算出（家賃・教育・保険・旅行は別項目）。総資産は現預金＋教育積立（別口座）＋NISA評価額＋確定拠出年金（DCは「枠内一時金」をオンにすると受給時に退職所得控除の枠まで非課税で受取り超過分は運用継続、退職金との控除枠重複は10年／19年ルールを簡易調整した概算。DC残りは将来課税のため実効税率を引いた税引後で計上）。教育費を別口座で積立をオンにすると、毎年「教育積立費」を現預金から別口座へ振替（＝現預金の支出として計上）し、学費はその別口座から支払います（不足分のみ現預金から）。別口座は安全資産（利回りなし）として扱うため、その分をNISA等で運用する場合に比べ最終資産はやや低めに出ます。NISAは引き出しても運用益が非課税。NISA積立は「その年が黒字」かつ「生活防衛費を超える現預金がある」場合のみ行い、赤字の年や取り崩す年は入金しません（入金と取り崩しの往復を回避）。なお、挙式・新生活の特別費（結婚年）と住宅購入諸費用（物件価格に対する率で購入年に一括）は、いずれも現金支出として資産推移に反映しています。月住宅費は、購入前は家賃、購入後はローンの月々返済（元利）＋固定資産税・管理費の月割で、ローン完済後は固定資産税・管理費のみになります（頭金・諸費用・修繕はイベント費用の列に別途計上）。<br><br><b>■ 初期値の根拠</b>（すべて公的統計の最新値・2026年7月時点。ご自身の数字に置き換えてお使いください）<br>
+        ※ 金額はすべて<b>万円</b>。<b>給与の入力は額面</b>（税・社会保険料を引く前）で、手取りは<b>実額計算</b>です（社会保険は標準報酬月額の等級表と標準賞与額の上限を適用し、所得税は給与所得控除→各種所得控除→超過累進税率＋復興特別所得税2.1%、住民税は所得割10%＋均等割5,000円に調整控除・非課税限度額を反映）。ただし<b>再雇用の年収は手取り</b>、<b>退職金は額面</b>での入力です。年次明細の「額面年収」は額面、「月手取り」以降の収支・資産はすべて手取りベースで表示しています。配偶者・扶養控除、iDeCoの小規模企業共済等掛金控除、退職所得の分離課税（退職所得控除→1/2→累進税率＋住民税10%）も法定額で計算します。健康保険料率は協会けんぽの都道府県別料率（令和8年度）を使い、「基本」欄の都道府県で切り替わります。制度は将来変わりうるため、令和8年分（2026年）の税制・料率を将来も据え置いて試算しています（厚生年金の標準報酬月額上限の段階引上げは反映済み）。死亡を見込むと、その年から収入が止まり、世帯人数に応じて生活費が下がり、<b>遺族基礎年金（基本額84.73万＋子の加算）・遺族厚生年金（報酬比例の3/4・300月みなし）・中高齢寡婦加算63.55万</b>（いずれも非課税）と、埋葬料・葬祭費5万、死亡一時金、死亡保険金、葬儀費用を反映します。団信に加入している場合は本人の死亡で住宅ローンの残債がなくなります。<b>遺産の相続</b>を入力すると、基礎控除（3,000万円＋600万円×法定相続人の数）を超えた部分について、法定相続分であん分した超過累進税率（10〜55%）で相続税の総額を求め、取得割合に応じた税額を相続年に現金納付として計上します（配偶者として相続する場合は「配偶者の税額軽減」で法定相続分または1億6,000万円まで非課税）。<b>相続財産は所得税・住民税の課税対象外</b>のため、翌年の住民税・社会保険料・配偶者控除の判定には影響しません（小規模宅地等の特例や生前贈与加算は未考慮）。2028年4月施行の遺族厚生年金の見直し（子のない60歳未満の配偶者は原則5年の有期給付・約1.3倍）は、女性の段階的な対象年齢引上げを「死亡時40歳未満の妻」で近似しています。学費は授業料無償化を反映し、公立小中高は授業料0で給食・教材・制服等の実費のみ（私立高校は就学支援金で授業料をほぼ相殺した実費目安、大学はMEXT等の平均）。多子世帯の大学無償化として、扶養中の子が3人以上いる間は第3子以降（扶養中）の大学授業料相当を免除（仕送りは対象外）。兄姉が独立年齢に達して扶養数が3人未満になると適用は外れます。塾・習い事は任意で別途加算。保険・固定資産税は自動概算です。生活費は「現在の世帯人数・月額」を基準に等価尺度（本人1.0／配偶者0.5／子0.3・14歳以上0.5）で世帯人数に応じて自動算出（家賃・教育・保険・旅行は別項目）。総資産は現預金＋教育積立（別口座）＋NISA評価額＋確定拠出年金（DCは「枠内一時金」をオンにすると受給時に退職所得控除の枠まで非課税で受取り超過分は運用継続、退職金との控除枠重複は10年／19年ルールを簡易調整した概算。DC残りは将来課税のため実効税率を引いた税引後で計上）。教育費を別口座で積立をオンにすると、毎年「教育積立費」を現預金から別口座へ振替（＝現預金の支出として計上）し、学費はその別口座から支払います（不足分のみ現預金から）。別口座は安全資産（利回りなし）として扱うため、その分をNISA等で運用する場合に比べ最終資産はやや低めに出ます。<b>資産比率の変更</b>を設定すると、指定年齢以降は<b>総資産（現預金＋運用資産）に対する目標比率</b>にもとづいて試算します。既定では<b>保有資産は売却せず</b>、以後の新規投資の配分を変えて段階的に目標へ近づけます（各変更で「一括で入れ替える」を選ぶと、その年にまとめて売買します）。運用資産の利回りは、実際の保有比率（投資信託・ゴールド・債券・不動産）の加重平均で計算し、現預金は値動きのない安全資産として普通預金の金利のみを見込みます。不動産は配分額が最低購入価格に満たない年は購入せず（ローンは組まない前提）、その分は投資信託に回します。<b>現物不動産はNISAの対象外</b>のため、特定口座の残高の範囲内でのみ保有します。NISAは<b>年間投資枠（1人360万円）・生涯投資枠（1人1,800万円）</b>を守り、売却した簿価分の生涯枠は<b>翌年</b>に復活します。家賃収入は表面利回り×(1−空室率)×(1−経費率)で求め、不動産所得として所得税・住民税の概算限界税率を差し引いた額を現預金に加算します。NISAは引き出しても運用益が非課税。特定口座（NISA枠超過分）を使う設定では、売却時に含み益へ20.315%を課税し、資産は税引後評価額で表示します（取り崩しは特定口座→NISAの順）。「指定年齢の詳細」の資産内訳の円グラフは、その年の実際の保有比率（投資信託・ゴールド・債券・不動産）で表示し、口座別（NISA・特定口座）の内訳は折りたたみの詳細に記載します。資産比率の変更は総資産に対する目標比率で、既存資産は売却せず、以後の投資配分によって段階的に近づけます。運用資産を取り崩した年は、その売却額（特定口座は税引後）を収支の「収入」に含めて表示します。各変更で「一括で入れ替える」を選ぶと、その年からまとめて売買して目標比率を目指します（特定口座の売却益は20.315%課税）。NISA内の入れ替えも年間投資枠を消費するため、1年で完了せず数年かかることがあります。NISAは売却しても<b>その年は枠が戻らず、売却した簿価分の生涯投資枠が翌年に復活</b>するため、買い直しは翌年以降・年間枠（1人360万円）の範囲で順次行う前提で試算します。NISA積立は「その年が黒字」かつ「生活防衛費を超える現預金がある」場合のみ行い、赤字の年や取り崩す年は入金しません（入金と取り崩しの往復を回避）。なお、挙式・新生活の特別費（結婚年）と住宅購入諸費用（物件価格に対する率で購入年に一括）は、いずれも現金支出として資産推移に反映しています。月住宅費は、購入前は家賃、購入後はローンの月々返済（元利）＋固定資産税・管理費の月割で、ローン完済後は固定資産税・管理費のみになります（頭金・諸費用・修繕はイベント費用の列に別途計上）。<br><br><b>■ 初期値の根拠</b>（すべて公的統計の最新値・2026年7月時点。ご自身の数字に置き換えてお使いください）<br>
 ・<b>年齢設定</b>：本人24歳（単身男性）。結婚31歳＝男性の平均初婚年齢31.1歳（厚労省「令和6年人口動態統計」）。パートナーは同い年。<br>
 ・<b>子ども</b>：2人（夫婦の完結出生児数1.9人）。第1子は本人33歳＝結婚から平均結婚期間1.9年後、第2子はその2.1年後の35歳（第1子・第2子出生時の母の平均年齢差31.0歳→33.1歳による）。<br>
 ・<b>給与</b>：厚労省「令和7年賃金構造基本統計調査」の男性・所定内給与額。20〜24歳24.6万円/月を基本給21.5万＋諸手当3.0万に分解し、55〜59歳のピーク44.6万円/月に達するよう昇給0.57万円/年・基本給上限41.5万円を設定。<br>
@@ -1481,7 +1584,7 @@ function eduTotalPerChild(P){ let t=0; for(let a=3;a<=21;a++) t+=eduAnnual(a,P);
 function insurance(age){ if(age<30)return 8; if(age<40)return 14; if(age<50)return 22; if(age<60)return 28; if(age<70)return 22; return 14; }
 /* 公的年金（令和7年度基準・概算）: 老齢基礎満額83.17万/年、報酬比例乗率5.481/1000（2003年4月〜）、標準報酬の年間上限概算1230万 */
 const CURRENT_YEAR=new Date().getFullYear();
-const APP_VERSION='0.0.28';   /* 更新するたびに末尾を増やす */
+const APP_VERSION='0.0.45';   /* 更新するたびに末尾を増やす */
 const MAX_AGE=120;  /* 生活資金が尽きなかった場合の試算上限 */
 const PENSION_FULL=83.17, PENSION_RATE=5.481/1000, PENSION_CAP=1230, PENSION_NET=0.90;
 /* マクロ経済スライドの調整期間（2024年財政検証・過去30年投影ケース）
@@ -1558,6 +1661,36 @@ function inheritanceTax(total,heirs,share,isSpouse){
   }
   selfTax=Math.max(0,selfTax);
   return {taxable, totalTax, selfTax, selfGross, selfNet:selfGross-selfTax, deduction};
+}
+
+/* ============ 贈与税 ============
+   ・暦年課税：年110万円の基礎控除。超過分に超過累進税率。
+     直系尊属（父母・祖父母）から18歳以上の子・孫への贈与は「特例贈与財産」として税率が緩和される。
+   ・相続時精算課税：年110万円の基礎控除（2024年分から）＋特別控除2,500万円（累計）。
+     超過分は一律20%。特別控除を使い切るまでは課税されない。 */
+const GIFT_SPECIAL=[[200,.10,0],[400,.15,10],[600,.20,30],[1000,.30,90],[1500,.40,190],[3000,.45,265],[4500,.50,415],[Infinity,.55,640]];
+const GIFT_GENERAL=[[200,.10,0],[300,.15,10],[400,.20,25],[600,.30,65],[1000,.40,125],[1500,.45,175],[3000,.50,250],[Infinity,.55,400]];
+/**
+ * 贈与税の概算（1年分）
+ * @param amount    その年に受け取る贈与額（万円）
+ * @param mode      'reki'＝暦年課税 / 'seisan'＝相続時精算課税
+ * @param special   直系尊属から18歳以上への贈与（特例贈与財産）か
+ * @param usedSpecial 相続時精算課税の特別控除の使用済み額（万円・累計）
+ * @returns {tax, usedSpecial, taxable}
+ */
+function giftTax(amount, mode, special, usedSpecial){
+  amount=Math.max(0,amount||0); usedSpecial=Math.max(0,usedSpecial||0);
+  if(amount<=0) return {tax:0, usedSpecial, taxable:0};
+  const taxable=Math.max(0, amount-110);          /* 基礎控除110万円は両方式に共通 */
+  if(taxable<=0) return {tax:0, usedSpecial, taxable:0};
+  if(mode==='seisan'){
+    const room=Math.max(0, 2500-usedSpecial);     /* 特別控除2,500万円（累計） */
+    const use=Math.min(room, taxable);
+    return {tax:Math.max(0,(taxable-use))*0.20, usedSpecial:usedSpecial+use, taxable};
+  }
+  const B=special?GIFT_SPECIAL:GIFT_GENERAL;
+  for(const [cap,rate,ded] of B){ if(taxable<=cap) return {tax:Math.max(0,taxable*rate-ded), usedSpecial, taxable}; }
+  return {tax:0, usedSpecial, taxable};
 }
 
 /* 死亡一時金（国民年金第1号・保険料納付月数に応じた額。遺族基礎年金を受けられない場合） */
@@ -1683,7 +1816,11 @@ const KOKUHO_CAP           = 106;   /* 国民健康保険の賦課限度額（�
    本ツールは労働時間を入力しないため、撤廃後も106万円を上限の目安として使う。
    （時給1,000〜1,100円なら年収106万円はおおむね週20時間に相当するため、撤廃後の『週20時間』基準の近似になる。
      週20時間未満で働く場合は被扶養者の収入基準130万円まで第3号でいられるが、本ツールは安全側に106万円で判定する。） */
-function kabeShakai(year){ return 106; }
+function kabeShakai(year, mode){
+  /* mode='h130' … 週20時間未満などで勤務先の社会保険に加入しない働き方。被扶養者の収入基準130万円が壁になる。
+     mode='h106'（既定）… 短時間労働者として適用対象になる働き方。106万円が壁。 */
+  return (mode==='h130')?130:106;
+}
 /* こどもNISA（令和8年度税制改正大綱で創設。2027年1月開始予定）
    ・対象：0〜17歳の未成年名義／対象商品はつみたて投資枠と同様の投資信託
    ・年間投資枠60万円（月5万円）／非課税保有限度額600万円（簿価・元本ベース）
@@ -1783,6 +1920,15 @@ function incomeTaxOn(taxable){
   for(const b of B){ if(taxable<=b[0]) return Math.max(0,taxable*b[1]-b[2])*1.021; }
   return 0;
 }
+/* 総合課税の限界税率（所得税＋復興特別所得税2.1%＋住民税10%）。
+   ★判定は「給与収入」ではなく【課税所得】で行う。給与収入で判定すると、給与所得控除・社会保険料控除・
+     基礎控除を引く前の金額で税率区分を決めることになり、限界税率を大きく過大評価してしまうため。 */
+function marginalRateOn(taxable){
+  taxable=Math.max(0,taxable||0);
+  const B=[[195,.05],[330,.10],[695,.20],[900,.23],[1800,.33],[4000,.40],[Infinity,.45]];
+  for(const b of B){ if(taxable<=b[0]) return b[1]*1.021+0.10; }
+  return 0.45*1.021+0.10;
+}
 /* 住民税（所得割10%＋均等割0.5万円）。調整控除・非課税限度額を反映 */
 function residentTaxOn(shotoku, deduction, humanDiff, famCount){
   const n=1+(famCount||0);
@@ -1815,7 +1961,7 @@ function netIncome(gross, age, opt){
   const bonus=(opt.bonus!=null)?Math.min(opt.bonus,gross):0;
   const monthly=(opt.monthly!=null)?opt.monthly:(gross-bonus)/12;
   /* 年収の壁：配偶者の扶養に入れる水準なら社会保険料の本人負担は発生しない */
-  const dependent=!!opt.dependentEligible && gross>0 && gross<kabeShakai(year);
+  const dependent=!!opt.dependentEligible && gross>0 && gross<kabeShakai(year, opt.kabeMode);
   const social=dependent?0:socialInsurance(monthly,bonus,age,opt);
   /* 給与所得＋給与以外の所得（副業・不動産は給与所得控除の対象外。総合課税で合算） */
   const shotoku=Math.max(0, gross-kyuyoDeduction(gross,year))+otherInc;
@@ -1938,6 +2084,29 @@ function simulate(P){
   const kidFunds=(P.children||[]).map(()=>({v:0,p:0,at22:null}));
   /* 借金の残債は年をまたいで持ち越すので、シミュレーションの外側で持つ */
   const debtState=(P.debts||[]).map(d=>({...d, bal:Math.max(0,d.bal||0)})); let cash=P.initCash, nisaP=P.initNisaP, nisaV=(P.initNisaV>0?P.initNisaV:P.initNisaP), dcValue=0;
+  /* 特定口座（課税口座）：NISAの生涯投資枠を超えた分の投資先。評価額と取得原価を分けて持ち、
+     売却（取り崩し）時に含み益へ課税する（譲渡益課税 20.315%）。 */
+  let taxV=0, taxP=0;
+  /* 運用資産の実際の中身（保有比率）。既定は全額インデックス。新規投資のたびに目標配分へ少しずつ寄る。 */
+  let mix={index:1,gold:0,bond:0,real:0};
+  /* 現物不動産の保有状態。物件は1件単位でしか売買できないため件数で管理する。
+     realBasis＝取得費（取得価額＋取得諸費用−減価償却累計）、realBldgCost＝建物部分の取得価額。 */
+  let realUnits=0, realBasis=0, realBldgCost=0, realDeprCum=0, realBuyYear=null;
+  /* 1件あたりの物件価格。★モンテカルロでは値上がり率にブレが乗るため、想定値ではなく
+     その年に実際に適用された不動産の利回りで改定していく（taxV に含まれる不動産の時価とずれないようにするため） */
+  let lotPrice=Math.max(0,((P.alcReal&&P.alcReal.min)||0));
+  /* NISAの売却で空く生涯投資枠（簿価ベース）。制度上、復活するのは【翌年】。
+     ★nisaP は「いま保有している分の簿価」とし、売却のたびに比例して減らす。
+       売却した簿価は nisaLocked へ移し、その年のあいだは「まだ枠が戻っていない」ものとして
+       生涯枠の判定に含める。翌年の初めに nisaLocked を0に戻すことで枠が復活する。
+       （nisaP を据え置いたまま売却額を積み上げる方式だと、同じ年に2回売却したときに
+         2回目の簿価が過大に計上され、生涯枠が余分に復活してしまうため） */
+  let nisaLocked=0;
+  const nisaBookUsed=()=>nisaP+nisaLocked;   /* 生涯投資枠を消費している簿価の合計 */
+  /* NISAを売却する共通処理（売却額 d は時価）。簿価を比例控除し、枠の復活は翌年に持ち越す */
+  const sellNisa=(d)=>{ if(!(d>0)||nisaV<=0) return 0;
+    const sell=Math.min(nisaV,d), book=nisaP*(sell/nisaV);
+    nisaP-=book; nisaLocked+=book; nisaV-=sell; return sell; };
   const eduTotalEach=eduTotalPerChild(P); const eduMonthlyEach=eduTotalEach/(EDU_SAVE_END*12); const totalEduAll=eduTotalEach*P.children.length; let eduFund=0, eduPaid=0, eduAccount=0; let lastCarPrice=0;
   /* 報酬比例部分の累積（標準報酬の年額の合計）。
      シミュレーションは現在年齢から始まるため、それ以前の厚生年金加入実績を初期値として加算する。
@@ -1945,8 +2114,11 @@ function simulate(P){
   let pcSelf=(P.pensionType!=='kokumin')?Math.max(0,Math.min(P.pastKoseiIncome||0,PENSION_CAP))*Math.max(0,P.pastKoseiYears||0):0,
       pcSpouse=Math.max(0,Math.min(P.pastKoseiIncomeP||0,PENSION_CAP))*Math.max(0,P.pastKoseiYearsP||0),
       pensionCalc=null, shortfallCum=0;
+  let giftSpecialUsed=0;   /* 相続時精算課税の特別控除（2,500万円）の使用済み額 */
   const nY=Math.max(1,MAX_AGE-P.currentAge+1);
   for(let i=0;i<nY;i++){
+    /* 前年に売却したNISAの簿価分は、この年の初めに生涯投資枠が復活する */
+    nisaLocked=0;
     const age=P.currentAge+i, pAge=P.partnerCurrentAge+i;
     /* 結婚の月単位対応：結婚が発生する行だけ在婚期間を按分（0〜1）。以降は1、以前は0 */
     let marriedFrac=Math.max(0,Math.min(1,(P.currentAgeFrac+i+1)-P.marriageAgeFrac));
@@ -2005,6 +2177,8 @@ function simulate(P){
     let sideInc=0;   /* 副業・不動産などの所得（額面。必要経費を引いたあと・税引き前） */
     if(P.hasSideIncome && age>=P.sideFrom && age<=P.sideTo && !selfDead) sideInc=P.sideIncome*Math.pow(1+(P.sideGrowth||0), Math.max(0,age-P.sideFrom));
     let net, pensionNom=null, taxSocial=0, taxIncome=0, taxResident=0;
+    /* 家賃収入（不動産所得）の限界税率を判定するための、本人ぶんの合計所得・社会保険料 */
+    let selfShotoku=null, selfSocial=0;
     if(age<P.selfRetire){
       /* 扶養控除の対象となる子の年齢（年少扶養は控除なし。非課税限度額には全員を含める） */
       const depAges=childAges.filter(a=>a!=null&&a>=16&&a<P.childIndependAge);
@@ -2014,7 +2188,7 @@ function simulate(P){
       const koseiSelf=(P.pensionType!=='kokumin');
       /* 扶養控除・配偶者控除は収入の多い側で適用する（節税効果が大きいため） */
       const selfIsEarner=(selfGross>=pGross);
-      const baseOpt={pref:P.pref, year:taxYear};
+      const baseOpt={pref:P.pref, year:taxYear, kabeMode:P.kabeMode};
       const selfOpt=Object.assign({}, baseOpt, {monthly:selfMonthly, bonus:selfBonus, kosei:koseiSelf, otherDeduction:idecoDed, otherIncome:sideInc,
         dependentEligible:(married && !selfIsEarner),
         depAges:(selfIsEarner)?depAges:[], famCount:(selfIsEarner?famKidCount:0)+((married&&selfIsEarner)?1:0),
@@ -2025,6 +2199,7 @@ function simulate(P){
       const rSelf=netIncome(selfGross, age, selfOpt);
       const rPart=married?netIncome(pGross, pAge, partOpt):{net:0,social:0,income:0,resident:0};
       taxSocial=rSelf.social+rPart.social; taxIncome=rSelf.income+rPart.income; taxResident=rSelf.resident+rPart.resident;
+      selfShotoku=rSelf.shotoku; selfSocial=rSelf.social;
       net = rSelf.net + rPart.net + selfLeaveNet + pLeaveNet;
     }
     else {
@@ -2163,6 +2338,14 @@ function simulate(P){
       }
       if(P.hasPartnerDeath && P.marriageRow>=0 && age===P.partnerDeathAge) addDeath('パートナー', P.lifeInsPartner);
     }
+    /* ---- 生前贈与（贈与税は分離。所得税・住民税・社会保険・扶養判定には影響しない） ---- */
+    let giftGross=0, giftTaxPaid=0, giftNet=0;
+    if(P.hasGift && (P.giftAnnual||0)>0 && age>=P.giftFrom && age<=P.giftTo){
+      giftGross=P.giftAnnual;
+      const gt=giftTax(giftGross, P.giftMode, P.giftSpecial, giftSpecialUsed);
+      giftTaxPaid=gt.tax; giftSpecialUsed=gt.usedSpecial; giftNet=giftGross-giftTaxPaid;
+      oneoffLbl.push('生前贈与 '+manU(giftGross)+(giftTaxPaid>0?('（贈与税 '+manU(giftTaxPaid)+'）'):'（非課税）'));
+    }
     /* ---- 遺産の相続（相続税は分離。所得税・住民税・社会保険・扶養判定には影響しない） ---- */
     let inheritGross=0, inheritTax=0, inheritNet=0, inheritLbl='';
     if(P.hasInherit && age===P.inheritAge && (P.inheritTotal||0)>0){
@@ -2174,15 +2357,267 @@ function simulate(P){
     net+=survivorPen;
     /* 副業・不動産の所得は netIncome 内で給与と合算課税済みのため、ここでは二重計上しない */
     const housingSubsidyNet=(housingSubsidy>0 && P.housingSubsidyTaxable===false)?housingSubsidy:0;   /* 非課税手当は手取りに直接加算 */
-    const incomeCash=net+allowance+grant+credit+ded+dcDed+deathBenefit+housingSubsidyNet+inheritNet;
+    const incomeCash=net+allowance+grant+credit+ded+dcDed+deathBenefit+housingSubsidyNet+inheritNet+giftNet;
     // 表示用：世帯の支出・純貯蓄（教育費も支出に含む）
     const expense=living+housing+edu+oneoff;
     const saving=incomeCash-expense-dcContrib;
     // 現預金の増減：教育は別途処理するため、まず教育以外で主口座を回す
     cash+=incomeCash-(living+housing+oneoff)-dcContrib;
-    const _yr=(P.yieldSeq&&P.yieldSeq[i]!=null)?P.yieldSeq[i]:P.nisaYield;
-    nisaV=nisaV*(1+_yr);
-    dcValue=dcValue*(1+_yr)+dcContrib+dcCorp;
+    let _yr=(P.yieldSeq&&P.yieldSeq[i]!=null)?P.yieldSeq[i]:P.nisaYield;
+    let _yrNisa=_yr;   /* NISA・DC・こどもNISA に適用する利回り（現物不動産を含まない） */
+    let _yrTax=_yr;    /* 特定口座に適用する利回り（現物不動産を含む） */
+    let _yrAll=_yr;    /* 現預金まで含めた総資産ベースの利回り（モンテカルロの実現利回り用） */
+    /* ---- 資産比率の変更 ----
+       配分は「総資産（現預金＋運用資産）」に対する目標比率。
+       ★既存の資産は売却しない（利確しない）。指定年齢以降の「新しい投資・積立の配分」だけを変えて、
+         時間をかけて目標比率へ近づけていく。1年で入れ替えるのは非現実的なため。
+       運用資産の中身は mix（投資信託／ゴールド／債券／不動産の実際の保有比率）で追跡する。 */
+    let drawNisa=0, drawDc=0, dcTaxPaid=0, drawTaxable=0, taxPaidCg=0;
+    let nisaUsedThisYear=0;   /* その年にNISAへ投じた額（年間投資枠 1人360万円 の管理用） */
+    let allocNow=null, realIncomeNet=0, realHeld=0, rebalance=0, mixTarget=null, realShortfall=0;
+    let realDepr=0;   /* その年の減価償却費（不動産所得から控除する） */
+    realHeld=Math.min(realUnits*lotPrice, Math.max(0,taxV));   /* 年初時点の不動産の時価 */
+    if(P.allocs && P.allocs.length){
+      for(const a of P.allocs){ if(age>=a.age) allocNow=a; }
+      if(allocNow){
+        const raw=ALLOC_KEYS.map(([k])=>Math.max(0,+allocNow[k]||0));
+        const tot=raw.reduce((x,y)=>x+y,0);
+        if(tot>0){
+          const wAll={}; ALLOC_KEYS.forEach(([k],idx)=>{ wAll[k]=raw[idx]/tot; });   /* 総資産に対する目標比率 */
+          const R=P.alcReal||{}, Y=P.alcYield||{};
+          const KS=['index','gold','bond','real'];
+          const rate=P.alcTaxRate||0;
+          const _acc=1+((P.hasPartnerNisa&&married)?1:0);   /* NISA口座の数（本人＋パートナー） */
+          /* --- 運用資産の中の目標比率（現預金を除いて100%に正規化） --- */
+          const wInvSum=wAll.index+wAll.gold+wAll.bond+wAll.real;
+          const wT0=(wInvSum>0)?{index:wAll.index/wInvSum, gold:wAll.gold/wInvSum, bond:wAll.bond/wInvSum, real:wAll.real/wInvSum}
+                               :{index:1,gold:0,bond:0,real:0};
+          /* ★「到達できる目標」に補正する。
+             現物不動産はNISAの対象外なので特定口座の残高が上限で、配分額が最低購入価格に満たない年は買えない。
+             補正しないと永久に届かない目標を追い続け、リバランスが止まらなくなるため、
+             買えないぶんは目標側で投資信託へ振り替える（画面の説明どおりの挙動）。 */
+          const invNowT=Math.max(0,nisaV+taxV);
+          const lotT=lotPrice;   /* その年の1件あたりの価格 */
+          const realRoom=(P.alcRealEnable!==false)?Math.max(0,taxV):0;
+          const rawAmtT=Math.min(invNowT*wT0.real, realRoom);
+          /* 物件は1件単位。端数では買えないので、目標も件数に丸める */
+          let unitsT=(lotT>0)?Math.floor(rawAmtT/lotT+1e-9):0;
+          /* いったん保有した物件は、目標が1件ぶんをわずかに下回った程度では手放さない
+             （売買のたびに譲渡費用と譲渡所得税がかかるため、毎年の入替えは非現実的） */
+          if(realUnits>0 && unitsT===realUnits-1 && lotT>0 && rawAmtT>=(realUnits-0.15)*lotT) unitsT=realUnits;
+          const realAmtT=unitsT*lotT;
+          const wRealT=(invNowT>0)?realAmtT/invNowT:0;
+          const wT={index:wT0.index+(wT0.real-wRealT), gold:wT0.gold, bond:wT0.bond, real:wRealT};
+          realShortfall=Math.max(0,wT0.real-wRealT);   /* 買えなかった不動産の比率（注意書き用） */
+          mixTarget=wT;
+          /* ===== 一括リバランス（「一括で入れ替える」にチェックがある場合） ===== */
+          /* 目標配分に届くまでは、NISAの年間投資枠の制約で1年では終わらないため翌年以降も継続する。 */
+          const gapPos=KS.reduce((s,k)=>s+Math.max(0,wT[k]-mix[k]),0);   /* 入れ替えが必要な割合 */
+          if(allocNow.lump && age>=allocNow.age){
+            const invNow0=Math.max(0,nisaV+taxV);
+            const totalAssets0=Math.max(0,cash)+invNow0;
+            const targetCash=totalAssets0*wAll.cash;
+            /* --- 現預金の比率調整 ---
+               毎年こまかく売買するのは税・手数料の面で非現実的なため、開始年をのぞいては
+               総資産の5%を超えてズレたときだけ動かす（バンドリバランス）。 */
+            if(age===allocNow.age || Math.abs(cash-targetCash)>totalAssets0*0.05){
+              if(cash<targetCash && invNow0>0){
+                /* 現金を増やす：特定口座を先に売却（含み益へ課税）、足りなければNISAを売却 */
+                let need=targetCash-cash;
+                const fundsV0=Math.max(0, taxV-realHeld);
+                if(fundsV0>0 && need>0){
+                  const gr=Math.max(0,(fundsV0-taxP))/fundsV0, npu=1-gr*rate;
+                  const sell=Math.min(fundsV0, npu>0?need/npu:fundsV0);
+                  const tax=sell*gr*rate;
+                  taxP-=taxP*(sell/fundsV0); taxV-=sell; cash+=sell-tax; taxPaidCg+=tax; rebalance+=sell; need-=(sell-tax);
+                }
+                if(nisaV>0 && need>0){
+                  const sold=sellNisa(need);   /* 簿価は比例控除し、生涯枠の復活は翌年 */
+                  cash+=sold; rebalance+=sold;
+                }
+              } else if(cash>targetCash){
+                /* 現金を減らす：生活防衛費は残し、NISAの空き枠（年間枠・生涯枠）の範囲で買い付け、
+                   超過分は特定口座へ。※この年に売却した分の枠はまだ復活していない点に注意。 */
+                let move=Math.min(cash-targetCash, Math.max(0,cash-emergency));
+                if(move>0){
+                  const lifeRoom=Math.max(0,P.nisaCap*_acc-nisaBookUsed());
+                  const yearRoom=Math.max(0,360*_acc-nisaUsedThisYear);   /* 年間投資枠（1人360万）の残り */
+                  const toNisa=Math.min(move, lifeRoom, yearRoom);
+                  if(toNisa>0){ cash-=toNisa; nisaV+=toNisa; nisaP+=toNisa; move-=toNisa; rebalance+=toNisa; nisaUsedThisYear+=toNisa; }
+                  if(move>0 && P.alcUseTaxable){ cash-=move; taxV+=move; taxP+=move; rebalance+=move; }
+                }
+              }
+            }
+            /* --- 運用資産の中身の入れ替え ---
+               ★消費する枠は「実際に入れ替えた金額」に比例させる（必要な入れ替えが1%でも年間枠を
+                 満額消費してしまうと、NISAへの新規積立が何年も止まってしまうため）。
+               ★特定口座での入れ替えは売却益に譲渡益課税がかかる。
+               ★NISA内の入れ替えは「売却 → 簿価ぶんの生涯枠は翌年復活 → 時価で買い直し」となるため、
+                 買い直し額（＝時価）ぶんの年間枠・生涯枠を消費する。含み益があるほど枠を余分に食う。 */
+            if(gapPos>0.005){
+              const invAll=Math.max(0,nisaV+taxV);
+              if(invAll>0){
+                const needMove=invAll*gapPos;   /* 入れ替えに必要な売買額 */
+                const fundsSw=Math.max(0, taxV-realHeld);   /* 入れ替えられるのは投資信託等だけ */
+                const moveTax=Math.min(fundsSw, needMove);
+                const annualRoom=Math.max(0,360*_acc-nisaUsedThisYear);
+                const lifeRoom=Math.max(0,P.nisaCap*_acc-nisaBookUsed());
+                const moveNisa=Math.min(Math.max(0,nisaV), Math.max(0,needMove-moveTax), annualRoom, lifeRoom);
+                const moved=moveTax+moveNisa;
+                if(moved>0){
+                  if(moveTax>0 && fundsSw>0){
+                    const gr=Math.max(0,(fundsSw-taxP))/fundsSw, tax=moveTax*gr*rate;
+                    taxP=taxP-taxP*(moveTax/fundsSw)+(moveTax-tax);   /* 売却分の簿価を外し、税引後の手取りで買い直す */
+                    taxV-=tax; taxPaidCg+=tax;
+                  }
+                  if(moveNisa>0){
+                    const sold=sellNisa(moveNisa);
+                    nisaV+=sold; nisaP+=sold; nisaUsedThisYear+=sold;   /* 同額を買い直す（時価ぶんの枠を消費） */
+                  }
+                  const f=Math.min(1, moved/needMove);   /* 必要な入れ替えのうち、この年に実施できた割合 */
+                  KS.forEach(k=>{ mix[k]=mix[k]+(wT[k]-mix[k])*f; });
+                  rebalance+=moved;
+                }
+              }
+            }
+          }
+          const w=mix;
+          const investable=Math.max(0,nisaV+taxV);
+          /* ★現物の不動産はNISAの対象外（NISAで買えるのは上場株式・投資信託等のみ）。
+             そのため不動産は特定口座（課税口座）の範囲内でしか保有できないものとし、
+             最低購入価格に満たない場合も購入しない（ローンは組まない前提）。 */
+          const wantReal=w.real;
+          /* ---- 現物不動産の売買（1件単位・諸費用あり） ----
+             ★物件は1件単位でしか売買できない。購入時は仲介手数料・登記費用・不動産取得税などの
+               取得諸費用が、売却時は仲介手数料などの譲渡費用がかかる。
+             ★買付の原資は特定口座の投資信託等を売って用意するため、その含み益にも課税される。 */
+          const canReal=(P.alcRealEnable!==false);
+          const acqR=Math.max(0,R.acq||0), sellR=Math.max(0,R.sell||0);
+          {
+            let want=0;
+            if(canReal && lotPrice>0){
+              /* ★件数は「目標比率」から決める（実際の保有比率から決めると、資産が増えても
+                 買い増しが起きず、税や費用で目減りするたびに売る一方になってしまうため） */
+              const aimAmt=Math.max(0, Math.min(investable*wT0.real, Math.max(0,taxV)));
+              want=Math.floor(aimAmt/lotPrice+1e-9);
+              /* 売買のたびに譲渡費用と譲渡所得税がかかるため、1件ぶんの1/4程度の上下では入れ替えない */
+              if(realUnits>0 && want===realUnits-1 && aimAmt>=(realUnits-0.25)*lotPrice) want=realUnits;
+              if(want>realUnits){
+                /* 買い増しは、不動産以外の特定口座残高（諸費用込み）でまかなえる範囲まで */
+                const fundsFree=Math.max(0, taxV-realHeld);
+                /* 原資は投資信託等を売って作るため、その譲渡益課税ぶんも余分に必要になる */
+                const gr0=(fundsFree>0)?Math.max(0,(fundsFree-taxP))/fundsFree:0;
+                const perUnit=lotPrice*(1+acqR)/Math.max(1e-9, 1-gr0*rate);
+                want=Math.min(want, realUnits+(perUnit>0?Math.floor(fundsFree/perUnit+1e-9):0));
+              }
+            }
+            if(want>realUnits && lotPrice>0){
+              const n=want-realUnits, price=n*lotPrice, fee=price*acqR;
+              const fundsB=Math.max(0, taxV-realHeld);
+              if(fundsB>0){
+                /* 買付原資として投資信託等を売った分の含み益に譲渡益課税 */
+                const used=Math.min(price+fee, fundsB);
+                const gr=Math.max(0,(fundsB-taxP))/fundsB, cgt=used*gr*rate;
+                taxP=Math.max(0, taxP-taxP*(used/fundsB));
+                taxV-=cgt; taxPaidCg+=cgt;
+              }
+              taxV=Math.max(0, taxV-fee);            /* 取得諸費用は物件価格に乗らず、資産から出ていく */
+              /* 端数処理で投資信託等の簿価が評価額を上回らないよう丸める（含み損として実現） */
+              taxP=Math.min(taxP, Math.max(0, taxV-want*lotPrice));
+              realBasis+=price+fee;                  /* 取得費には諸費用も含める */
+              realBldgCost+=(price+fee)*Math.max(0,Math.min(1,R.bldg||0));
+              if(realBuyYear==null) realBuyYear=i;
+              realUnits=want; rebalance+=price;
+            } else if(want<realUnits && lotPrice>0){
+              const n=realUnits-want, price=n*lotPrice;
+              const proceeds=price*(1-sellR);
+              const basis=(realUnits>0)?realBasis*(n/realUnits):0;
+              const gain=Math.max(0, proceeds-basis);
+              /* 譲渡所得税：所有5年超は長期20.315%、5年以下は短期39.63% */
+              const rr=(realBuyYear!=null && (i-realBuyYear)>5)?0.20315:0.3963;
+              const tax=gain*rr;
+              const net=Math.max(0, proceeds-tax);
+              taxV=Math.max(0, taxV-price+net);      /* 物件が抜け、手取りが特定口座へ戻る */
+              taxP+=net;                             /* 戻した資金はその時点の簿価になる */
+              taxPaidCg+=tax;
+              const fr=n/realUnits;
+              realBasis=Math.max(0, realBasis-basis);
+              realBldgCost=Math.max(0, realBldgCost*(1-fr));
+              realDeprCum=Math.max(0, realDeprCum*(1-fr));
+              realUnits=want; if(realUnits===0) realBuyYear=null;
+              rebalance+=price;
+            }
+            realHeld=Math.min(realUnits*lotPrice, Math.max(0,taxV));
+          }
+          /* 減価償却（定額法）。建物部分の取得価額を耐用年数で按分し、不動産所得から控除する。
+             取得費が減るぶん、将来の売却時の譲渡所得は増える。 */
+          if(realUnits>0 && (R.life||0)>0){
+            realDepr=Math.min(Math.max(0, realBldgCost-realDeprCum), realBldgCost/(R.life||1));
+            realDeprCum+=realDepr; realBasis=Math.max(0, realBasis-realDepr);
+          }
+          const wReal=(investable>0)?realHeld/investable:0;
+          /* ★買えなかった不動産ぶんは投資信託として保有しているものとして扱う。
+             円グラフ・資産内訳の表示と実際の保有を一致させるため、mix 自体を実態に合わせて書き換える
+             （書き換えないと、実在しない不動産が資産内訳に表示され続けてしまう）。 */
+          if(wantReal>wReal+1e-9){ mix.index+=(wantReal-wReal); mix.real=wReal; }
+          const wIdx=w.index;
+          /* 不動産の手取り利回り＝表面×(1−空室率)×(1−経費率)。家賃は総合課税なので税引後で現金計上 */
+          const netYieldReal=(R.gross||0)*(1-(R.vacancy||0))*(1-(R.cost||0));
+          realIncomeNet=realHeld*netYieldReal;
+          /* モンテカルロ時は、資産ごとに相関を持つブレ（assetShockSeq）を各資産の利回りに加える */
+          const sh=(P.assetShockSeq&&P.assetShockSeq[i])?P.assetShockSeq[i]:null;
+          const yIndexBase=(P.yieldSeq&&P.yieldSeq[i]!=null&&!sh)?P.yieldSeq[i]:(Y.index!=null?Y.index:P.nisaYield);
+          const yIndex=yIndexBase+(sh?sh.index:0);
+          const yGold=(Y.gold||0)+(sh?sh.gold:0);
+          const yBond=(Y.bond||0)+(sh?sh.bond:0);
+          const yReal=(R.appr||0)+(sh?sh.real:0);
+          _yr=wIdx*yIndex + w.gold*yGold + w.bond*yBond + wReal*yReal;   /* 運用資産だけの利回り */
+          /* ★口座ごとに利回りを分ける。現物不動産は特定口座にしか置けないため、
+             NISA・DC・こどもNISAには不動産以外（投資信託・ゴールド・債券）の利回りを適用する。
+             両者を評価額で加重すると全体は _yr に一致する。 */
+          const wNon=wIdx+w.gold+w.bond;
+          const yNon=(wNon>0)?(wIdx*yIndex+w.gold*yGold+w.bond*yBond)/wNon:0;
+          _yrNisa=yNon;
+          _yrTax=(taxV>0)?((Math.min(realHeld,taxV)*yReal+Math.max(0,taxV-Math.min(realHeld,taxV))*yNon)/taxV):yNon;
+          /* 家賃収入も、その年の空室状況（不動産のショック）でわずかに増減させる */
+          if(sh) realIncomeNet=realHeld*Math.max(0,netYieldReal*(1+sh.real*0.5));
+          /* ★1件あたりの物件価格を、その年に実際に適用された不動産の利回りで改定する
+             （taxV に含まれる不動産の時価と、件数×単価がずれないようにするため） */
+          lotPrice=Math.max(0, lotPrice*(1+yReal));
+          /* 現預金の利息（安全資産） */
+          if((Y.cash||0)>0) cash+=Math.max(0,cash)*(Y.cash||0);
+          /* ★モンテカルロの「実現利回り」用に、現預金まで含めた総資産ベースの利回りも記録する。
+             _yr は運用資産だけの利回りなので、現預金を厚くしてもブレが縮まないように見えてしまうため。 */
+          { const c0=Math.max(0,cash), t0=c0+investable;
+            _yrAll=(t0>0)?(_yr*investable+(Y.cash||0)*c0)/t0:_yr; }
+        }
+      }
+    }
+    /* NISAは現物不動産を持てないため不動産を除いた利回り、特定口座は不動産を含む利回りで運用する */
+    nisaV=nisaV*(1+_yrNisa);
+    taxV=taxV*(1+_yrTax);   /* 特定口座は課税を売却時に行う */
+    dcValue=dcValue*(1+_yrNisa)+dcContrib+dcCorp;   /* DC・iDeCoでも現物不動産は買えない */
+    /* 家賃収入（税引後）を現預金へ。不動産所得は総合課税のため、限界税率ぶんを差し引く。
+       ★税率区分の判定は【課税所得】で行う（給与収入で判定すると税率を大きく過大評価するため）。 */
+    let realIncomeAfterTax=0;
+    if(realIncomeNet>0){
+      /* 定年後は公的年金等控除（65歳以上・年金収入330万円未満なら110万円）を引いた雑所得で見る */
+      const _pGross=pensionNom?((pensionNom.selfBasic||0)+(pensionNom.selfKosei||0)):0;
+      const _shotoku=(selfShotoku!=null)?selfShotoku
+        :(Math.max(0,_pGross-110)+Math.max(0,sideInc||0));
+      const _taxable=Math.max(0, _shotoku-kisoDeductionIncome(_shotoku)-Math.max(0,selfSocial||0));
+      const mtr=marginalRateOn(_taxable);
+      /* 不動産所得＝家賃収入（空室・経費控除後）−減価償却費。
+         減価償却で赤字になる年は【損益通算】で給与などの税が戻るため、手取りが家賃を上回ることがある
+         （その分、売却時の取得費が減って譲渡所得は増える）。 */
+      const rentTaxable=realIncomeNet-Math.max(0,realDepr||0);
+      if(rentTaxable>=0){ realIncomeAfterTax=realIncomeNet-rentTaxable*mtr; }
+      else {
+        const refund=Math.min(-rentTaxable*mtr, Math.max(0,(taxIncome||0)+(taxResident||0)));
+        realIncomeAfterTax=realIncomeNet+refund;
+      }
+      cash+=realIncomeAfterTax;
+    }
     let retireNet=0;
     if(P.hasRetireBonus && age===P.selfRetire){ retireNet=retireBonusNet(P); cash+=retireNet; }
     let dcLumpFree=0;
@@ -2203,14 +2638,86 @@ function simulate(P){
     eduFund=eduAccount;                                           // 表示・アドバイス用：教育口座の残高
     // NISA積立：その年の黒字（saving>0）かつ生活防衛費を超える余剰のみ（教育の振替・支払い後の現預金で判定）。
     // 収支が赤字＝取り崩しが必要な年は積立しない。
-    let contrib=0;
+    let contrib=0, taxContrib=0;
     { const accounts=1+((P.hasPartnerNisa&&married)?1:0);   /* NISA口座の数（本人＋パートナー） */
-      const annualNisa=(P.nisaMonthly+((P.hasPartnerNisa&&married)?(P.pNisaMonthly||0):0))*12;
-      const room=Math.min(Math.max(0,P.nisaCap*accounts-nisaP),360*accounts);
+      let annualNisa=(P.nisaMonthly+((P.hasPartnerNisa&&married)?(P.pNisaMonthly||0):0))*12;
+      /* ★資産比率の目標がある年は、既存資産を売らずに「その年に投資へ回す額」で目標比率へ近づける。
+         　現預金が目標比率より少なければ投資を控えて現金を厚くし、多ければ多めに投資へ回す。 */
+      let alcTarget=null;
+      if(P.allocs&&P.allocs.length){ for(const a of P.allocs){ if(age>=a.age) alcTarget=a; } }
+      /* 「NISA積立」に入れた金額は、資産比率の変更を設定している間は
+         【毎月の投資に回せる余剰資金の総額】として扱い、目標比率に応じて各資産へ配分する。
+         （設定がないときは、これまでどおり全額を投資信託＝NISAへ積み立てる） */
+      if(alcTarget){
+        const rawT=ALLOC_KEYS.map(([k])=>Math.max(0,+alcTarget[k]||0));
+        const totT=rawT.reduce((x,y)=>x+y,0);
+        if(totT>0){
+          const wCash=rawT[ALLOC_KEYS.findIndex(([k])=>k==='cash')]/totT;
+          const totalAssets=Math.max(0,cash)+nisaV+taxV;
+          const targetCash=totalAssets*wCash;
+          /* 投資に回す総額のうち、目標の現預金比率ぶんは現金として残す（投資に回さない） */
+          annualNisa=annualNisa*Math.max(0,1-wCash);
+          if(cash>targetCash){
+            /* 現預金が目標より多い → 超過分を数年かけて投資へ移す（1年で一気に動かすと不自然なため、
+               超過分の1/5を上乗せする上限つき。生活防衛費は必ず残す） */
+            const extra=Math.min((cash-targetCash)*0.2, Math.max(0,cash-emergency));
+            annualNisa=Math.min(annualNisa+Math.max(0,extra), Math.max(0,cash-emergency));
+          }else if(targetCash>0){
+            /* 現預金が目標より少ない → 投資額をさらに絞って現金を厚くする（ただし完全には止めない） */
+            const gapRatio=Math.min(1,(targetCash-cash)/targetCash);
+            annualNisa=annualNisa*Math.max(0.3,1-gapRatio);
+          }
+        }
+      }
+      const room=Math.min(Math.max(0,P.nisaCap*accounts-nisaBookUsed()), Math.max(0,360*accounts-nisaUsedThisYear));
       /* 一度でも資金不足に陥った後は、生活費すらまかなえていないため新規投資は行わない */
-      const affordable=(shortfallCum>0)?0:Math.min(Math.max(0, cash-emergency), Math.max(0, saving));
-      contrib=Math.min(annualNisa, room, affordable);
-      if(contrib>0){ cash-=contrib; nisaV+=contrib; nisaP+=contrib; } }
+      /* 投資に回せる額：生活防衛費を超える現預金の範囲内。目標比率がある年は、その年の黒字に縛られず
+         現預金の超過分から回せる（ただし生活防衛費は必ず残す）。 */
+      const affordable=(shortfallCum>0)?0:(alcTarget
+        ? Math.max(0, cash-emergency)
+        : Math.min(Math.max(0, cash-emergency), Math.max(0, saving)));
+      /* その年に投資へ回す総額。NISAの枠内はNISAへ、枠を超えた分は（希望すれば）特定口座へ。
+         不動産はNISA対象外のため、不動産に配分する分は必ず特定口座で買う。 */
+      const investPool=Math.min(annualNisa, affordable);
+      let poolLeft=investPool;
+      /* 不動産ぶんは先に特定口座へ確保（NISAでは買えない） */
+      let realShare=0;
+      if(mixTarget && (mixTarget.real||0)>0 && P.alcUseTaxable) realShare=investPool*mixTarget.real;
+      const nisaWant=Math.max(0, poolLeft-realShare);
+      contrib=Math.min(nisaWant, room);
+      if(contrib>0){ cash-=contrib; nisaV+=contrib; nisaP+=contrib; nisaUsedThisYear+=contrib; poolLeft-=contrib; }
+      /* NISAの枠（年間枠・生涯枠）を使い切った分＋不動産ぶんは、希望すれば特定口座（課税）で投資する */
+      if(P.alcUseTaxable){
+        taxContrib=Math.max(0, poolLeft);
+        if(taxContrib>0){ cash-=taxContrib; taxV+=taxContrib; taxP+=taxContrib; poolLeft-=taxContrib; }
+      }
+      /* ★既存資産は売らず、その年の買い増しで保有比率を目標へ寄せる。
+         　買い付け先は「目標比率どおり」ではなく、【目標に対して不足している資産】から優先して埋める。
+         　（例：投信50%/現金50% → 投信30%/現金40%/金30% に変えた場合、金が0なので新規資金は
+         　　まず全額を金に投じるのが最短。足りない分だけ将来の売却を検討することになる） */
+      if(mixTarget){
+        const added=Math.max(0,contrib+taxContrib);   /* スイープ分は後段で別途反映 */
+        const invNow=Math.max(0,nisaV+taxV);
+        if(invNow>0 && added>0){
+          const prev=Math.max(0,invNow-added);
+          const KS=['index','gold','bond','real'];
+          const amt={}; KS.forEach(k=>{ amt[k]=prev*mix[k]; });        /* 買い増し前の各資産の金額 */
+          /* 各資産の不足額（目標金額 − 現在額）。プラスのものだけを埋める対象にする */
+          const short={}; let shortSum=0;
+          KS.forEach(k=>{ const t=invNow*mixTarget[k]-amt[k]; short[k]=Math.max(0,t); shortSum+=short[k]; });
+          if(shortSum>0){
+            /* 不足額に比例して新規資金を配分（不足が大きい資産ほど多く買う） */
+            const use=Math.min(added,shortSum);
+            KS.forEach(k=>{ amt[k]+=use*(short[k]/shortSum); });
+            /* 不足をすべて埋めてもなお余る分は、目標比率どおりに配分 */
+            const rest=added-use;
+            if(rest>0) KS.forEach(k=>{ amt[k]+=rest*mixTarget[k]; });
+          }else{
+            KS.forEach(k=>{ amt[k]+=added*mixTarget[k]; });
+          }
+          KS.forEach(k=>{ mix[k]=amt[k]/invNow; });
+        }
+      } }
     /* こどもNISA（2027年1月開始予定・非課税）。世帯の現預金から拠出し、
        0〜17歳のあいだ年60万円・累計600万円まで積み立てる。18歳以降は新規投資せず非課税のまま運用を続け、
        指定した年齢で子どもに渡す前提で金額を表示する（世帯の総資産には含めない）。 */
@@ -2218,7 +2725,7 @@ function simulate(P){
     const calYearNow=CURRENT_YEAR+i;
     (P.children||[]).forEach((c,ci)=>{
       const f=kidFunds[ci]; if(!f) return;
-      f.v=f.v*(1+_yr);
+      f.v=f.v*(1+_yrNisa);   /* こどもNISAでも現物不動産は買えない */
       const ca=age-c.birthAge;
       if(P.hasKidNisa && ca>=0 && ca<=KIDNISA_MAX_AGE && ca<P.kidNisaTo
          && calYearNow>=KIDNISA_START_YEAR && shortfallCum<=0){
@@ -2246,17 +2753,69 @@ function simulate(P){
     // スイープ：上限超過分をNISAへ（教育口座は別勘定なので主口座のみが対象）
     let sweep=0;
     if(P.sweepNisa && shortfallCum<=0){ const floor=Math.max(P.cashCap,emergency);
-      const sweepable=cash-floor;
+      let sweepable=cash-floor;
       const _acc=1+((P.hasPartnerNisa&&married)?1:0);
-      if(sweepable>0){ const annualRoom=Math.max(0,360*_acc-contrib), lifeRoom=Math.max(0,P.nisaCap*_acc-nisaP);
-        sweep=Math.min(sweepable,annualRoom,lifeRoom); if(sweep>0){ cash-=sweep; nisaV+=sweep; nisaP+=sweep; } } }
+      /* 資産比率の目標がある場合、スイープする資金も目標比率に合わせて配分する。
+         目標の現預金比率ぶんは現金として残し、不動産ぶんはNISA対象外なので特定口座で買う。 */
+      if(mixTarget && sweepable>0){
+        const rawS=ALLOC_KEYS.map(([k])=>Math.max(0,+allocNow[k]||0));
+        const totS=rawS.reduce((x,y)=>x+y,0);
+        const wCashS=totS>0?rawS[ALLOC_KEYS.findIndex(([k])=>k==='cash')]/totS:0;
+        const totalAssetsS=Math.max(0,cash)+nisaV+taxV;
+        const targetCashS=totalAssetsS*wCashS;
+        sweepable=Math.max(0, Math.min(sweepable, cash-Math.max(floor,targetCashS)));   /* 目標の現金は残す */
+      }
+      if(sweepable>0){ const annualRoom=Math.max(0,360*_acc-nisaUsedThisYear), lifeRoom=Math.max(0,P.nisaCap*_acc-nisaBookUsed());
+        /* 不動産に配分する分はNISAでは買えないため、特定口座へ回す */
+        const realPart=(mixTarget&&P.alcUseTaxable)?sweepable*(mixTarget.real||0):0;
+        sweep=Math.min(Math.max(0,sweepable-realPart),annualRoom,lifeRoom);
+        let swTax=0;
+        if(sweep>0){ cash-=sweep; nisaV+=sweep; nisaP+=sweep; nisaUsedThisYear+=sweep; }
+        if(P.alcUseTaxable){
+          swTax=Math.max(0, Math.min(sweepable-sweep, Math.max(0,cash-floor)));
+          if(swTax>0){ cash-=swTax; taxV+=swTax; taxP+=swTax; taxContrib+=swTax; }
+        }
+        const addedSw=sweep+swTax;
+        if(mixTarget && addedSw>0){ const invNow=Math.max(0,nisaV+taxV);
+          if(invNow>0){ const prev=Math.max(0,invNow-addedSw);
+            const KS=['index','gold','bond','real'];
+            const amt={}; KS.forEach(k=>{ amt[k]=prev*mix[k]; });
+            const short={}; let shortSum=0;
+            KS.forEach(k=>{ const t=invNow*mixTarget[k]-amt[k]; short[k]=Math.max(0,t); shortSum+=short[k]; });
+            if(shortSum>0){
+              const use=Math.min(addedSw,shortSum);
+              KS.forEach(k=>{ amt[k]+=use*(short[k]/shortSum); });
+              const rest=addedSw-use;
+              if(rest>0) KS.forEach(k=>{ amt[k]+=rest*mixTarget[k]; });
+            }else{ KS.forEach(k=>{ amt[k]+=addedSw*mixTarget[k]; }); }
+            KS.forEach(k=>{ mix[k]=amt[k]/invNow; });
+          } }
+      } }
     // 取り崩し：現預金が生活防衛費を下回る年のみ（この年は上のとおり入金していない）
-    let drawNisa=0, drawDc=0, dcTaxPaid=0; const target=emergency;
-    const takeNisa=(need)=>{ if(nisaV<=0||need<=0)return; const d=Math.min(nisaV,need); const ratio=d/nisaV; nisaP-=nisaP*ratio; nisaV-=d; cash+=d; drawNisa+=d; };
+    const target=emergency;
+    /* NISAの売却：非課税で全額が現金化される。売却した簿価分の生涯投資枠が復活するのは【翌年】なので、
+       sellNisa が簿価を nisaLocked へ退避し、その年のあいだは枠を使っているものとして扱う。 */
+    const takeNisa=(need)=>{ const sold=sellNisa(need); if(sold>0){ cash+=sold; drawNisa+=sold; } };
+    /* 特定口座の取り崩し：売却分に含まれる含み益へ譲渡益課税（20.315%）。手取りが need に届くよう逆算する。 */
+    /* ★現物不動産は1件単位でしか売れないため、取り崩しの対象は特定口座のうち
+       投資信託等（＝taxV から不動産の時価を除いた部分）に限る。
+       taxP は投資信託等の簿価だけを持つので、含み益の判定もこの部分だけで行う。 */
+    const takeTaxable=(need)=>{ if(need<=0)return;
+      const fundsV=Math.max(0, taxV-realHeld); if(fundsV<=0) return;
+      const rate=P.alcTaxRate||0;
+      const gainRatio=Math.max(0,(fundsV-taxP))/fundsV;            /* 評価額に占める含み益の割合 */
+      const netPerUnit=1-gainRatio*rate;                          /* 1万円売ると手取りいくらか */
+      const sell=Math.min(fundsV, netPerUnit>0?need/netPerUnit:fundsV);
+      const gain=sell*gainRatio, tax=gain*rate;
+      taxP-=taxP*(sell/fundsV); taxV-=sell; cash+=sell-tax; drawTaxable+=sell; taxPaidCg+=tax; };
     const takeDc=(need)=>{ if(!(P.hasDC&&age>=P.dcReceiveAge)||dcValue<=0||need<=0)return; const gross=Math.min(dcValue,need/(1-P.dcTaxRate)); const net=gross*(1-P.dcTaxRate); dcValue-=gross; cash+=net; drawDc+=gross; dcTaxPaid+=gross*P.dcTaxRate; };
     if(cash<target){
-      if(P.withdrawOrder==='dc'){ takeDc(target-cash); if(cash<target) takeNisa(target-cash); }
-      else { takeNisa(target-cash); if(cash<target) takeDc(target-cash); }
+      /* 課税口座を先に取り崩し、非課税のNISAはできるだけ長く運用を続ける */
+      takeTaxable(target-cash);
+      if(cash<target){
+        if(P.withdrawOrder==='dc'){ takeDc(target-cash); if(cash<target) takeNisa(target-cash); }
+        else { takeNisa(target-cash); if(cash<target) takeDc(target-cash); }
+      }
     }
     /* 最終手段：支払いに足りない場合のみ教育積立（別口座）を取り崩す。
        生活防衛費を積むためには使わず、現預金がマイナスになるときだけ充当する。 */
@@ -2273,7 +2832,13 @@ function simulate(P){
     if(cash<0){ shortfall=-cash; cash=0; }
     shortfallCum+=shortfall;
     /* 生活に使える資産（受給開始前の確定拠出年金は引き出せないため除外） */
-    const liquid=cash+eduAccount+nisaV+((P.hasDC&&age>=P.dcReceiveAge)?dcValue*(1-P.dcTaxRate):0);
+    /* 特定口座は含み益に将来課税されるため、税引後の評価額で資産に計上する（DCと同じ考え方） */
+    /* 税引後の評価額。投資信託等は簿価(taxP)、現物不動産は取得費(realBasis)を使って含み益を判定する */
+    const _fundsV=Math.max(0, taxV-realHeld);
+    const taxVNet=taxV
+      -Math.max(0,_fundsV-taxP)*(P.alcTaxRate||0)
+      -Math.max(0,realHeld-realBasis)*0.20315;
+    const liquid=cash+eduAccount+nisaV+taxVNet+((P.hasDC&&age>=P.dcReceiveAge)?dcValue*(1-P.dcTaxRate):0);
     const busted=(shortfall>0 || liquid<=0);
     /* 生活が破綻した年は、引き出せない確定拠出年金が残っていても総資産は0として扱う
        （生活費をまかなえない以上、資産として機能していないため） */
@@ -2282,10 +2847,19 @@ function simulate(P){
     if(P.buyAge!=null && age>=P.buyAge && !(selfDead&&P.hasDanshin!==false)){
       const k=age-P.buyAge+1; if(k<=P.loanYears) loanBal=Math.max(0, balAfter(L,k));
     }
-    const netWorth=busted?0:(cash+eduAccount+nisaV+dcValue*(1-P.dcTaxRate));
+    const netWorth=busted?0:(cash+eduAccount+nisaV+taxVNet+dcValue*(1-P.dcTaxRate));
     const defl=Math.pow(1+P.inflation,i);
     const events=eventsFor(P,age,childAges,L);
-    rows.push({i,age,pAge,married,childAges,dep:dep.length,earners,emgMonths,emergency,pension:pensionNom,gross,bonus,pGross,net,taxSocial,taxIncome,taxResident,selfDead,widowed,survivorPen,survivorParts,deathBenefit,living,housing,edu,oneoff,oneoffLbl,saving,contrib,sweep,ded,dcContrib,dcCorp,dcDed,retireNet,dcLumpFree,dcValue,eduFund,sideInc,drawNisa,drawDc,drawEdu,dcTaxPaid,inheritGross,inheritTax,inheritNet,drawdown,shortfall,shortfallCum,liquid,busted,nisaV,nisaP,cash,netWorth,loanBal,kidFundNow,housingSubsidy,debtPay,debtBal,defl,livingBase,ins,trav,care,med,eduSave:eduSaveAnnual,eduTransfer,eduPayCash,eduAccount,incomeCash,expense,events});
+    /* 表示用の保有比率。実際に購入できた不動産の額に合わせ、買えていないぶんは投資信託に寄せる
+       （最低購入価格に届くまでの年に、実在しない不動産が円グラフに出ないようにするため） */
+    let mixDisp=null;
+    if(allocNow){
+      mixDisp={...mix};
+      const invEnd=Math.max(0,nisaV+taxV);
+      const wRd=(invEnd>0)?Math.min(mixDisp.real, Math.max(0,realHeld)/invEnd):0;
+      if(mixDisp.real>wRd){ mixDisp.index+=(mixDisp.real-wRd); mixDisp.real=wRd; }
+    }
+    rows.push({i,age,pAge,married,childAges,dep:dep.length,earners,emgMonths,emergency,pension:pensionNom,gross,bonus,pGross,net,taxSocial,taxIncome,taxResident,selfDead,widowed,survivorPen,survivorParts,deathBenefit,living,housing,edu,oneoff,oneoffLbl,saving,contrib,sweep,ded,dcContrib,dcCorp,dcDed,retireNet,dcLumpFree,dcValue,eduFund,sideInc,drawNisa,drawDc,drawEdu,dcTaxPaid,taxV,taxP,taxVNet,taxContrib,drawTaxable,taxPaidCg,rebalance,mixNow:mixDisp,inheritGross,inheritTax,inheritNet,giftGross,giftTaxPaid,giftNet,allocNow,realHeld,realIncomeNet,realIncomeAfterTax,yieldUsed:_yr,yieldAll:_yrAll,realShortfall,realUnits,realDepr,realBasis,drawdown,shortfall,shortfallCum,liquid,busted,nisaV,nisaP,cash,netWorth,loanBal,kidFundNow,housingSubsidy,debtPay,debtBal,defl,livingBase,ins,trav,care,med,eduSave:eduSaveAnnual,eduTransfer,eduPayCash,eduAccount,incomeCash,expense,events});
     /* 生活資金が尽きた（＝支出をまかなえなくなった）時点で試算を終了する */
     if(selfDead && !married) break;   /* 世帯を継続する人がいないためここで終了 */
     if(busted) break;
@@ -2302,6 +2876,8 @@ function readParams(){
   const P = {
     pref:val('pref'), gender:val('gender'),
     hasSelfDeath:document.getElementById('hasSelfDeath').checked, selfDeathAge:num('selfDeathAge'), lifeInsSelf:num('lifeInsSelf'),
+    hasGift:document.getElementById('hasGift').checked, giftAnnual:num('giftAnnual'), giftFrom:num('giftFrom'), giftTo:num('giftTo'),
+    giftMode:val('giftMode'), giftSpecial:document.getElementById('giftSpecial').checked,
     hasInherit:document.getElementById('hasInherit').checked, inheritTotal:num('inheritTotal'), inheritAge:num('inheritAge'),
     inheritHeirs:num('inheritHeirs'), inheritShare:num('inheritShare')/100, inheritIsSpouse:document.getElementById('inheritIsSpouse').checked,
     hasPartnerDeath:document.getElementById('hasPartnerDeath').checked, partnerDeathAge:num('partnerDeathAge'), lifeInsPartner:num('lifeInsPartner'),
@@ -2333,11 +2909,20 @@ function readParams(){
     hasHousingSubsidy:document.getElementById('hasHousingSubsidy').checked, housingSubsidyMode:val('housingSubsidyMode'),
     housingSubsidyFixed:num('housingSubsidyFixed'), housingSubsidyRate:num('housingSubsidyRate')/100, housingSubsidyYears:num('housingSubsidyYears'),
     housingSubsidyTaxable:document.getElementById('housingSubsidyTaxable').checked,
+    kabeMode:val('kabeMode'),
     curHouseholdSize:num('curHouseholdSize'), curMonthlyLiving:num('curMonthlyLiving'), inflation:num('inflation')/100,
     travelCount:num('travelCount'), travelCost:num('travelCost'),
     initCash:num('initCash'), nisaMonthly:num('nisaMonthly'),
     initNisaP:num('initNisaP'), initNisaV:num('initNisaV'),
     nisaYield:num('nisaYield')/100, nisaCap:num('nisaCap'),
+    allocs:(ALLOCS||[]).slice().sort((a,b)=>a.age-b.age),
+    alcYield:{index:num('alcYieldIndex')/100, gold:num('alcYieldGold')/100, bond:num('alcYieldBond')/100, cash:num('alcYieldCash')/100},
+    alcUseTaxable:document.getElementById('alcUseTaxable').checked, alcTaxRate:num('alcTaxRate')/100,
+    alcRealEnable:document.getElementById('alcRealEnable').checked,
+    alcReal:{gross:num('alcRealGross')/100, vacancy:num('alcVacancy')/100, cost:num('alcRealCost')/100,
+             appr:num('alcRealAppr')/100, min:num('alcRealMin'),
+             acq:num('alcRealAcq')/100, sell:num('alcRealSell')/100,
+             bldg:num('alcRealBldg')/100, life:Math.max(1,num('alcRealLife')||47)},
     sweepNisa:document.getElementById('sweepNisa').checked, cashCap:num('cashCap'),
     hasDC:document.getElementById('hasDC').checked, dcType:val('dcType'), dcMonthly:num('dcMonthly'), corpDcMode:val('corpDcMode'), corpDcRate:num('corpDcRate'), corpDcFixed:num('corpDcFixed'), dcReceiveAge:num('dcReceiveAge'),
     hasRetireBonus:document.getElementById('hasRetireBonus').checked, retireBonus:num('retireBonus'), joinAge:num('joinAge'),
@@ -2839,10 +3424,16 @@ function renderSnapshot(){
 
   /* NISA/DC 実質も */
   const dcNet=r.dcValue*(1-P.dcTaxRate);
+  const invTotal=(r.nisaV||0)+(r.taxVNet||0);
+  const alc=r.allocNow;
   const rowsTbl=[
     ['現預金', r.cash, true],
     ['教育積立（別口座）', (r.eduAccount||0), false],
-    ['NISA 評価額', r.nisaV, false],
+    ['運用資産（合計）', invTotal, false],
+    ['　└ うち NISA（非課税）', (r.nisaV||0), false],
+    ...(((r.taxVNet||0)>0)?[['　└ うち 特定口座（税引後）', r.taxVNet, false]]:[]),
+    ...(((r.realHeld||0)>0.5)?[['　　└ うち 現物不動産（'+(r.realUnits||0)+'件・税引後）',
+        (r.realHeld-Math.max(0,(r.realHeld||0)-(r.realBasis||0))*0.20315), false]]:[]),
     ['DC 税引後評価額', dcNet, false],
     ['― 総資産（合計）', r.netWorth, true],
     ['生活防衛費（目安）', r.emergency, false],
@@ -2859,7 +3450,10 @@ function renderSnapshot(){
   const idx=rows.indexOf(r);
   const prevCash=idx>0?rows[idx-1].cash:(P.initCash||0);
   const drawDcNet=(r.drawDc||0)-(r.dcTaxPaid||0);
-  const inflowExtra=(r.retireNet||0)+(r.dcLumpFree||0)+(r.drawNisa||0)+drawDcNet; /* 給与以外の現預金流入 */
+  /* 給与以外の現預金流入。運用資産の売却（取り崩し・利確）も「投資からの収入」として計上する。
+     NISAは非課税なので全額、特定口座は譲渡益課税を差し引いた手取りを収入に含める。 */
+  const drawTaxNet=(r.drawTaxable||0)-(r.taxPaidCg||0);
+  const inflowExtra=(r.retireNet||0)+(r.dcLumpFree||0)+(r.drawNisa||0)+drawDcNet+drawTaxNet;
   const incomeY=(r.incomeCash||0)+inflowExtra;   /* 年間の現預金流入（収入） */
   /* 支出内訳（年額）＝この年に現預金から出て行ったお金 */
   const cat=[
@@ -2873,6 +3467,7 @@ function renderSnapshot(){
     ['iDeCo拠出',   (r.dcContrib||0),                     '#AC92EC'],   /* 自己負担分のみ（企業型DCは会社負担のため現預金を通らない） */
     ['NISA積立',    (r.contrib||0),                       '#5D9CEC'],
     ['NISAスイープ',(r.sweep||0),                         '#3B7DD8'],
+    ['特定口座 積立',(r.taxContrib||0),                    '#2E6BB8'],   /* NISA枠を超えた分の投資 */
   ];
   const slices=cat.filter(c=>c[1]>0.5).map(c=>({label:c[0],val:c[1],color:c[2]}));
   const expenseY=slices.reduce((s,c)=>s+c.val,0);        /* 年間の現預金流出（支出） */
@@ -2881,16 +3476,42 @@ function renderSnapshot(){
   const incomeStr=manU(incomeY), expStr=manU(expenseY);
 
   /* --- 資産比率（評価額、金額の大きい順） --- */
-  const assetCat=[
+  /* 運用資産は、その年の実際の保有比率（mixNow）で資産の種類ごとに分解して表示する。
+     資産比率の変更を設定していない場合は、従来どおり「NISA」「特定口座」でまとめる。 */
+  const invTotalPie=(r.nisaV||0)+(r.taxVNet||0);
+  const mixNow=r.mixNow;
+  const assetCat=(mixNow)?[
+    ['現預金',    r.cash,                        '#B7C3D0'],
+    ['投資信託',  invTotalPie*(mixNow.index||0), '#0CA795'],
+    ['ゴールド',  invTotalPie*(mixNow.gold||0),  '#E2B23A'],
+    ['債券',      invTotalPie*(mixNow.bond||0),  '#5B8DEF'],
+    ['不動産',    invTotalPie*(mixNow.real||0),  '#C2748A'],
+    ['DC・iDeCo', r.dcValue*(1-P.dcTaxRate),     '#AC92EC'],
+    ['教育積立',  (r.eduAccount||0),             '#A0D468'],
+  ]:[
     ['現預金',    r.cash,                       '#B7C3D0'],
     ['NISA',      r.nisaV,                      '#5D9CEC'],
+    ...(((r.taxVNet||0)>0.5)?[['特定口座', r.taxVNet, '#3B7DD8']]:[]),
     ['DC・iDeCo', r.dcValue*(1-P.dcTaxRate),    '#AC92EC'],
     ['教育積立',  (r.eduAccount||0),            '#A0D468'],
   ];
-  const assetSlices=assetCat.filter(c=>c[1]>0.5).map(c=>({label:c[0],val:c[1],color:c[2]})).sort((a,b)=>b.val-a.val);
+  /* 前年（同じ分類）の金額。凡例に「前年比 +○○万円」を出すために使う。 */
+  const catOf=(rr)=>{
+    if(!rr) return null;
+    const inv=(rr.nisaV||0)+(rr.taxVNet||0), mx=rr.mixNow;
+    const o={};
+    o['現預金']=rr.cash; o['教育積立']=(rr.eduAccount||0); o['DC・iDeCo']=rr.dcValue*(1-P.dcTaxRate);
+    if(mx){ o['投資信託']=inv*(mx.index||0); o['ゴールド']=inv*(mx.gold||0); o['債券']=inv*(mx.bond||0); o['不動産']=inv*(mx.real||0); }
+    else { o['NISA']=(rr.nisaV||0); o['特定口座']=(rr.taxVNet||0); }
+    return o;
+  };
+  const prevRow=rows[rows.indexOf(r)-1];
+  const prevCat=catOf(prevRow);
+  const assetSlices=assetCat.filter(c=>c[1]>0.5).map(c=>({label:c[0],val:c[1],color:c[2],
+      diff:(prevCat&&prevCat[c[0]]!=null)?(c[1]-prevCat[c[0]]):null})).sort((a,b)=>b.val-a.val);
   const assetTotal=assetSlices.reduce((s,c)=>s+c.val,0);
   const assetStr=manU(assetTotal);
-  const assetFull={'現預金':'現預金','NISA':'NISA評価額','DC・iDeCo':'確定拠出年金(DC・iDeCo)税引後','教育積立':'教育積立(別口座)'};
+  const assetFull={'現預金':'現預金','NISA':'NISA評価額','特定口座':'特定口座(税引後)','投資信託':'投資信託(インデックス)','ゴールド':'ゴールド','債券':'債券','不動産':'不動産','DC・iDeCo':'確定拠出年金(DC・iDeCo)税引後','教育積立':'教育積立(別口座)'};
 
   body.innerHTML=`
     <div class="snap-hero">
@@ -2912,7 +3533,7 @@ function renderSnapshot(){
         <div class="bud-title">この年の現預金の使いみち（${r.age}歳）</div>
         <div class="bud-chart"><canvas id="snapPie"></canvas></div>
         <div class="bud-figs">
-          <div class="bud-row"><span class="bud-k">収入</span><span class="bud-v col"><span>${yenFull(incomeY)}<small>（月 ${yenFull(incomeY/12)}）</small></span>${(r.drawNisa||0)>0.5?`<small class="bud-sub">うちNISA取り崩し ${yenFull(r.drawNisa)}</small>`:''}${((r.taxSocial||0)+(r.taxIncome||0)+(r.taxResident||0))>0.5?`<small class="bud-sub">額面 ${yenFull(r.gross)} − 社会保険 ${yenFull(r.taxSocial)} − 所得税 ${yenFull(r.taxIncome)} − 住民税 ${yenFull(r.taxResident)}</small>`:''}${(r.survivorPen||0)>0.5?`<small class="bud-sub">うち遺族年金（非課税） ${yenFull(r.survivorPen)}${r.survivorParts?`（遺族基礎 ${yenFull(r.survivorParts.kiso*(r.survivorPen/(r.survivorParts.total||1)))}・遺族厚生 ${yenFull(r.survivorParts.kosei*(r.survivorPen/(r.survivorParts.total||1)))}${r.survivorParts.kafu>0?`・中高齢寡婦加算 ${yenFull(r.survivorParts.kafu*(r.survivorPen/(r.survivorParts.total||1)))}`:''}）`:''}</small>`:''}${(r.deathBenefit||0)>0.5?`<small class="bud-sub">うち死亡に伴う給付 ${yenFull(r.deathBenefit)}</small>`:''}</span></div>
+          <div class="bud-row"><span class="bud-k">収入</span><span class="bud-v col"><span>${yenFull(incomeY)}<small>（月 ${yenFull(incomeY/12)}）</small></span>${(r.drawNisa||0)>0.5?`<small class="bud-sub">うちNISA取り崩し ${yenFull(r.drawNisa)}</small>`:''}${((r.taxSocial||0)+(r.taxIncome||0)+(r.taxResident||0))>0.5?`<small class="bud-sub">額面 ${yenFull(r.gross)} − 社会保険 ${yenFull(r.taxSocial)} − 所得税 ${yenFull(r.taxIncome)} − 住民税 ${yenFull(r.taxResident)}</small>`:''}${(r.survivorPen||0)>0.5?`<small class="bud-sub">うち遺族年金（非課税） ${yenFull(r.survivorPen)}${r.survivorParts?`（遺族基礎 ${yenFull(r.survivorParts.kiso*(r.survivorPen/(r.survivorParts.total||1)))}・遺族厚生 ${yenFull(r.survivorParts.kosei*(r.survivorPen/(r.survivorParts.total||1)))}${r.survivorParts.kafu>0?`・中高齢寡婦加算 ${yenFull(r.survivorParts.kafu*(r.survivorPen/(r.survivorParts.total||1)))}`:''}）`:''}</small>`:''}${(r.realIncomeAfterTax||0)>0.5?`<small class="bud-sub">うち家賃収入（税引後） ${yenFull(r.realIncomeAfterTax)}${(r.realDepr||0)>0.5?`（減価償却 ${yenFull(r.realDepr)}を控除）`:''}</small>`:''}${(r.giftNet||0)>0.5?`<small class="bud-sub">うち生前贈与（税引後） ${yenFull(r.giftNet)}${(r.giftTaxPaid||0)>0.5?`（贈与税 ${yenFull(r.giftTaxPaid)}）`:''}</small>`:''}${(r.deathBenefit||0)>0.5?`<small class="bud-sub">うち死亡に伴う給付 ${yenFull(r.deathBenefit)}</small>`:''}</span></div>
           <div class="bud-row"><span class="bud-k">支出</span><span class="bud-v">${yenFull(expenseY)}<small>（月 ${yenFull(expenseY/12)}）</small></span></div>
           <div class="bud-div"></div>
           <div class="bud-row big ${balanceY<0?'neg':'pos'}"><span class="bud-k">収支（現預金の前年比）</span><span class="bud-v">${balanceY<0?'−':'+'}${yenFull(Math.abs(balanceY))}<small>（月 ${balanceY<0?'−':'+'}${yenFull(Math.abs(balanceY)/12)}）</small></span></div>
@@ -2931,6 +3552,7 @@ function renderSnapshot(){
           <div class="bud-row big ${nwWarn?'neg':'pos'}"><span class="bud-k">総資産</span><span class="bud-v">${manY(assetTotal)}<small>（実質 ${manY(real(assetTotal))}）</small></span></div>
         </div>
         <div class="bud-note">NISA・確定拠出年金は評価額（DC・iDeCoは将来課税を引いた税引後）。金額の大きい順に表示しています。</div>
+        <div class="hint" id="assetAllocNote" style="margin:6px 0 2px"></div>
         <div class="bud-legend" id="assetLegend"></div>
       </div>
      </div>
@@ -2938,12 +3560,14 @@ function renderSnapshot(){
     <div class="snap-dots"><span class="snap-dot active"></span><span class="snap-dot"></span></div>
     <div class="snap-hint">← スワイプで「資産の内訳」も見られます →</div>
 
+    <details class="snap-det"><summary>資産・収支の詳細（口座別の内訳を含む）</summary><div class="sd-in">
     <table class="snap-tbl">
       <thead><tr><td>項目</td><td>名目（その年の額）</td><td>実質（今の価値）</td></tr></thead>
       <tbody>
         ${rowsTbl.map(([lbl,v])=>`<tr><td>${lbl}</td><td class="${v<0?'neg':''}">${manY(v)}</td><td class="${v<0?'neg':''}">${manY(real(v))}</td></tr>`).join('')}
       </tbody>
     </table>
+    </div></details>
 
     ${r.events&&r.events.length?`<div class="snap-ev">この年のイベント：<b>${r.events.join('・')}</b></div>`:''}
 
@@ -3034,7 +3658,22 @@ function renderSnapshot(){
       plugins:[assetCenter]
     });
     const alg=document.getElementById('assetLegend');
-    if(alg) alg.innerHTML=assetSlices.map(s=>`<span class="bud-chip"><i style="background:${s.color}"></i>${assetFull[s.label]||s.label} <b>${manY(s.val)}</b><b class="chip-pct">・${(s.val/assetTotal*100).toFixed(0)}%</b></span>`).join('');
+    /* 資産比率の目標は「現預金＋運用資産」に対する比率。教育積立（別口座）や確定拠出年金は
+       目標配分の対象外なので、対象内だけで見た比率も併記して混乱を防ぐ。 */
+    const allocBase=assetSlices.filter(x=>!['教育積立','DC・iDeCo'].includes(x.label)).reduce((t,x)=>t+x.val,0);
+    const excluded=assetTotal-allocBase;
+    const noteEl=document.getElementById('assetAllocNote');
+    if(noteEl){
+      noteEl.innerHTML=(mixNow&&excluded>0.5)
+        ? '資産比率の目標は<b>現預金＋運用資産</b>（'+manY(allocBase)+'）に対する比率です。教育積立・確定拠出年金は対象外のため、下の%（総資産に対する割合）とは一致しません。カッコ内が配分対象内での比率です。'
+        : '';
+    }
+    if(alg) alg.innerHTML=assetSlices.map(s=>{
+      const d=(s.diff==null||Math.abs(s.diff)<0.5)?'':`<b class="chip-diff ${s.diff<0?'dn':'up'}">（前年比 ${s.diff>=0?'+':'−'}${manY(Math.abs(s.diff))}）</b>`;
+      const inScope=(mixNow && excluded>0.5 && !['教育積立','DC・iDeCo'].includes(s.label) && allocBase>0)
+        ? `<b class="chip-sub">（配分内 ${(s.val/allocBase*100).toFixed(0)}%）</b>` : '';
+      return `<span class="bud-chip"><i style="background:${s.color}"></i>${assetFull[s.label]||s.label} <b>${manY(s.val)}</b><b class="chip-pct">・${(s.val/assetTotal*100).toFixed(0)}%</b>${inScope}${d}</span>`;
+    }).join('');
   }
 
   /* スワイプのドット表示（スマホ） */
@@ -3245,9 +3884,13 @@ function render(){
       </tr>`;
     }).join('');
   }
-  const _mm=document.getElementById('mcMu'); if(_mm) _mm.textContent=(P.nisaYield*100).toFixed(1)+'%';
+  const _mm=document.getElementById('mcMu');
+  if(_mm) _mm.textContent=(P.nisaYield*100).toFixed(1)+'%'+((P.allocs&&P.allocs.length)?'／配分の期待値で判定':'');
   renderBalance(P);
   renderKidFunds(P,rows);
+  renderAllocResult(P,rows);
+  { const th=document.getElementById('thNisaV');
+    if(th) th.textContent=(P.allocs&&P.allocs.length)?'運用資産 評価':'NISA評価'; }
   renderPension(P,rows);
   renderCompare(P,rows);
   renderCompareLife(P,rows);
@@ -3257,7 +3900,63 @@ function render(){
 }
 
 /* ============ 子ども名義の積立の結果 ============ */
+/* 資産比率の変更：各タイミングの円グラフと、運用結果の要約を描画 */
+let ALLOC_CHARTS=[];
+function renderAllocResult(P,rows){
+  const res=document.getElementById('allocResult');
+  ALLOC_CHARTS.forEach(c=>{ try{c.destroy();}catch(e){} }); ALLOC_CHARTS=[];
+  const list=(P.allocs||[]);
+  if(!list.length){ if(res) res.innerHTML=''; return; }
+  const COLORS=['#0CA795','#E2B23A','#5B8DEF','#C2748A','#8A94A6'];
+  /* 円グラフは、各「変更」の行の中（renderAllocRows が用意した canvas）に描く */
+  list.forEach((a,i)=>{
+    const raw=ALLOC_KEYS.map(([k])=>Math.max(0,+a[k]||0)); const tot=raw.reduce((x,y)=>x+y,0)||1;
+    const data=raw.map(v=>Math.round(v/tot*1000)/10);
+    const cv=document.getElementById('alcPie'+i); if(!cv) return;
+    ALLOC_CHARTS.push(new Chart(cv,{type:'doughnut',
+      data:{labels:ALLOC_KEYS.map(([,l])=>l), datasets:[{data, backgroundColor:COLORS, borderWidth:2, borderColor:'#fff'}]},
+      options:{responsive:true, maintainAspectRatio:true, plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}},
+        tooltip:{callbacks:{label:c=>c.label+' '+c.parsed+'%'}}}}}));
+  });
+  /* 要約：不動産の保有額・家賃収入（空室・経費・税を反映） */
+  const withReal=rows.filter(r=>r.realHeld>0);
+  const first=withReal[0];
+  const R=P.alcReal||{};
+  const netY=((R.gross||0)*(1-(R.vacancy||0))*(1-(R.cost||0))*100).toFixed(2);
+  if(!res) return;
+  /* 「資産形成」タブの想定利回りと、この画面の投資信託の想定利回りが食い違っていないか */
+  const yi=(P.alcYield&&P.alcYield.index!=null)?P.alcYield.index:P.nisaYield;
+  const muWarn=(Math.abs(yi-P.nisaYield)>0.0005)
+    ? `<br><b style="color:var(--warn,#C46A2B)">利回りの設定が2か所で食い違っています。</b>「資産形成」タブの想定利回りは<b>${(P.nisaYield*100).toFixed(1)}%</b>、この画面の投資信託は<b>${(yi*100).toFixed(1)}%</b>です。配分を切り替える年から、投資信託の利回りは<b>${(yi*100).toFixed(1)}%</b>に変わります。`
+    : '';
+  /* 不動産が買えていない年があるかどうか（目標比率どおりに保有できていない） */
+  const shortRows=rows.filter(r=>(r.realShortfall||0)>0.001);
+  const realWarn=(shortRows.length && (P.alcUseTaxable===false))
+    ? `<br>「NISA枠を超えたら特定口座で投資を続ける」がオフのため、<b>不動産を購入できません</b>（現物不動産はNISAでは買えないため）。その分は投資信託に配分しています。`
+    : (shortRows.length && first
+      ? `<br>なお <b>${shortRows[0].age}歳ごろ</b>は特定口座の残高または最低購入価格の制約で、目標の比率どおりには不動産を保有できていません（その分は投資信託に配分）。`
+      : '');
+  res.innerHTML='<div class="hint" style="margin-top:14px">'
+    +`不動産の<b>手取り利回りは ${netY}%</b>（表面${((R.gross||0)*100).toFixed(1)}% × 空室率${((R.vacancy||0)*100).toFixed(0)}%控除 × 経費率${((R.cost||0)*100).toFixed(0)}%控除）。`
+    +(first
+      ? `${first.age}歳から不動産を<b>${manY(first.realHeld)}</b>保有する想定で、その年の家賃収入は<b>${manY(first.realIncomeNet)}</b>（税引後 ${manY(first.realIncomeAfterTax)}）です。`
+      : `配分額が最低購入価格（${manY(R.min||0)}）に届かないため、<b>不動産は購入しない</b>試算になっています（その分は投資信託に配分）。`)
+    +realWarn+muWarn
+    +'</div>';
+}
+
 function renderKidFunds(P,rows){
+  /* 入力欄の直下にも、受け渡し年齢時点の金額を併記する */
+  const note=document.getElementById('kidNisaNote');
+  if(note){
+    const l=(rows.kidFunds||[]).filter(f=>f && f.value!=null);
+    if(!P.hasKidNisa || !l.length){ note.innerHTML=''; }
+    else{
+      note.innerHTML='受け渡し時点（子が'+P.kidNisaTo+'歳）の見込み額：'
+        + l.map((f,i)=>`<b>第${i+1}子 ${manY(f.value)}</b>（元本 ${manY(f.principal)}）`).join('／')
+        + '。運用益は非課税のため税金は差し引いていません。';
+    }
+  }
   const el=document.getElementById('kidFundBox'); if(!el) return;
   const list=(rows.kidFunds||[]).filter(f=>f && f.value!=null);
   if(!P.hasKidNisa || !list.length){ el.style.display='none'; el.innerHTML=''; return; }
@@ -3304,14 +4003,14 @@ function renderLoanNote(P,rows){
 
 /* ============ 初期化 ============ */
 const DEFAULTS={currentAge:24,currentAgeMonths:0,marriageAge:31,marriageAgeMonths:0,weddingCost:150,partnerCurrentAge:24,
-  pref:'全国平均',gender:'na',hasSelfDeath:false,selfDeathAge:55,lifeInsSelf:0,hasInherit:false,inheritTotal:0,inheritAge:60,inheritHeirs:2,inheritShare:50,inheritIsSpouse:false,hasPartnerDeath:false,partnerDeathAge:55,lifeInsPartner:0,funeralCost:96,hasDanshin:true,selfWorkMode:'single',partnerWorkMode:'segments',partnerBaseMonthly:21,partnerAllowance:3,partnerRaise:0.4,partnerCapMonthly:30,partnerBonusMonths:3.5,partnerStartAge:31,partnerRetire:65,selfBaseMonthly:21.5,selfAllowance:3.0,hasFamAllow:true,famAllowSpouse:1.0,famAllowChild:0.5,famChildAge:18,selfRaise:0.57,selfCapMonthly:41.5,selfBonusMonths:3.5,selfRetire:65,
+  pref:'全国平均',gender:'na',hasSelfDeath:false,selfDeathAge:55,lifeInsSelf:0,hasGift:false,giftAnnual:110,giftFrom:35,giftTo:45,giftMode:'reki',giftSpecial:true,hasInherit:false,inheritTotal:0,inheritAge:60,inheritHeirs:2,inheritShare:50,inheritIsSpouse:false,hasPartnerDeath:false,partnerDeathAge:55,lifeInsPartner:0,funeralCost:96,hasDanshin:true,selfWorkMode:'single',partnerWorkMode:'segments',partnerBaseMonthly:21,partnerAllowance:3,partnerRaise:0.4,partnerCapMonthly:30,partnerBonusMonths:3.5,partnerStartAge:31,partnerRetire:65,selfBaseMonthly:21.5,selfAllowance:3.0,hasFamAllow:true,famAllowSpouse:1.0,famAllowChild:0.5,famChildAge:18,selfRaise:0.57,selfCapMonthly:41.5,selfBonusMonths:3.5,selfRetire:65,
   reemployIncome:260,reemployTo:65,jobType:'kaisha',pensionType:'kosei',pensionBasicYears:40,pastKoseiYears:0,pastKoseiIncome:0,pastKoseiYearsP:0,pastKoseiIncomeP:0,macroSlide:'1',pensionCase:'past30',childIndependAge:22,
   eduKinder:'pub',eduElem:'pub',eduJunior:'pub',eduHigh:'pub',eduUniv:'kokuritsu',eduAway:'no',jukuMonthly:0,
   birthGrant:50,
   buyAge:41,rentMonthly:7.5,price:3830,downpay:400,closingRate:7,rate:1.5,loanYears:35,propertyTax:15,
   repair1Year:10,repair1Cost:120,repair2Year:35,repair2Cost:500,creditYears:13,creditRate:0.7,creditCap:21,
   hasHousingSubsidy:false,housingSubsidyMode:'fixed',housingSubsidyFixed:2,housingSubsidyRate:0.1,housingSubsidyYears:10,housingSubsidyTaxable:true,
-  curHouseholdSize:1,curMonthlyLiving:12.0,inflation:1.5,travelCount:1,travelCost:12,
+  kabeMode:'h106',curHouseholdSize:1,curMonthlyLiving:12.0,inflation:1.5,travelCount:1,travelCost:12,
   initCash:50,nisaMonthly:2,nisaYield:4.0,nisaCap:1800,initNisaP:0,initNisaV:0,
   sweepNisa:false,cashCap:300,
   hasDC:false,dcType:'ideco',dcMonthly:2.0,corpDcMode:'rate',corpDcRate:2.5,corpDcFixed:1.0,dcReceiveAge:65,hasRetireBonus:true,retireBonus:1500,joinAge:22,
@@ -3324,7 +4023,13 @@ const DEFAULTS={currentAge:24,currentAgeMonths:0,marriageAge:31,marriageAgeMonth
   hasSideIncome:false,sideIncome:60,sideFrom:30,sideTo:70,sideGrowth:0,
   hasJobChange:false,jobChangeAge:35,jobChangeRate:10,jobChangeGap:0,
   hasDivorce:false,divorceAge:50,divorceCost:500,
-  hasCar:false,carFirstAge:30,carPrice:250,carCycle:8,carInflation:2.5,carReturnAge:70};
+  hasCar:false,carFirstAge:30,carPrice:250,carCycle:8,carInflation:2.5,carReturnAge:70,
+  /* 資産比率の変更（利回り・不動産の詳細設定）。HTMLのvalue属性と同じ文字列にしておくこと。
+     ここに登録することで「保存」「共有URL」「リセット」の対象になる。 */
+  alcYieldIndex:'4.0',alcYieldGold:'2.5',alcYieldBond:'1.5',alcYieldCash:'0.2',
+  alcRealGross:'6.0',alcVacancy:'18',alcRealCost:'20',alcRealAppr:'0',alcRealMin:'1000',
+  alcRealAcq:'7',alcRealSell:'4',alcRealBldg:'60',alcRealLife:'47',alcRealEnable:true,
+  alcUseTaxable:true,alcTaxRate:'20.315'};
 const STATIC_IDS=Object.keys(DEFAULTS);
 
 function setDefaults(){
@@ -3334,13 +4039,19 @@ function setDefaults(){
 }
 
 /* ============ 保存・共有 ============ */
-function getState(){ const o={}; STATIC_IDS.forEach(id=>{const el=document.getElementById(id); if(!el)return; o[id]=el.type==='checkbox'?el.checked:el.value;}); o.segs=segs; o.selfSegs=selfSegs; o.kids=kids; o.debts=debts; return o; }
+function getState(){ const o={}; STATIC_IDS.forEach(id=>{const el=document.getElementById(id); if(!el)return; o[id]=el.type==='checkbox'?el.checked:el.value;}); o.segs=segs; o.selfSegs=selfSegs; o.kids=kids; o.debts=debts; o.allocs=(typeof ALLOCS!=='undefined')?ALLOCS:[]; return o; }
 function applyState(s){
   STATIC_IDS.forEach(id=>{const el=document.getElementById(id); if(el&&s[id]!=null){ if(el.type==='checkbox')el.checked=!!s[id]; else el.value=s[id]; }});
   if(Array.isArray(s.segs)) segs=s.segs.map(x=>({...x}));
   if(Array.isArray(s.selfSegs)) selfSegs=s.selfSegs.map(x=>({...x}));
   if(Array.isArray(s.kids)) kids=s.kids.map(x=>({...x}));
   if(Array.isArray(s.debts)) debts=s.debts.map(x=>({...x}));
+  /* 資産比率の変更。共有URL・保存データに含まれていれば復元する（含まれない古いデータでは触らない） */
+  if(Array.isArray(s.allocs) && typeof ALLOCS!=='undefined'){
+    ALLOCS=s.allocs.map(x=>({...x}));
+    if(typeof saveAllocs==='function') saveAllocs();
+    if(typeof renderAllocRows==='function') renderAllocRows();
+  }
   renderSegs(); renderSelfSegs(); renderKids(); if(typeof renderDebts==='function') renderDebts(); if(typeof updateSelfWorkUI==='function') updateSelfWorkUI(); if(typeof updatePartnerWorkUI==='function') updatePartnerWorkUI(); if(typeof updatePrefUI==='function') updatePrefUI(); if(typeof updateOptBoxUI==='function') updateOptBoxUI();
 }
 function b64e(str){ return btoa(unescape(encodeURIComponent(str))); }
@@ -3353,6 +4064,7 @@ function getDiffState(){
   if(JSON.stringify(full.segs)!==JSON.stringify(DEF_SEGS)) o.segs=full.segs;
   if(JSON.stringify(full.kids)!==JSON.stringify(DEF_KIDS)) o.kids=full.kids;
   if(Array.isArray(full.debts) && full.debts.length) o.debts=full.debts;   /* 借入情報も共有URLに含める（既定は空配列） */
+  if(Array.isArray(full.allocs) && full.allocs.length) o.allocs=full.allocs;   /* 資産比率の変更（既定は空配列） */
   return o;
 }
 function encodeShare(){
@@ -5090,6 +5802,56 @@ const DEBT_PRESETS=[
   {name:'その他ローン', bal:50, mon:1.0},
 ];
 let debts=[];
+/* ============ 資産比率の変更（最大3つ） ============ */
+/* 指定年齢から、総資産（現預金＋運用資産）に対する目標比率へ近づける。
+   5区分：投資信託（インデックス）／ゴールド／債券／不動産／現預金。
+   既定は「保有資産を売らず、新規投資の配分だけを変えて段階的に寄せる」。lump=true でその年に一括入替。
+   不動産は最低購入価格に満たない配分額では買えず、NISA対象外のため特定口座の範囲内のみ。 */
+let ALLOCS=[];
+const ALLOC_MAX=3;
+const ALLOC_KEYS=[['index','投資信託'],['gold','ゴールド'],['bond','債券'],['real','不動産'],['cash','現預金']];
+function allocDefault(){ return {age:60,index:50,gold:10,bond:20,real:0,cash:20,lump:false}; }
+function renderAllocRows(){
+  const box=document.getElementById('allocRows'); if(!box) return;
+  box.innerHTML=ALLOCS.map((a,i)=>{
+    const sum=ALLOC_KEYS.reduce((t,[k])=>t+(+a[k]||0),0);
+    const cls=Math.abs(sum-100)<0.01?'ok':'ng';
+    return `<div class="alloc-row" data-i="${i}">
+      <div class="ar-h"><b>変更${i+1}</b>
+        <span class="ig" style="max-width:150px"><input type="number" class="alc-age" value="${a.age}" min="0" max="120"><span class="unit">歳から</span></span>
+        <button type="button" class="ar-del">削除</button></div>
+      <div class="ar-grid">
+        ${ALLOC_KEYS.map(([k,lbl])=>`<div class="field"><label>${lbl}</label><div class="ig"><input type="number" class="alc-${k}" value="${a[k]}" min="0" max="100" step="5"><span class="unit">%</span></div></div>`).join('')}
+      </div>
+      <div class="ar-sum ${cls}">合計 ${sum.toFixed(0)}%${cls==='ng'?'（100%になるよう自動で調整して試算します）':''}</div>
+      <div class="ar-pie"><canvas id="alcPie${i}"></canvas></div>
+      <label class="ar-lump"><input type="checkbox" class="alc-lump"${a.lump?' checked':''}><span>この年に<b>一括で</b>入れ替える（保有資産を売却してこの比率にする）</span></label>
+      <div class="ar-lumpnote">${a.lump
+        ? 'その年にまとめて売買します。特定口座の売却益には20.315%が課税されます。NISAで売却した分の枠（簿価）は<b>翌年に復活</b>するため、買い直しは翌年以降・年間枠の範囲で順次行います。'
+        : 'チェックしない場合は、<b>保有資産は売らず</b>、以後の新規投資の配分だけを変えて時間をかけて目標比率に近づけます。'}</div>
+    </div>`;
+  }).join('') || '<div class="hint" style="margin:0">変更はまだありません。「＋ 変更を追加」で、年齢と配分を設定してください。設定がない場合は、これまでどおり「NISA」欄の想定利回りで運用します。</div>';
+  const addBtn=document.getElementById('allocAdd'); if(addBtn) addBtn.style.display=ALLOCS.length>=ALLOC_MAX?'none':'';
+  /* 入力（その場で反映。フォーカスは保持したいので再描画せず値だけ更新） */
+  box.querySelectorAll('.alloc-row').forEach(row=>{
+    const i=+row.dataset.i;
+    const upd=()=>{
+      const sum=ALLOC_KEYS.reduce((t,[k])=>t+(+ALLOCS[i][k]||0),0);
+      const el=row.querySelector('.ar-sum');
+      el.textContent='合計 '+sum.toFixed(0)+'%'+(Math.abs(sum-100)<0.01?'':'（100%になるよう自動で調整して試算します）');
+      el.className='ar-sum '+(Math.abs(sum-100)<0.01?'ok':'ng');
+    };
+    row.querySelector('.alc-age').addEventListener('input',e=>{ ALLOCS[i].age=+e.target.value||0; saveAllocs(); render(); });
+    ALLOC_KEYS.forEach(([k])=>{
+      row.querySelector('.alc-'+k).addEventListener('input',e=>{ ALLOCS[i][k]=Math.max(0,+e.target.value||0); upd(); saveAllocs(); render(); });
+    });
+    row.querySelector('.alc-lump').addEventListener('change',e=>{ ALLOCS[i].lump=e.target.checked; saveAllocs(); renderAllocRows(); render(); });
+    row.querySelector('.ar-del').addEventListener('click',()=>{ ALLOCS.splice(i,1); saveAllocs(); renderAllocRows(); render(); });
+  });
+}
+function saveAllocs(){ try{ localStorage.setItem('mlog_allocs',JSON.stringify(ALLOCS)); }catch(e){} }
+function loadAllocs(){ try{ const j=localStorage.getItem('mlog_allocs'); if(j) ALLOCS=JSON.parse(j)||[]; }catch(e){ ALLOCS=[]; } }
+
 function renderDebts(){
   const host=document.getElementById('debtList'); if(!host) return;
   host.innerHTML=debts.map((d,i)=>`
@@ -5299,6 +6061,39 @@ function renderCompare(P, baseRows){
 let mcComputed=false;
 function mcMarkStale(){ if(mcComputed){ const st=document.getElementById('mcStatus'); if(st) st.textContent='入力が変わりました。「再分析」で更新できます。'; } }
 function _gauss(){ let u=0,v=0; while(u===0)u=Math.random(); while(v===0)v=Math.random(); return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v); }
+/* ───────── 資産別のリスク（年率の標準偏差）と相関 ─────────
+   長期の実績にもとづく目安。投資信託（全世界株式）は振れ幅が大きく、債券は小さい。
+   ゴールドは株式と相関がほぼゼロ〜わずかにマイナスで、株安のときに買われやすい（避難先）。
+   不動産（現物）は価格の変動が緩やかで、株式との相関は中程度。現預金は変動なし。 */
+const ASSET_VOL={index:18.0, gold:15.0, bond:4.0, real:7.0, cash:0.0};   /* %/年 */
+/* 相関係数（対角は1）。株式-ゴールドはマイナス＝株が下がるときに上がりやすい。 */
+const ASSET_CORR={
+  index:{index:1.00, gold:-0.15, bond:0.10, real:0.45, cash:0},
+  gold: {index:-0.15, gold:1.00, bond:0.15, real:0.10, cash:0},
+  bond: {index:0.10, gold:0.15, bond:1.00, real:0.10, cash:0},
+  real: {index:0.45, gold:0.10, bond:0.10, real:1.00, cash:0},
+  cash: {index:0, gold:0, bond:0, real:0, cash:1.00}
+};
+const ASSET_ORDER=['index','gold','bond','real','cash'];
+/* コレスキー分解（相関行列 → 下三角行列）。相関のある正規乱数を作るために使う。 */
+function _cholesky(M){
+  const n=M.length, L=Array.from({length:n},()=>new Array(n).fill(0));
+  for(let i=0;i<n;i++) for(let j=0;j<=i;j++){
+    let s=0; for(let k=0;k<j;k++) s+=L[i][k]*L[j][k];
+    if(i===j) L[i][j]=Math.sqrt(Math.max(1e-12,M[i][i]-s));
+    else L[i][j]=(M[i][j]-s)/(L[j][j]||1e-12);
+  }
+  return L;
+}
+const _ASSET_L=_cholesky(ASSET_ORDER.map(a=>ASSET_ORDER.map(b=>ASSET_CORR[a][b])));
+/* 独立な正規乱数 → 相関のある正規乱数（資産ごとのショック） */
+function _correlatedShocks(){
+  const z=ASSET_ORDER.map(()=>_gauss());
+  const out={};
+  ASSET_ORDER.forEach((a,i)=>{ let s=0; for(let k=0;k<=i;k++) s+=_ASSET_L[i][k]*z[k]; out[a]=s; });
+  return out;
+}
+
 function _real95(rows){ const r=rows.find(x=>x.age===95); return (r&&!r.busted)?r.netWorth/r.defl:0; }
 function runMonteCarlo(P){
   const sigma=Math.max(0,(num('mcSigma')||0))/100;
@@ -5306,29 +6101,65 @@ function runMonteCarlo(P){
   let rho=num('mcRho')||0; rho=Math.max(-0.9,Math.min(0.9,rho));
   const mu=P.nisaYield;
   const nY=Math.max(1,MAX_AGE-P.currentAge+1);
+  const useAssets=!!(P.allocs && P.allocs.length);   /* 資産配分の設定があれば、資産ごとのブレを使う */
+  const volScale=(sigma>0 && ASSET_VOL.index>0)?(sigma/(ASSET_VOL.index/100)):1;  /* 画面のブレ幅を株式基準にそろえる */
   const res=[];
   for(let t=0;t<trials;t++){
     const seq=new Array(nY); let prevZ=0;
+    const assetSeq=useAssets?new Array(nY):null;
+    let prevS=null;
     for(let i=0;i<nY;i++){
       let z=_gauss();
       if(i>0&&rho!==0) z=rho*prevZ+Math.sqrt(1-rho*rho)*z;
       prevZ=z; seq[i]=mu+sigma*z;
+      if(useAssets){
+        /* 資産ごとに相関のあるショックを生成。年をまたぐ持続性（rho）も各資産に適用する */
+        let s=_correlatedShocks();
+        if(i>0&&rho!==0&&prevS){ const t2=Math.sqrt(1-rho*rho); const m={}; ASSET_ORDER.forEach(a=>{ m[a]=rho*prevS[a]+t2*s[a]; }); s=m; }
+        prevS=s;
+        const r={}; ASSET_ORDER.forEach(a=>{ r[a]=(ASSET_VOL[a]/100)*volScale*s[a]; });   /* 平均からの乖離 */
+        assetSeq[i]=r;
+        seq[i]=mu+r.index;   /* 投資信託の実現利回り（配分なしの資産にも使う） */
+      }
     }
-    const rows=simulate({...P,yieldSeq:seq});
+    const rows=simulate({...P,yieldSeq:seq, assetShockSeq:assetSeq});
     const last=rows[rows.length-1];
     const bust=last.busted && last.age<MAX_AGE;
-    /* 実現利回り＝全期間の年平均（幾何平均）。良い/悪いの順位付けもこの実現利回りで行う */
-    let prod=1; for(let i=0;i<nY;i++) prod*=(1+seq[i]);
-    const gm=Math.pow(prod,1/nY)-1;
+    /* 実現利回り＝全期間の年平均（幾何平均）。
+       資産配分を設定している場合は、その年に実際に適用された【総資産ベース】の利回り（yieldAll）を使う。
+       運用資産だけの利回りにすると、現預金を厚くしてもブレが縮まないように見えてしまうため、
+       値動きのない現預金まで含めた比率で加重する。 */
+    let prod=1, cnt=0;
+    for(let i=0;i<rows.length;i++){
+      const y=(useAssets && rows[i].yieldAll!=null)?rows[i].yieldAll:seq[i];
+      if(y!=null){ prod*=(1+y); cnt++; }
+    }
+    const gm=cnt>0?Math.pow(prod,1/cnt)-1:0;
     const real95=_real95(rows);
     res.push({survive:last.age, bust, gm, real95, alive95:real95>0});
+  }
+  /* 想定利回りの比較基準。資産配分を設定している場合は、その配分から決まる期待利回り
+     （ブレなしで試算したときの総資産ベースの年平均）を基準にする。
+     配分後の期待値が2%の人に「想定利回り4%を達成できたか」を問うのは意味がないため。 */
+  let muEff=mu;
+  if(useAssets){
+    const baseRows=simulate({...P, yieldSeq:null, assetShockSeq:null});
+    let p2=1,c2=0;
+    for(const r of baseRows){ if(r.yieldAll!=null){ p2*=(1+r.yieldAll); c2++; } }
+    if(c2>0) muEff=Math.pow(p2,1/c2)-1;
   }
   const notBust=res.filter(r=>!r.bust).length;
   const alive95=res.filter(r=>r.alive95).length;
   /* 実現利回りの低い順に並べ、下位10%＝不調・上位10%＝好調とする（利回りが単調に並ぶ） */
   const sorted=[...res].sort((a,b)=>a.gm-b.gm);
   const pick=p=>sorted[Math.min(sorted.length-1, Math.round(p*(sorted.length-1)))];
-  return { trials,sigma,rho,mu, good:pick(0.90), bad:pick(0.10),
+  /* 想定利回りの達成率＝実現利回り（全期間の年平均）が想定利回り以上になった試行の割合。
+     ブレがある以上、平均どおりに増える保証はないことを数字で示す。 */
+  const hit=res.filter(x=>x.gm>=muEff-1e-9).length;
+  const gmSorted=res.map(x=>x.gm).sort((a,b)=>a-b);
+  const gmAt=q=>gmSorted[Math.min(gmSorted.length-1,Math.max(0,Math.round((gmSorted.length-1)*q)))];
+  return { trials,sigma,rho,mu,muEff,useAssets, good:pick(0.90), bad:pick(0.10),
+           hitPct:hit/trials*100, gmMedian:gmAt(0.5), gmLow:gmAt(0.10), gmHigh:gmAt(0.90),
            survivedPct:notBust/trials*100, alive95Pct:alive95/trials*100 };
 }
 function renderMonteCarlo(P, baseRows){
@@ -5340,7 +6171,15 @@ function renderMonteCarlo(P, baseRows){
   const card=(cls,tag,ann,survive,real95)=>'<div class="mc-card '+cls+'"><div class="mc-tag">'+tag+'</div>'
     +'<div class="mc-big">'+ageTxt(survive)+'<small> まで資産がもつ</small></div>'
     +'<div class="mc-sub">実現利回り（全期間の年平均）：<b>年 '+(ann*100).toFixed(1)+'%</b> 相当<br>95歳時点の資産（実質）：<b>'+manY(real95)+'</b></div></div>';
-  el.innerHTML='<div class="mc-head">'+res.trials.toLocaleString('ja-JP')+'回の試算のうち、<b>'+res.alive95Pct.toFixed(0)+'%</b> のケースで95歳時点でも資産が残りました（想定利回り '+(res.mu*100).toFixed(1)+'%・年ごとのブレ幅 ±'+(res.sigma*100).toFixed(0)+'%）。運用の実現利回りが低いほど、資産がもつ年齢は下がります。基準は想定利回りを固定した現状の試算です。</div>'
+  /* 資産比率の変更を設定している場合、比較の基準は「その配分から決まる期待利回り」を使う */
+  const muTxt=(res.muEff*100).toFixed(1);
+  const muLbl=res.useAssets?'配分から決まる想定利回り':'想定利回り';
+  const muNote=(res.useAssets&&Math.abs(res.muEff-res.mu)>0.0005)
+    ? '（資産形成タブの想定利回り '+(res.mu*100).toFixed(1)+'% ではなく、現預金を含めた配分全体の期待値で判定しています）' : '';
+  el.innerHTML='<div class="mc-head">'+res.trials.toLocaleString('ja-JP')+'回の試算のうち、<b>'+res.alive95Pct.toFixed(0)+'%</b> のケースで95歳時点でも資産が残りました（'+muLbl+' '+muTxt+'%・年ごとのブレ幅 ±'+(res.sigma*100).toFixed(0)+'%）。運用の実現利回りが低いほど、資産がもつ年齢は下がります。基準は想定利回りを固定した現状の試算です。</div>'
+    +'<div class="mc-head" style="margin-top:8px">'+muLbl+' <b>'+muTxt+'%</b> を実際に達成できたのは <b>'+res.hitPct.toFixed(0)+'%</b> のケースでした（実現利回りの中央値 <b>'+(res.gmMedian*100).toFixed(1)+'%</b>、上位10% '+(res.gmHigh*100).toFixed(1)+'%／下位10% '+(res.gmLow*100).toFixed(1)+'%）。'+muNote
+    +(res.hitPct<50?'値動きのある資産は、良い年と悪い年が交互に来ると平均どおりには増えないため（複利の性質）、達成率は50%を下回るのが普通です。':'')
+    +'</div>'
     +'<div class="mc-grid">'
     +card('bad','不調（実現利回り 下位10%）', res.bad.gm, res.bad.survive, res.bad.real95)
     +card('base','基準（想定利回りで固定）', P.nisaYield, bl.age, baseReal95)
@@ -5416,7 +6255,11 @@ function init(){
   if(km){ askUnlock(km[1]); return; }
   let loaded=false;
   const s=decodeShare(location.hash);
-  if(s){ try{ applyState(s); loaded=true; }catch(e){} }
+  if(s){ try{
+      /* 共有リンクは送り主の試算をそのまま再現する。配分設定が含まれていなければ手元の設定も外す */
+      if(!Array.isArray(s.allocs)){ ALLOCS=[]; saveAllocs(); renderAllocRows(); }
+      applyState(s); loaded=true;
+    }catch(e){} }
   if(!loaded){ try{ const ls=localStorage.getItem('lifeplan'); if(ls){ applyState(JSON.parse(ls)); } }catch(e){} }
   /* 初回かどうかは render()（内部で保存を行う）より前に確定させる */
   finishInit(loaded);
@@ -5427,6 +6270,16 @@ document.getElementById('addSeg').addEventListener('click',()=>{ segs.push({from
 var _asb=document.getElementById('addSelfSeg'); if(_asb) _asb.addEventListener('click',()=>{ selfSegs.push({from:30,to:60,base:21,allow:3,raise:0.3,cap:30,bonusMonths:3.0,kind:'work'}); renderSelfSegs(); render(); });
 var _swmSel=document.getElementById('selfWorkMode'); if(_swmSel) _swmSel.addEventListener('change',()=>{ updateSelfWorkUI(); render(); });
 var _pwmSel=document.getElementById('partnerWorkMode'); if(_pwmSel) _pwmSel.addEventListener('change',()=>{ updatePartnerWorkUI(); render(); });
+var _alcTax=document.getElementById('alcUseTaxable');
+if(_alcTax) _alcTax.addEventListener('change',function(){ render(); });
+var _alcRE=document.getElementById('alcRealEnable');
+if(_alcRE) _alcRE.addEventListener('change',function(){ render(); });
+var _allocAdd=document.getElementById('allocAdd');
+if(_allocAdd) _allocAdd.addEventListener('click',function(){ if(ALLOCS.length>=ALLOC_MAX) return; ALLOCS.push(allocDefault()); saveAllocs(); renderAllocRows(); render(); });
+['alcYieldIndex','alcYieldGold','alcYieldBond','alcYieldCash','alcRealGross','alcVacancy','alcRealCost','alcRealAppr','alcRealMin','alcRealAcq','alcRealSell','alcRealBldg','alcRealLife','alcTaxRate'].forEach(function(id){
+  var e=document.getElementById(id); if(e) e.addEventListener('input',function(){ render(); });
+});
+loadAllocs(); renderAllocRows();
 var _addDebt=document.getElementById('addDebt');
 if(_addDebt) _addDebt.addEventListener('click',function(){
   var pre=DEBT_PRESETS[Math.min(debts.length,DEBT_PRESETS.length-1)];
@@ -5501,6 +6354,8 @@ var _pph=document.getElementById('psetPartHome'); if(_pph) _pph.addEventListener
 document.getElementById('addKid').addEventListener('click',()=>{ kids.push({birthAge:34}); renderKids(); render(); });
 document.getElementById('resetBtn').addEventListener('click',()=>{
   setDefaults();
+  /* 資産比率の変更もリセットの対象にする（残ったままだと初期状態に戻らないため） */
+  ALLOCS=[]; saveAllocs(); renderAllocRows();
   try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){}
   try{ localStorage.removeItem('lifeplan'); }catch(e){}
   render();
