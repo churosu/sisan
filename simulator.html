@@ -139,6 +139,27 @@
   /* ---- inputs ---- */
   .panel{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;}
 
+  /* ===== 入力項目の重要度 ===== */
+  .impbadge{display:inline-block; font-size:9.5px; font-weight:700; line-height:1.6; padding:0 5px;
+            border-radius:4px; margin-left:7px; vertical-align:middle; letter-spacing:.02em; white-space:nowrap;}
+  .impbadge.req{background:#FBE9EC; color:#A23A52;}   /* 必須 */
+  .impbadge.rec{background:#E7F1EC; color:#1F6B54;}   /* おすすめ */
+  .impbadge.opt{background:#F1F2F5; color:#5C6478;}   /* 任意 */
+  .impbadge.adv{background:#EFEDF6; color:#54508A;}   /* 詳細 */
+  /* 改善提案の「変更前→変更後」 */
+  .p-eff .ba{display:inline-flex; align-items:center; gap:5px; font-size:11.5px; white-space:nowrap;
+             background:var(--bg-sub,#F7F7F5); border:1px solid var(--line); border-radius:5px; padding:1px 7px; margin-left:2px;}
+  .p-eff .ba .b0{color:var(--slate-2); text-decoration:line-through;}
+  .p-eff .ba .b1{color:var(--ink); font-weight:700;}
+
+  /* ===== 計算の出どころを示すバッジ ===== */
+  .srcbadge{display:inline-block; font-size:9.5px; font-weight:700; line-height:1.6; padding:0 5px;
+            border-radius:4px; margin-left:6px; vertical-align:middle; letter-spacing:.02em; white-space:nowrap;}
+  .srcbadge.law{background:#E7F1EC; color:#1F6B54;}
+  .srcbadge.approx{background:#FDF0E3; color:#9A5A16;}
+  .srcbadge.own{background:#EDEEF5; color:#4A4F70;}
+  .srcbadge.future{background:#F2E9F5; color:#6B3A7A;}
+
   /* ===== 計算ロジックの詳細（必要な人だけが開く） ===== */
   .logic{border-top:1px solid var(--line); padding:2px 0;}
   .logic > summary{cursor:pointer; list-style:none; padding:11px 2px; font-size:13.5px; font-weight:700; color:var(--ink);}
@@ -153,9 +174,27 @@
   .logic-body li{margin-bottom:3px;}
   .logic-body b{color:var(--ink); font-weight:600;}
   .logic-note{margin-top:10px !important; padding-top:8px; border-top:1px dashed var(--line); color:var(--slate-2); font-size:12px;}
-  .logic-tbl{border-collapse:collapse; margin:4px 0 8px; font-size:12px;}
-  .logic-tbl th,.logic-tbl td{border:1px solid var(--line); padding:4px 10px; text-align:left;}
+  /* 表は内容にあわせて広がるとスマホで見切れるため、必ず親幅に収めて折り返す */
+  .logic-tbl{border-collapse:collapse; margin:4px 0 10px; font-size:12px;
+             width:100%; max-width:100%; table-layout:fixed; white-space:normal;}
+  /* 全体の table 指定（white-space:nowrap）を打ち消さないと、スマホで文字が折り返せず見切れる */
+  .logic-tbl th,.logic-tbl td{border:1px solid var(--line); padding:5px 8px; text-align:left;
+             white-space:normal; overflow-wrap:anywhere; word-break:normal; line-height:1.6; vertical-align:top;}
   .logic-tbl th{background:var(--bg-sub,#F7F7F5); font-weight:600; color:var(--ink);}
+  /* 区分の列は狭くてよい／バッジは折り返さない */
+  .logic-tbl td .srcbadge{margin-left:0;}
+  .logic-body{overflow-wrap:anywhere;}
+  /* 列幅の目安（table-layout:fixed は等分になるため、意味のある配分に寄せる） */
+  .lt-legend td:first-child{width:110px;}
+  .lt-class th:first-child,.lt-class td:first-child{width:38%;}
+  .lt-class th:nth-child(2),.lt-class td:nth-child(2){width:92px;}
+  @media(max-width:640px){
+    .logic-tbl{font-size:11px;}
+    .logic-tbl th,.logic-tbl td{padding:4px 5px;}
+    .lt-legend td:first-child{width:84px;}
+    .lt-class th:first-child,.lt-class td:first-child{width:36%;}
+    .lt-class th:nth-child(2),.lt-class td:nth-child(2){width:72px;}
+  }
   /* 各入力欄からロジックへ飛ぶ小さなリンク */
   .logic-link{display:inline-block; margin-left:6px; font-size:11px; color:var(--slate-2);
               text-decoration:underline; text-underline-offset:2px; cursor:pointer; background:none; border:0; padding:0; font-family:inherit;}
@@ -1048,7 +1087,7 @@
     </div>
 
     <details class="grp" id="sec-basic" open>
-      <summary><span class="tag">基本</span>あなたと家族の前提<span class="chev">▶</span></summary>
+      <summary><span class="tag">基本</span><span class="impbadge req">必須</span>あなたと家族の前提<span class="chev">▶</span></summary>
       <div class="body">
         <div class="field"><label>現在の年齢（本人）</label><div class="ig"><input type="number" id="currentAge" value="26"><span class="unit mo">歳</span><input type="number" class="mo" id="currentAgeMonths" value="0" min="0" max="11" step="1"><span class="unit mo">ヶ月</span></div></div>
         <div class="field"><label>性別（本人）</label><select id="gender"><option value="na">回答しない</option><option value="male">男性</option><option value="female">女性</option></select></div>
@@ -1064,7 +1103,7 @@
     </details>
 
     <details class="grp" id="sec-spend">
-      <summary><span class="tag">生活費</span>支出目安・保険・旅行<span class="chev">▶</span></summary>
+      <summary><span class="tag">生活費</span><span class="impbadge req">必須</span>支出目安・保険・旅行<span class="chev">▶</span></summary>
       <div class="body">
         <div class="field"><label>現在の世帯人数</label><div class="ig"><input type="number" id="curHouseholdSize" value="2" step="1"><span class="unit">人</span></div></div>
         <div class="field"><label>現在の月々の生活費（家賃・特別費除く）</label><div class="ig"><input type="number" id="curMonthlyLiving" value="20" step="0.5"><span class="unit">万/月</span></div></div>
@@ -1072,12 +1111,12 @@
         <div class="field"><label>インフレ率（年）<button type="button" class="logic-link" data-logic="logic-inflation">計算ロジック</button></label><div class="ig"><input type="number" id="inflation" value="1.0" step="0.1"><span class="unit">%</span></div></div>
         <div class="field"><label>旅行の回数</label><div class="ig"><input type="number" id="travelCount" value="1"><span class="unit">回/年</span></div></div>
         <div class="field"><label>　└ 1回あたり費用</label><div class="ig"><input type="number" id="travelCost" value="20"><span class="unit">万</span></div></div>
-        <div class="hint">保険は年齢に応じて自動計上（20代8→30代14→40代22→50代28→60代22→70代〜14 万/年）。</div>
+        <div class="hint">保険は年齢に応じて自動計上（20代8→30代14→40代22→50代28→60代22→70代〜14 万/年）。<span class="srcbadge own">独自初期値</span><br>この年齢別の金額は公的な基準ではなく、生命保険文化センターの調査などを参考にした<b>Mirai Shishin独自の初期値</b>です。すでに加入している保険料がわかる場合は実額に、<b>保険を見込まない場合は0に変更できます</b>（家計結果への影響が大きい項目です）。</div>
       </div>
     </details>
 
     <details class="grp" id="sec-income">
-      <summary><span class="tag">収入 本人</span>あなたの給与・退職後<span class="chev">▶</span></summary>
+      <summary><span class="tag">収入 本人</span><span class="impbadge req">必須</span>あなたの給与・退職後<span class="chev">▶</span></summary>
       <div class="body">
         <div class="hint" style="margin-top:0">給与は<b>額面（税・社会保険料を引く前）</b>で入力してください。手取りは、標準報酬月額の等級表と累進税率による<b>実額計算</b>で自動換算します（健康保険・介護・子ども子育て支援金・厚生年金・雇用保険・所得税・住民税）。<b>再雇用の年収と退職金は例外</b>で、再雇用は手取り額、退職金は額面での入力です（それぞれ欄に明記）。</div>
         <div class="field"><label>本人の働き方</label><select id="selfWorkMode"><option value="single">基本の給与カーブ（既定）</option><option value="segments">区間で指定（就職・転職・育休・産休）</option><option value="homemaker">専業主婦(夫)・収入なし</option></select></div>
@@ -1122,13 +1161,14 @@
     </details>
 
     <details class="grp" id="sec-partner">
-      <summary><span class="tag">収入 相手</span>パートナーの勤務（複数可）<span class="chev">▶</span></summary>
+      <summary><span class="tag">収入 相手</span><span class="impbadge rec">おすすめ</span>パートナーの勤務（複数可）<span class="chev">▶</span></summary>
       <div class="body">
         <div class="field"><label>パートナーの働き方</label><select id="partnerWorkMode"><option value="segments">区間で指定（就職・転職・育休・産休）</option><option value="single">基本の給与カーブ（通常勤務）</option><option value="none">専業主婦(夫)・収入なし</option></select></div>
         <div class="hint" id="partnerWorkModeHint" style="margin-top:0">産休・復職などを区間で指定します（既定）。</div>
-        <div class="field"><label>扶養内で働く場合の「年収の壁」</label><select id="kabeMode"><option value="h106">106万円（勤務先の社会保険に加入する働き方）</option><option value="h130">130万円（週20時間未満・加入しない働き方）</option></select></div>
+        <div class="field"><label>社会保険に入る目安（扶養内で働く場合）<span class="srcbadge future">将来制度</span></label><select id="kabeMode"><option value="h106">年収106万円を目安（週20時間以上・加入する働き方）</option><option value="h130">年収130万円を目安（週20時間未満・加入しない働き方）</option></select></div>
+        <div class="hint" style="margin-top:0"><b>2026年10月に賃金要件（月8.8万円＝年収約106万円）は撤廃予定</b>です。撤廃後の加入判定は<b>労働時間（週20時間以上）</b>で行われますが、本ツールは労働時間を入力しないため、簡易的に<b>年収106万円を目安</b>として判定しています（時給1,000〜1,100円なら年収106万円がおおむね週20時間に相当するため）。106万円を超えたら必ず加入、という意味ではありません。</div>
         <div class="hint" style="margin-top:0;text-align:right"><button type="button" class="logic-link" data-logic="logic-tax">税・社会保険の計算ロジック</button></div>
-        <details class="kabe"><summary>「年収の壁」の扱い（2026年改正対応）</summary><div class="kabe-b">2025〜2026年は年収の壁が大きく変わりました。本ツールは<b>令和8年（2026年）分</b>の制度で、壁の前後を<b>自動で判定</b>します。金額はすべて額面年収です。<br><b>・106万円の壁（社会保険）</b>…配偶者に扶養されうる側（世帯で収入の少ない側）が対象。年収106万円未満なら第3号被保険者とみなし、<b>本人負担の社会保険料は0</b>で試算します。これを超えると健康保険料・厚生年金保険料の本人負担が生じ、手取りが一時的に下がります（いわゆる働き損）。<br>　<b>2026年10月にこの賃金要件（月8.8万円）は撤廃</b>されますが、これは壁が上がるのではなく、<b>賃金が低くても週20時間以上働いていれば加入対象になる（適用が広がる）</b>改正です。本ツールは労働時間を入力しないため、撤廃後も106万円を目安に判定します（時給1,000〜1,100円なら年収106万円がおおむね週20時間に相当するため）。週20時間未満で働く場合は次の130万円が壁になります。<br><b>・130万円の壁（扶養）</b>…週20時間未満などで勤務先の社会保険に加入しない場合、この額まで被扶養者でいられます（超えると国民年金・国民健康保険に自分で加入）。壁自体は残ります。<br><b>・178万円の壁（所得税）</b>…給与所得控除（最低保障74万円）＋基礎控除（104万円）で、<b>年収178万円までは本人の所得税が0</b>（令和8・7年の時限措置。かつての103万→2025年160万→2026年178万）。年収665万円を超えると特例が縮小します。<br><b>・110万円台の壁（住民税）</b>…住民税の基礎控除は43万円のままなので、所得税より早く（おおむね年収110万円台から）住民税がかかりはじめます。<br><b>・136万円／169万円／207万円の壁（配偶者控除）</b>…2026年分から、配偶者控除の対象は給与年収<b>136万円以下</b>、配偶者特別控除の<b>満額は169万円まで</b>に拡大し、<b>約207万円で0</b>になります。本ツールは法定の逓減どおりに計算し、<b>控除は収入の多い側</b>に適用します。</div></details>
+        <details class="kabe"><summary>「年収の壁」の扱い（2026年改正対応）</summary><div class="kabe-b">2025〜2026年は年収の壁が大きく変わりました。本ツールは<b>令和8年（2026年）分</b>の制度で、壁の前後を<b>自動で判定</b>します。金額はすべて額面年収です。<br><b>・106万円の壁（社会保険）</b>…配偶者に扶養されうる側（世帯で収入の少ない側）が対象。年収106万円未満なら第3号被保険者とみなし、<b>本人負担の社会保険料は0</b>で試算します。これを超えると健康保険料・厚生年金保険料の本人負担が生じ、手取りが一時的に下がります（いわゆる働き損）。<br>　<b>2026年10月にこの賃金要件（月8.8万円）は撤廃</b>されますが、これは壁が上がるのではなく、<b>賃金が低くても週20時間以上働いていれば加入対象になる（適用が広がる）</b>改正です。本ツールは労働時間を入力しないため、撤廃後も106万円を目安に判定します（時給1,000〜1,100円なら年収106万円がおおむね週20時間に相当するため）。週20時間未満で働く場合は次の130万円が壁になります。<br><b>・130万円の壁（扶養）</b>…週20時間未満などで勤務先の社会保険に加入しない場合、この額まで被扶養者でいられます（超えると国民年金・国民健康保険に自分で加入）。壁自体は残ります。<br><b>・178万円の壁（所得税）</b>…<b>2026年分から</b>（改正法は原則2026年12月1日施行）、給与所得控除の最低保障74万円＋基礎控除104万円により、<b>給与収入178万円以下なら本人の所得税が0</b>になります（給与以外の所得や他の控除がない場合）。74万円のうち5万円と基礎控除の上乗せは<b>令和8・9年分の時限措置</b>で、令和10年分以降は縮小します。かつての103万→2025年分160万→2026年分178万という経緯です。年収665万円を超えると特例が縮小します。<br><b>・住民税の壁（おおむね年収110万円台）</b>…住民税の基礎控除は43万円のままのため、所得税より早く課税が始まります。ただし<b>所得割と均等割で開始点が異なり</b>、均等割の非課税限度額は<b>自治体によって差があります</b>（本ツールは1級地の基準で計算）。また住民税は<b>前年の所得</b>に対して課税されるため、所得税（2026年分）と住民税（2027年度）では効き始める年が1年ずれます（本ツールは簡便のため同年で計算）。「年収○万円なら住民税ゼロ」と一律には決まらない点にご注意ください。<br><b>・136万円／169万円／207万円の壁（配偶者控除）</b>…2026年分から、配偶者控除の対象は給与年収<b>136万円以下</b>、配偶者特別控除の<b>満額は169万円まで</b>に拡大し、<b>約207万円で0</b>になります。本ツールは法定の逓減どおりに計算し、<b>控除は収入の多い側</b>に適用します。</div></details>
         <div id="partnerSingleFields" style="display:none">
           <div class="hint" style="margin-top:0">本人と同じくひとつの給与カーブで試算します（通常勤務）。金額は<b>額面</b>。結婚前の期間は世帯収入に含みません。</div>
           <div class="field"><label>基本給（月・額面）</label><div class="ig"><input type="number" id="partnerBaseMonthly" value="21" step="0.5"><span class="unit">万/月</span></div></div>
@@ -1148,7 +1188,7 @@
     </details>
 
     <details class="grp" id="sec-edu">
-      <summary><span class="tag">子ども</span>人数・タイミング・学費<span class="chev">▶</span></summary>
+      <summary><span class="tag">子ども</span><span class="impbadge rec">おすすめ</span>人数・タイミング・学費<span class="chev">▶</span></summary>
       <div class="body">
         <div class="hint">子ども1人ごとに「出産時の本人年齢」を設定。学費は公私を選べます（全員共通プラン）。公立小・中は義務教育で授業料無償、公立高校も無償化。表示額は授業料以外の実費（給食・教材・制服・修学旅行等）で、塾・習い事は下の欄で別途加算します。私立高校の授業料は就学支援金でほぼ相殺した実費目安です。</div>
         <div id="kidList"></div>
@@ -1169,11 +1209,11 @@
     </details>
 
     <details class="grp" id="sec-invest">
-      <summary><span class="tag">資産</span>現預金・NISA<span class="chev">▶</span></summary>
+      <summary><span class="tag">資産</span><span class="impbadge req">必須</span>現預金・NISA<span class="chev">▶</span></summary>
         <div class="hint" style="margin-top:0;text-align:right"><button type="button" class="logic-link" data-logic="logic-nisa">NISAの計算ロジック</button></div>
       <div class="body">
         <div class="field"><label>現在の現預金</label><div class="ig"><input type="number" id="initCash" value="250"><span class="unit">万</span></div></div>
-        <div class="hint">生活防衛費は毎年自動算出：稼ぎ手が1人以下なら生活費の10ヶ月分、2人なら6ヶ月分、子どもがいる期間は（稼ぎ手数に関わらず）12ヶ月分。老後（年金生活・就労なし）は現金保有なし＝0（不足分はNISA/DCから取り崩し）。現預金はこの水準を保つよう調整します。</div>
+        <div class="hint">生活防衛費は毎年自動算出：稼ぎ手が1人以下なら生活費の10ヶ月分、2人なら6ヶ月分、子どもがいる期間は（稼ぎ手数に関わらず）12ヶ月分。老後（年金生活・就労なし）は現金保有なし＝0（不足分はNISA/DCから取り崩し）。現預金はこの水準を保つよう調整します。<span class="srcbadge own">独自初期値</span><br>この「何ヶ月分」という基準に公的な定めはなく、収入が途絶えたときの立て直しやすさから逆算した<b>Mirai Shishin独自のモデル</b>です（一般には3〜12ヶ月分と幅があります）。</div>
         <div class="field"><label>現在のNISA元本</label><div class="ig"><input type="number" id="initNisaP" value="0"><span class="unit">万</span></div></div>
         <div class="field"><label>現在のNISA評価額</label><div class="ig"><input type="number" id="initNisaV" value="0"><span class="unit">万</span></div></div>
         <div class="hint">すでに積立中の場合は開始時点の元本（と含み益込みの評価額）を入力。評価額が0なら元本と同額として扱い、生涯投資枠の残りも元本ぶん差し引きます。</div>
@@ -1185,7 +1225,8 @@
         <div class="field"><label>　└ パートナーの積立額</label><div class="ig"><input type="number" id="pNisaMonthly" value="3" step="0.5"><span class="unit">万/月</span></div></div>
         <div class="hint" style="margin-top:0">オンにすると、年間投資枠（360万×2＝720万）と生涯投資枠（1,800万×2＝3,600万）が2人分になります。運用利回りは共通で、評価額は世帯の総資産に合算します。</div>
         </div>
-        <div class="field"><label>こどもNISAを使う</label><input type="checkbox" id="hasKidNisa"></div>
+        <div class="field"><label>こどもNISAを使う<span class="srcbadge future">将来制度</span></label><input type="checkbox" id="hasKidNisa"></div>
+        <div class="hint" style="margin-top:0">こどもNISAは<b>まだ始まっていない制度案</b>です（2027年1月以降・0〜17歳・年間60万円・非課税保有限度額600万円という案で検討中）。<b>2026年8月時点の案</b>にもとづく試算で、今後変更・見送りの可能性があります。</div>
         <div id="kidNisaFields" class="optbox" style="display:none">
         <div class="field"><label>　└ 積立額（子1人あたり）</label><div class="ig"><input type="number" id="kidNisaMonthly" value="1" step="0.5" max="5"><span class="unit">万/月</span></div></div>
         <div class="field"><label>　└ 受け渡す年齢</label><div class="ig"><input type="number" id="kidNisaTo" value="22"><span class="unit">歳</span></div></div>
@@ -1200,7 +1241,7 @@
     </details>
 
     <details class="grp" id="sec-debt">
-      <summary><span class="tag">借金</span>住宅ローン以外の借入<span class="chev">▶</span></summary>
+      <summary><span class="tag">借金</span><span class="impbadge opt">任意</span>住宅ローン以外の借入<span class="chev">▶</span></summary>
       <div class="body">
         <div class="hint" style="margin-top:0">カーローン・奨学金・カードローンなど、<b>住宅ローン以外</b>の借入を入力します（住宅ローンは「住居」で設定します）。残債は<b>利息を含めた総支払残額</b>を入力してください。毎年「月々返済額×12」を現預金から返済し、残債が0になった時点で返済を終えます。</div>
         <div id="debtList"></div>
@@ -1210,7 +1251,7 @@
     </details>
 
     <details class="grp" id="sec-house">
-      <summary><span class="tag">住居</span>賃貸・購入・ローン・修繕<span class="chev">▶</span></summary>
+      <summary><span class="tag">住居</span><span class="impbadge rec">おすすめ</span>賃貸・購入・ローン・修繕<span class="chev">▶</span></summary>
       <div class="body">
         <div class="field"><label>戸建てを購入する年齢</label><div class="ig"><input type="number" id="buyAge" value="36"><span class="unit">歳</span></div></div>
         <div class="hint">購入しない場合は空欄または0にしてください（生涯賃貸として試算します）。</div>
@@ -1242,7 +1283,7 @@
     </details>
 
     <details class="grp" id="sec-car">
-      <summary><span class="tag">車</span>自動車の購入・買い替え<span class="chev">▶</span></summary>
+      <summary><span class="tag">車</span><span class="impbadge opt">任意</span>自動車の購入・買い替え<span class="chev">▶</span></summary>
       <div class="body">
         <div class="field"><label>車を保有する</label><input type="checkbox" id="hasCar"></div>
         <div class="field"><label>初回購入年齢</label><div class="ig"><input type="number" id="carFirstAge" value="30"><span class="unit">歳</span></div></div>
@@ -1258,7 +1299,7 @@
     </details>
 
     <details class="grp" id="sec-retire">
-      <summary><span class="tag">退職</span>確定拠出年金・退職金<span class="chev">▶</span></summary>
+      <summary><span class="tag">退職</span><span class="impbadge opt">任意</span>確定拠出年金・退職金<span class="chev">▶</span></summary>
       <div class="body">
         <div class="field"><label>確定拠出年金（iDeCo/企業型DC）</label><input type="checkbox" id="hasDC"></div>
         <div class="dc-on">
@@ -1283,7 +1324,7 @@
     </details>
 
     <details class="grp" id="sec-pension">
-      <summary><span class="tag">年金</span>受給開始・制度の前提<span class="chev">▶</span></summary>
+      <summary><span class="tag">年金</span><span class="impbadge rec">おすすめ</span>受給開始・制度の前提<span class="chev">▶</span></summary>
         <div class="hint" style="margin-top:0;text-align:right"><button type="button" class="logic-link" data-logic="logic-pension">年金の計算ロジック</button></div>
       <div class="body">
         <div class="field"><label>年金の受給開始年齢</label><select id="pensionStartAge">
@@ -1311,7 +1352,7 @@
     </details>
 
     <details class="grp" id="sec-others">
-      <summary><span class="tag">ライフイベント</span>副業・転職・介護・離婚・死亡<span class="chev">▶</span></summary>
+      <summary><span class="tag">ライフイベント</span><span class="impbadge adv">詳細</span>副業・転職・介護・離婚・死亡<span class="chev">▶</span></summary>
       <div class="body">
         <div class="hint" style="margin-top:0">起こるかどうか分からない出来事をまとめています。使う項目だけ開いてチェックを入れてください。</div>
         <details class="subgrp" id="sec-side"><summary>副業・不動産収入<span class="sg-chev">▶</span></summary><div class="sg-body">
@@ -1468,6 +1509,7 @@
         <div class="hint" style="margin-top:0;text-align:right"><button type="button" class="logic-link" data-logic="logic-mc">モンテカルロの計算ロジック</button></div>
       <details class="mc-set" id="mcSet">
           <summary>詳細設定（標準偏差・試行回数・相関）</summary>
+      <div class="hint" style="margin:0 0 6px">下の初期値（標準偏差15%・自己相関0）と、資産別の標準偏差・相関は<b>Mirai Shishin独自の初期値</b>です<span class="srcbadge own">独自初期値</span>。長期の市場データを参考にした一般的な水準で、公的な基準ではありません。変更すると結果は大きく変わります。</div>
           <div class="mc-fields">
             <div class="mc-f"><label>年リターンの標準偏差</label><input type="number" id="mcSigma" value="15" step="1"> <span style="font-size:11px;color:var(--slate-2)">%（株式中心なら15〜20%が目安）</span></div>
             <div class="mc-f"><label>試行回数</label><input type="number" id="mcTrials" value="800" step="100"> <span style="font-size:11px;color:var(--slate-2)">回（多いほど安定・遅い）</span></div>
@@ -1632,6 +1674,52 @@
       <h2>計算ロジックの詳細</h2>
       <p class="hint" style="margin-top:0">この試算が内部で何をしているかをまとめたものです。数字の根拠を確かめたい方だけご覧ください。金額の単位はすべて万円、税・社会保険は<b>令和8年度（2026年度）</b>の制度にもとづきます。</p>
 
+      <h4 style="margin:14px 0 6px;font-size:12.5px">入力項目の重要度</h4>
+      <p class="hint" style="margin-top:0">左（スマホでは上）の入力欄には、どこまで埋めるべきかの目安を付けています。<b>必須</b>だけ入れれば結果は出ます。</p>
+      <table class="logic-tbl lt-legend"><tbody>
+        <tr><td><span class="impbadge req">必須</span></td><td>ここを埋めないと試算が成り立ちません（年齢・生活費・収入・資産）</td></tr>
+        <tr><td><span class="impbadge rec">おすすめ</span></td><td>該当する人は精度が大きく上がります（家族・住まい・年金）</td></tr>
+        <tr><td><span class="impbadge opt">任意</span></td><td>あてはまる場合だけ（車・借入・退職金）</td></tr>
+        <tr><td><span class="impbadge adv">詳細</span></td><td>より細かく詰めたい人向け（副業・介護・相続など）</td></tr>
+      </tbody></table>
+
+      <h4 style="margin:14px 0 6px;font-size:12.5px">制度の基準日</h4>
+      <p class="hint" style="margin-top:0">分野ごとに、どの時点の制度にもとづいて計算しているかを示します。</p>
+      <table class="logic-tbl lt-class"><thead><tr><th>分野</th><th>基準</th><th>反映済みの改正</th></tr></thead><tbody>
+        <tr><td>所得税・住民税</td><td>令和8年分<br>（2026年分）</td><td>基礎控除・給与所得控除の改正（2026年12月1日施行・2026年分から適用）</td></tr>
+        <tr><td>社会保険</td><td>令和8年度<br>（2026年度）</td><td>子ども・子育て支援金0.230%（2026年4月〜）／賃金要件撤廃（2026年10月予定）</td></tr>
+        <tr><td>厚生年金の等級</td><td>令和8年度<br>（2026年度）</td><td>標準報酬月額の上限引上げ（2027年9月・2028年9月・2029年9月）</td></tr>
+        <tr><td>公的年金の給付</td><td>令和8年度<br>（2026年度）</td><td>令和6年財政検証のマクロ経済スライド／遺族厚生年金の見直し（2028年4月）</td></tr>
+        <tr><td>NISA</td><td>2024年からの<br>新NISA</td><td>年間360万・生涯1,800万（簿価管理・翌年復活）／こどもNISAは2027年開始の制度案</td></tr>
+        <tr><td>相続税・贈与税</td><td>令和8年分<br>（2026年分）</td><td>相続時精算課税の年110万円基礎控除（2024年分〜）</td></tr>
+      </tbody></table>
+      <p class="logic-note">この一覧は<b>2026年8月時点</b>の情報にもとづいています。制度改正は随時行われるため、重要な判断の際は必ず最新の公式情報をご確認ください。</p>
+
+      <h4 style="margin:14px 0 6px;font-size:12.5px">計算の出どころ</h4>
+      <p class="hint" style="margin-top:0">項目によって精度が異なります。画面の各所に次のバッジを付けています。</p>
+      <table class="logic-tbl lt-legend"><tbody>
+        <tr><td><span class="srcbadge law">制度準拠</span></td><td>法令の税率表・控除額・料率どおりに計算しているもの</td></tr>
+        <tr><td><span class="srcbadge approx">近似</span></td><td>制度は反映しているが、自治体差や個別要件を簡略化しているもの</td></tr>
+        <tr><td><span class="srcbadge own">独自初期値</span></td><td>公的な基準がなく、Mirai Shishin が仮置きした値（変更を推奨）</td></tr>
+        <tr><td><span class="srcbadge future">将来制度</span></td><td>施行前・改正予定にもとづくもの（今後変わる可能性あり）</td></tr>
+      </tbody></table>
+      <table class="logic-tbl lt-class"><thead><tr><th>項目</th><th>区分</th><th>補足</th></tr></thead><tbody>
+        <tr><td>所得税・住民税</td><td><span class="srcbadge law">制度準拠</span></td><td>令和8年分の税率表・控除額</td></tr>
+        <tr><td>社会保険料（会社員）</td><td><span class="srcbadge law">制度準拠</span></td><td>標準報酬等級表・都道府県別料率。健保組合の独自料率は未反映</td></tr>
+        <tr><td>社会保険料（自営業）</td><td><span class="srcbadge approx">近似</span></td><td>国民健康保険は自治体差が大きく目安計算</td></tr>
+        <tr><td>老齢年金の額</td><td><span class="srcbadge law">制度準拠</span></td><td>報酬比例・繰上げ繰下げ・在職老齢年金</td></tr>
+        <tr><td>年金の手取り</td><td><span class="srcbadge approx">近似</span></td><td>公的年金等控除・国保・介護を計算。自治体差あり</td></tr>
+        <tr><td>マクロ経済スライド</td><td><span class="srcbadge future">将来制度</span></td><td>財政検証の3ケース</td></tr>
+        <tr><td>標準報酬月額の上限引上げ</td><td><span class="srcbadge future">将来制度</span></td><td>2027・2028・2029年9月に段階実施</td></tr>
+        <tr><td>年収の壁（106万円）</td><td><span class="srcbadge future">将来制度</span></td><td>2026年10月に賃金要件撤廃。労働時間を入力しないため年収で近似</td></tr>
+        <tr><td>NISAの枠管理</td><td><span class="srcbadge law">制度準拠</span></td><td>年間360万・生涯1,800万（簿価）・翌年復活</td></tr>
+        <tr><td>こどもNISA</td><td><span class="srcbadge future">将来制度</span></td><td>2027年開始予定の制度案（2026年8月時点）</td></tr>
+        <tr><td>生活防衛費の月数</td><td><span class="srcbadge own">独自初期値</span></td><td>公的基準なし。一般には3〜12ヶ月分</td></tr>
+        <tr><td>保険料の年齢別自動設定</td><td><span class="srcbadge own">独自初期値</span></td><td>0円への変更可</td></tr>
+        <tr><td>モンテカルロの標準偏差・相関</td><td><span class="srcbadge own">独自初期値</span></td><td>長期の市場データを参考にした一般的な水準</td></tr>
+        <tr><td>賞与3.5ヶ月・退職金1,500万など</td><td><span class="srcbadge own">独自初期値</span></td><td>統計が一意に定まらないため仮置き</td></tr>
+      </tbody></table>
+
       <details class="logic" id="logic-tax"><summary>税金の計算</summary>
       <div class="logic-body">
         <h4>所得税</h4>
@@ -1667,7 +1755,14 @@
         <h4>老齢基礎年金</h4>
         <p>満額<b>83.17万円</b>（令和8年度）に納付月数の割合をかけます。40年（480月）納付で満額です。</p>
         <h4>老齢厚生年金（報酬比例部分）</h4>
-        <p>「<b>平均標準報酬額 × 5.481/1000 × 加入月数</b>」で計算します。本試算では毎年の標準報酬（年額・上限1,230万円）を積み上げた累計に料率をかける形で等価に処理しています。過去の加入実績は「平均年収 × 加入年数」で初期値として加算します。</p>
+        <p>「<b>平均標準報酬額 × 5.481/1000 × 加入月数</b>」で計算します。本試算では毎年の標準報酬を積み上げた累計に料率をかける形で等価に処理しています。過去の加入実績は「平均年収 × 加入年数」で初期値として加算します。</p>
+        <p>年間に算入できる標準報酬には上限があり、<b>標準報酬月額の上限×12＋標準賞与額の上限（150万円/回）×年2回</b>で求めています。標準報酬月額の上限は<b>65万円</b>ですが、<b>2027年9月に68万円、2028年9月に71万円、2029年9月に75万円</b>へ段階的に引き上げられるため、年度に応じて上限も切り替わります。</p>
+        <table class="logic-tbl"><thead><tr><th>年度</th><th>標準報酬月額の上限</th><th>年間の算入上限</th></tr></thead><tbody>
+          <tr><td>2026年度</td><td>65万円</td><td>1,080万円</td></tr>
+          <tr><td>2027年度〜</td><td>68万円</td><td>1,116万円</td></tr>
+          <tr><td>2028年度〜</td><td>71万円</td><td>1,152万円</td></tr>
+          <tr><td>2029年度〜</td><td>75万円</td><td>1,200万円</td></tr>
+        </tbody></table>
         <h4>繰上げ・繰下げ</h4>
         <p>繰上げは1ヶ月あたり<b>−0.4%</b>（60歳まで最大−24%）、繰下げは1ヶ月あたり<b>＋0.7%</b>（75歳まで最大＋84%）。減額・増額は生涯続きます。</p>
         <h4>在職老齢年金</h4>
@@ -1682,7 +1777,15 @@
         <p>いずれのケースでも、報酬比例部分について財政検証が織り込む実質賃金上昇による増加分は<b>見込まず</b>、安全側に寄せています。</p>
         <h4>遺族年金</h4>
         <p>遺族厚生年金は報酬比例部分の<b>3/4</b>（加入300月未満は300月みなし）。遺族基礎年金は18歳到達年度末までの子がいる間、中高齢寡婦加算は妻が40〜65歳の間。<b>2028年4月の改正</b>（子のない60歳未満の配偶者は原則5年の有期給付、有期給付加算で約1.3倍）も反映しています。遺族年金は<b>非課税</b>です。</p>
-        <p class="logic-note">年金は物価スライドで名目化し、受給額には手取り率<b>90%</b>（税・社会保険料の控除後）をかけて現金計上します。未反映：加給年金、振替加算、女性の支給開始年齢引上げの詳細（「死亡時40歳未満の妻」で近似）。</p>
+        <h4>年金の手取り<span class="srcbadge approx">近似</span></h4>
+        <p>受給額に固定率をかけるのではなく、<b>実際に税・社会保険料を計算</b>して手取りを求めます。</p>
+        <ol>
+          <li><b>公的年金等控除</b>を引いて雑所得を出します（65歳以上・年金収入330万円以下なら110万円、以降は段階的に増加）。</li>
+          <li><b>国民健康保険料・介護保険料</b>を計算します。65歳以上は介護保険第1号被保険者として月約6,500円を計上。</li>
+          <li>残りに<b>基礎控除・社会保険料控除</b>を適用し、所得税（＋復興特別2.1%）と住民税（所得割10%＋均等割）を計算します。</li>
+        </ol>
+        <p>結果として手取り率はおおむね<b>81〜85%</b>になります（年金額が少ないほど国民健康保険の均等割の影響で率が下がる場合もあります）。<b>近似</b>としているのは、国民健康保険料に自治体差が大きいこと、75歳以上の後期高齢者医療も同じ式で代用していること、配偶者の保険料を世帯人数で概算していることによります。</p>
+        <p class="logic-note">年金は物価スライドで名目化してから手取りを計算します。未反映：加給年金、振替加算、女性の支給開始年齢引上げの詳細（「死亡時40歳未満の妻」で近似）、後期高齢者医療の独自料率。</p>
       </div>
       </details>
 
@@ -1695,7 +1798,12 @@
         </ul>
         <p>パートナーのNISAを使う設定にすると、両方の枠が2倍になります。</p>
         <h4>売却したときの枠の復活</h4>
-        <p>ここが最も間違えやすい点です。NISAを売却すると<b>売却した分の簿価</b>だけ生涯投資枠が空きますが、実際に使えるようになるのは<b>翌年</b>です。本試算では売却時に簿価を比例控除したうえで別枠に退避し、その年のあいだは「枠を使っている」ものとして扱い、翌年の初めに解放します。年間投資枠は復活しません。</p>
+        <p><b>売却しても生涯投資枠が失われることはありません。</b>2つの枠を分けて考えると分かりやすくなります。</p>
+        <ul>
+          <li><b>生涯投資枠（1,800万円）</b>…売却した分の<b>簿価</b>が空きます。ただし実際に使えるのは<b>翌年から</b>で、その年のうちには再利用できません。翌年以降は<b>何度でも</b>使い直せます。</li>
+          <li><b>年間投資枠（360万円）</b>…売却しても<b>その年の枠は戻りません</b>。復活した生涯枠を使うには、翌年以降に年間枠の範囲内で買い付けることになります。</li>
+        </ul>
+        <p>本試算では、売却時に簿価を比例控除したうえで別枠に退避し、その年のあいだは「枠を使っている」ものとして扱い、翌年の初めに解放しています。</p>
         <h4>NISA内で商品を入れ替える場合</h4>
         <p>「売却 → 買い直し」となるため、<b>買い直し額（＝時価）ぶんの年間枠・生涯枠を消費</b>します。売却で戻る枠は簿価ぶんなので、<b>含み益が大きいほど枠を余分に使う</b>ことになります。資産比率の変更で一括リバランスを選んだ場合、この制約により目標比率に到達するまで数年かかることがあります。</p>
         <h4>枠を超えた分の扱い</h4>
@@ -1724,6 +1832,30 @@
           <li>税・社会保険の各種控除額、退職金：制度改定を織り込まないため据え置き。</li>
         </ul>
         <p class="logic-note">「最大支出」がいつの年かを判定する際は、名目額で比べるとインフレのぶん必ず最終年が最大になってしまうため、<b>実質額で判定</b>しています。</p>
+      </div>
+      </details>
+
+      <details class="logic" id="logic-glossary"><summary>用語のかんたん説明</summary>
+      <div class="logic-body">
+        <table class="logic-tbl lt-class"><tbody>
+          <tr><td><b>標準報酬月額</b></td><td>社会保険</td><td>社会保険料や年金額を計算するために、給与を等級（区切りのよい金額）にあてはめたもの。実際の給与そのものではありません。</td></tr>
+          <tr><td><b>標準賞与額</b></td><td>社会保険</td><td>賞与を1,000円未満切り捨てにしたもの。1回あたり・年度あたりの上限があります。</td></tr>
+          <tr><td><b>報酬比例部分</b></td><td>年金</td><td>厚生年金のうち、現役時代の給与が高いほど多くなる部分。全員共通の老齢基礎年金に上乗せされます。</td></tr>
+          <tr><td><b>マクロ経済スライド</b></td><td>年金</td><td>少子高齢化に合わせて年金の増え方を物価上昇より少し抑える仕組み。<b>金額は減らなくても、実質的な価値は下がっていきます</b>。</td></tr>
+          <tr><td><b>在職老齢年金</b></td><td>年金</td><td>働きながら年金を受け取ると、給与と年金の合計が一定額を超えた分だけ年金が止まる仕組み。</td></tr>
+          <tr><td><b>所得控除</b></td><td>税</td><td>税率をかける前の所得から差し引ける金額。基礎控除・社会保険料控除・配偶者控除など。<b>控除が大きいほど税金は減ります</b>。</td></tr>
+          <tr><td><b>合計所得金額</b></td><td>税</td><td>収入から必要経費（給与なら給与所得控除）を引いたあとの金額。「年収」とは別物で、各種の判定はこちらで行われます。</td></tr>
+          <tr><td><b>課税所得</b></td><td>税</td><td>合計所得金額から所得控除を引いた、実際に税率をかける金額。</td></tr>
+          <tr><td><b>限界税率</b></td><td>税</td><td>「あと1万円多く稼いだとき、そのうち何%が税金になるか」。副収入の手取りを見るときに使います。</td></tr>
+          <tr><td><b>簿価</b></td><td>投資</td><td>買ったときの値段。NISAの生涯投資枠は評価額ではなく<b>簿価</b>で管理されます。</td></tr>
+          <tr><td><b>含み益</b></td><td>投資</td><td>まだ売っていない値上がり分。売って初めて課税されます。</td></tr>
+          <tr><td><b>名目値／実質価値</b></td><td>共通</td><td><b>名目</b>はその年に実際に動く金額、<b>実質（今の価値）</b>はインフレを割り戻して現在の物価に直した金額。「30年後の3,000万円」は名目で、実質では2,000万円程度かもしれません。</td></tr>
+          <tr><td><b>ボラティリティ<br>（標準偏差）</b></td><td>投資</td><td><b>資産価格のブレの大きさ</b>。年18%なら「1年の成績が平均±18%の範囲に収まることが約7割」という意味です。</td></tr>
+          <tr><td><b>相関係数</b></td><td>投資</td><td>2つの資産が<b>同じ方向に動く度合い</b>。+1は完全に同じ動き、0は無関係、−1は正反対。異なる動きの資産を組み合わせると全体のブレが小さくなります。</td></tr>
+          <tr><td><b>幾何平均</b></td><td>投資</td><td>複利を考えた平均利回り。+50%と−50%を1年ずつなら、単純平均は0%でも実際は−13.4%になります。</td></tr>
+          <tr><td><b>生活防衛費</b></td><td>家計</td><td>収入が途絶えても暮らしを立て直せるよう、現金で持っておく金額。</td></tr>
+          <tr><td><b>資産寿命</b></td><td>家計</td><td>現預金・運用資産を取り崩しながら、何歳まで暮らしを続けられるか。</td></tr>
+        </tbody></table>
       </div>
       </details>
 
@@ -1802,9 +1934,17 @@ function eduTotalPerChild(P){ let t=0; for(let a=3;a<=21;a++) t+=eduAnnual(a,P);
 function insurance(age){ if(age<30)return 8; if(age<40)return 14; if(age<50)return 22; if(age<60)return 28; if(age<70)return 22; return 14; }
 /* 公的年金（令和7年度基準・概算）: 老齢基礎満額83.17万/年、報酬比例乗率5.481/1000（2003年4月〜）、標準報酬の年間上限概算1230万 */
 const CURRENT_YEAR=new Date().getFullYear();
-const APP_VERSION='0.0.53';   /* 更新するたびに末尾を増やす */
+const APP_VERSION='0.0.56';   /* 更新するたびに末尾を増やす */
 const MAX_AGE=120;  /* 生活資金が尽きなかった場合の試算上限 */
-const PENSION_FULL=83.17, PENSION_RATE=5.481/1000, PENSION_CAP=1230, PENSION_NET=0.90;
+const PENSION_FULL=83.17, PENSION_RATE=5.481/1000;
+/* 報酬比例部分の計算に使う「年間の標準報酬の上限」。
+   独自の固定値ではなく、制度どおり【標準報酬月額の上限×12＋標準賞与額の上限(150万/回)×支給回数】で求める。
+   標準報酬月額の上限は 65万円 → 2027年9月 68万 → 2028年9月 71万 → 2029年9月 75万 と段階的に引き上げられる。
+   （2026年度=1,080万円／2027年度=1,116万／2028年度=1,152万／2029年度以降=1,200万） */
+function pensionAnnualCap(year){
+  const g=pensionGrades(year||CURRENT_YEAR);
+  return g[g.length-1]*12 + BONUS_CAP_PENSION*BONUS_TIMES;
+}
 /* マクロ経済スライドの調整期間（2024年財政検証・過去30年投影ケース）
    ・報酬比例部分（厚生年金2階）：2026年度に調整終了 → 以後は実質維持
    ・基礎年金（1階）：2057年度まで調整継続 → 実質で目減り（夫婦2人分で2024→2057に約▲20%） */
@@ -1911,6 +2051,40 @@ function giftTax(amount, mode, special, usedSpecial){
   return {tax:0, usedSpecial, taxable};
 }
 
+/* ============ 年金受給時の手取り ============
+   ・公的年金等控除（令和8年分・公的年金等以外の合計所得1,000万円以下の区分）を引いて雑所得を出す。
+   ・そこから所得税（＋復興特別2.1%）・住民税、国民健康保険料・介護保険料（65歳以上は第1号）を差し引く。
+   ・国民健康保険料は自治体差が大きいため目安計算。75歳以上の後期高齢者医療も同じ式で近似する。 */
+const KAIGO1_MONTH = 0.65;   /* 65歳以上の介護保険料（第1号・全国平均 月約6,500円） */
+function nenkinKoujo(gross, age){
+  gross=Math.max(0,gross||0);
+  if(age>=65){
+    if(gross<=330) return Math.min(gross,110);
+    if(gross<=410) return gross*0.25+27.5;
+    if(gross<=770) return gross*0.15+68.5;
+    if(gross<=1000) return gross*0.05+145.5;
+    return 195.5;
+  }
+  if(gross<=130) return Math.min(gross,60);
+  if(gross<=410) return gross*0.25+27.5;
+  if(gross<=770) return gross*0.15+68.5;
+  if(gross<=1000) return gross*0.05+145.5;
+  return 195.5;
+}
+function pensionNetOf(gross, age, opt){
+  opt=opt||{};
+  gross=Math.max(0,gross||0);
+  if(gross<=0) return {net:0, social:0, income:0, resident:0};
+  const shotoku=Math.max(0, gross-nenkinKoujo(gross,age));
+  const fam=Math.max(0,opt.famCount||0), heads=1+fam;
+  const kokuho=Math.min(KOKUHO_CAP, Math.max(0,shotoku-43)*(KOKUHO_RATE/100)+KOKUHO_CAPITA*heads);
+  const kaigo=(age>=65)?KAIGO1_MONTH*12*heads:0;
+  const social=kokuho+kaigo;
+  const it=incomeTaxOn(shotoku-kisoDeductionIncome(shotoku)-social);
+  const rt=residentTaxOn(shotoku, kisoDeductionResident(shotoku)+social, 5, fam);
+  return {net:Math.max(0,gross-social-it-rt), social:social, income:it, resident:rt};
+}
+
 /* 死亡一時金（国民年金第1号・保険料納付月数に応じた額。遺族基礎年金を受けられない場合） */
 function shiboIchijikin(months){
   if(months<36) return 0;
@@ -1974,7 +2148,7 @@ function computePension(P,pcSelf,pcSpouse,married,calYear){
   const gross=selfBasic+selfKosei+spouse;
   /* 戻り値は「現在の物価水準（今日の円）」ベース。実際の給付は物価スライドで名目額が増えるため、
      利用側で (1+インフレ率)^経過年 を掛けて名目化する。 */
-  return {gross, net:gross*PENSION_NET, selfBasic, selfKosei, spouse};
+  return {gross, net:null, selfBasic, selfKosei, spouse};   /* net は受給年齢が確定する呼び出し側で実額計算する */
 }
 /* ============ 税・社会保険の実額計算（万円単位） ============
    令和8年度（2026年度）の制度にもとづく実額計算。概算の「手取り率」は使わない。
@@ -2329,8 +2503,8 @@ function simulate(P){
   /* 報酬比例部分の累積（標準報酬の年額の合計）。
      シミュレーションは現在年齢から始まるため、それ以前の厚生年金加入実績を初期値として加算する。
      （平均年収 × 加入年数。標準報酬の年間上限で頭打ち） */
-  let pcSelf=(P.pensionType!=='kokumin')?Math.max(0,Math.min(P.pastKoseiIncome||0,PENSION_CAP))*Math.max(0,P.pastKoseiYears||0):0,
-      pcSpouse=Math.max(0,Math.min(P.pastKoseiIncomeP||0,PENSION_CAP))*Math.max(0,P.pastKoseiYearsP||0),
+  let pcSelf=(P.pensionType!=='kokumin')?Math.max(0,Math.min(P.pastKoseiIncome||0,pensionAnnualCap(CURRENT_YEAR)))*Math.max(0,P.pastKoseiYears||0):0,
+      pcSpouse=Math.max(0,Math.min(P.pastKoseiIncomeP||0,pensionAnnualCap(CURRENT_YEAR)))*Math.max(0,P.pastKoseiYearsP||0),
       pensionCalc=null, shortfallCum=0;
   let giftSpecialUsed=0;   /* 相続時精算課税の特別控除（2,500万円）の使用済み額 */
   const nY=Math.max(1,MAX_AGE-P.currentAge+1);
@@ -2361,15 +2535,15 @@ function simulate(P){
       if(_swm==='homemaker'){ /* 専業主婦(夫)：収入なし */ }
       else if(_swm==='segments'){
         for(const s of (P.selfSegs||[])){ if(age>=s.from&&age<=s.to){
-          if(s.kind==='leave'){ const bl=(s.base+(s.allow||0)); selfLeaveNet+=bl*((s.benefit!=null?s.benefit:67)/100)*12; if(P.pensionType!=='kokumin'&&age>=P.joinAge) selfPc+=Math.min(bl*12,PENSION_CAP); }
+          if(s.kind==='leave'){ const bl=(s.base+(s.allow||0)); selfLeaveNet+=bl*((s.benefit!=null?s.benefit:67)/100)*12; if(P.pensionType!=='kokumin'&&age>=P.joinAge) selfPc+=Math.min(bl*12,pensionAnnualCap(CURRENT_YEAR+i)); }
           else { const base=Math.min(s.base+(s.raise||0)*Math.max(0,age-s.from),s.cap||s.base); selfBase+=base; selfAllow+=(s.allow||0); selfBonus+=base*(s.bonusMonths||0); selfWorks=true; }
         } }
         selfMonthly=selfBase+selfAllow; selfGross=selfMonthly*12+selfBonus;
-        if(selfWorks && P.pensionType!=='kokumin' && age>=P.joinAge) selfPc+=Math.min(selfGross,PENSION_CAP);
+        if(selfWorks && P.pensionType!=='kokumin' && age>=P.joinAge) selfPc+=Math.min(selfGross,pensionAnnualCap(CURRENT_YEAR+i));
       }
       else { selfBase=Math.min(P.selfBaseMonthly+P.selfRaise*i,P.selfCapMonthly); if(P.hasJobChange&&age>=P.jobChangeAge) selfBase*=(1+P.jobChangeRate); const famKids=childAges.filter(a=>a!=null && a<=(P.famChildAge!=null?P.famChildAge:P.childIndependAge)).length; const famAllow=(P.hasFamAllow!==false)?((P.famAllowSpouse||0)*marriedFrac+famKids*(P.famAllowChild||0)):0; selfAllow=P.selfAllowance+famAllow; selfMonthly=selfBase+selfAllow; selfBonus=selfBase*P.selfBonusMonths; selfGross=selfMonthly*12+selfBonus; selfWorks=true;
         if(housingSubsidy>0 && P.housingSubsidyTaxable!==false){ selfGross+=housingSubsidy; selfMonthly+=housingSubsidy/12; }
-        if(P.pensionType!=='kokumin' && age>=P.joinAge) selfPc+=Math.min(selfGross,PENSION_CAP); }
+        if(P.pensionType!=='kokumin' && age>=P.joinAge) selfPc+=Math.min(selfGross,pensionAnnualCap(CURRENT_YEAR+i)); }
     }
     if(selfDead){ selfBase=0; selfAllow=0; selfMonthly=0; selfBonus=0; selfGross=0; selfLeaveNet=0; selfWorks=false; selfPc=0; }
     let pMonthly=0,pBonus=0,pGross=0,pLeaveNet=0,pPc=0;
@@ -2383,7 +2557,7 @@ function simulate(P){
         }
       } else {
         for(const s of P.partnerSegs){ if(age>=s.from&&age<=s.to){
-          if(s.kind==='leave'){ const bl=(s.base+(s.allow||0)); pLeaveNet+=bl*((s.benefit!=null?s.benefit:67)/100)*12; pPc+=Math.min(bl*12,PENSION_CAP); }
+          if(s.kind==='leave'){ const bl=(s.base+(s.allow||0)); pLeaveNet+=bl*((s.benefit!=null?s.benefit:67)/100)*12; pPc+=Math.min(bl*12,pensionAnnualCap(CURRENT_YEAR+i)); }
           else { const base=Math.min(s.base+(s.raise||0)*Math.max(0,age-s.from),s.cap||s.base); const m=base+(s.allow||0); pMonthly+=m; pBonus+=base*(s.bonusMonths||0);} } }
       }
       pMonthly*=marriedFrac; pBonus*=marriedFrac; pLeaveNet*=marriedFrac; pPc*=marriedFrac; pGross=pMonthly*12+pBonus;
@@ -2391,7 +2565,7 @@ function simulate(P){
     const gross=selfGross+pGross, bonus=selfBonus+(married?pBonus:0);
     /* 厚生年金の標準報酬を積み立て（就労中・上限あり。育休・産休は免除期間も加入期間とみなす） */
     pcSelf+=selfPc;
-    if(married){ if(pGross>0) pcSpouse+=Math.min(pGross,PENSION_CAP); pcSpouse+=pPc; }
+    if(married){ if(pGross>0) pcSpouse+=Math.min(pGross,pensionAnnualCap(CURRENT_YEAR+i)); pcSpouse+=pPc; }
     let sideInc=0;   /* 副業・不動産などの所得（額面。必要経費を引いたあと・税引き前） */
     if(P.hasSideIncome && age>=P.sideFrom && age<=P.sideTo && !selfDead) sideInc=P.sideIncome*Math.pow(1+(P.sideGrowth||0), Math.max(0,age-P.sideFrom));
     let net, pensionNom=null, taxSocial=0, taxIncome=0, taxResident=0;
@@ -2433,7 +2607,7 @@ function simulate(P){
         /* 繰上げ −0.4%/月、繰下げ +0.7%/月（生涯継続） */
         const adj=(ps<65)?(1-0.004*(65-ps)*12):(1+0.007*(ps-65)*12);
         pc={gross:pc.gross*adj,net:pc.net*adj,selfBasic:pc.selfBasic*adj,selfKosei:pc.selfKosei*adj,spouse:pc.spouse*adj};
-        if(selfDead) pc={gross:pc.spouse, net:pc.spouse*PENSION_NET, selfBasic:0, selfKosei:0, spouse:pc.spouse};
+        if(selfDead) pc={gross:pc.spouse, net:null, selfBasic:0, selfKosei:0, spouse:pc.spouse};
         /* 在職老齢年金：働きながら受給する場合、報酬比例部分の月額と総報酬月額相当額の合計が
            支給停止基準額（令和8年度 65万円/月）を超えると、超過分の半額が報酬比例から支給停止される。
            基礎年金は停止されない。 */
@@ -2442,14 +2616,19 @@ function simulate(P){
           const over=kosei_m+wage_m-65;   /* 令和8年度の支給停止基準額 65万円/月（令和7年度は51万円） */
           if(over>0){
             const cut=Math.min(kosei_m, over/2)*12;
-            pc={...pc, selfKosei:pc.selfKosei-cut, gross:pc.gross-cut, net:(pc.gross-cut)*PENSION_NET};
+            pc={...pc, selfKosei:pc.selfKosei-cut, gross:pc.gross-cut};
           }
         }
         /* 公的年金は物価スライドで名目額が改定されるため、生活費と同じインフレ係数で名目化する
            （マクロ経済スライドによる実質目減りは computePension 側で調整済み） */
         const pf=Math.pow(1+P.inflation,i);
         pensionCalc=pc;
-        pensionNom={gross:pc.gross*pf, net:pc.net*pf, selfBasic:pc.selfBasic*pf, selfKosei:pc.selfKosei*pf, spouse:pc.spouse*pf};
+        /* ★手取りは固定率ではなく、公的年金等控除→所得税・住民税・国民健康保険・介護保険を
+           実際に計算して求める（名目化したあとの金額で判定する） */
+        const gN=pc.gross*pf;
+        const pn=pensionNetOf(gN, age, {famCount:(married&&!widowed)?1:0});
+        pensionNom={gross:gN, net:pn.net, social:pn.social, income:pn.income, resident:pn.resident,
+                    selfBasic:pc.selfBasic*pf, selfKosei:pc.selfKosei*pf, spouse:pc.spouse*pf};
       }
       net=reemp+(pensionNom?pensionNom.net:0);
     }
@@ -3552,9 +3731,9 @@ function renderProposals(P, rows){
   }
   el.innerHTML=scored.map((c,i)=>{
     const eff=[];
-    if(c.bustFix) eff.push(`<b style="color:var(--teal)">資金不足を回避できる試算</b>（${base.endAge}歳で資金が尽きる → ${MAX_AGE}歳まで資産が残る）`);
-    else if(c.dLast>0) eff.push(`資産の持続を<b style="color:var(--teal)">${c.dLast}年延長</b>（${base.endAge}歳 → ${c.m.endAge}歳）`);
-    if(base.survived&&c.m.survived) eff.push(`最終総資産 ${man(base.final)} → <b>${manY(c.m.final)}</b>（<b style="color:${c.dFinal>=0?'var(--teal)':'var(--rose)'}">${c.dFinal>=0?'+':''}${manY(c.dFinal)}</b>）`);
+    if(c.bustFix) eff.push(`<b style="color:var(--teal)">資金不足を回避できる試算</b>　<span class="ba"><span class="b0">${base.endAge}歳で資金切れ</span>→<span class="b1">${MAX_AGE}歳まで維持</span></span>`);
+    else if(c.dLast>0) eff.push(`資産寿命 <b style="color:var(--teal)">＋${c.dLast}年</b>　<span class="ba"><span class="b0">${base.endAge}歳</span>→<span class="b1">${c.m.endAge}歳</span></span>`);
+    if(base.survived&&c.m.survived) eff.push(`最終総資産 <b style="color:${c.dFinal>=0?'var(--teal)':'var(--rose)'}">${c.dFinal>=0?'＋':'−'}${manY(Math.abs(c.dFinal))}</b>　<span class="ba"><span class="b0">${man(base.final)}</span>→<span class="b1">${manY(c.m.final)}</span></span>`);
     if(base.minGap<-0.5&&c.dGap>5) eff.push(`現預金の谷が${manY(c.dGap)}改善`);
     return `<div class="proposal"><div class="p-rank">${i+1}</div><div class="p-body">
       <div class="p-title">${c.icon} ${c.label}</div>
@@ -4003,6 +4182,24 @@ function renderResultSheet(P, rows){
   (mr.oneoffItems||[]).forEach(o=>{ if(o.amt>0.5) br.push({k:o.lbl, v:manU(o.amt), s:'-'}); });
   items.push({k:'最大支出', v:manY(mx.v), sub:`${mx.age}歳・${Math.max(0,mx.age-now)}年後`, d:br});
 
+  /* --- 4.5 老後に必要なお金と過不足 ---
+     年金生活に入ってから95歳までに、収入でまかなえない支出の累計＝資産から取り崩す必要がある額。
+     それをリタイア時点の総資産（税引後）と比べて、足りているかどうかを示す。 */
+  const retAge=Math.max(P.selfRetire||65, 60);
+  const oldRows=rows.filter(r=>r.age>=retAge && r.age<=95);
+  if(oldRows.length){
+    let needOld=0;
+    oldRows.forEach(r=>{ needOld+=Math.max(0,(r.expense||0)-(r.incomeCash||0)); });
+    const atRet=rows.find(r=>r.age>=retAge);
+    const haveRet=atRet?(atRet.netWorth||0):0;
+    const gap=needOld-haveRet;
+    items.push({k:'老後に必要なお金', v:manY(needOld), sub:`${retAge}〜95歳`, d:[
+      {k:`${retAge}歳時点の総資産`, v:manY(haveRet), s:'+'},
+      {k:'収入でまかなえない支出', v:manY(needOld), s:'-'},
+      (gap>0.5? {k:'不足額', v:manY(gap), s:'-', bold:true}
+              : {k:'余裕', v:manY(-gap), s:'+', bold:true})]});
+  }
+
   /* --- 5. 今から始める積立 --- */
   let goals=[];
   if(P.marriageRow>=0 && P.marriageAgeFrac>P.currentAgeFrac && (P.weddingCost||0)>0)
@@ -4067,7 +4264,7 @@ function renderResultSheet(P, rows){
   const ul=d=>(!d||!d.length)?'':`<ul class="rs-ul">`+d.map(x=>{
     if(typeof x==='string') return `<li><span class="rs-lk">${x}</span></li>`;
     if(x.muted!=null) return `<li class="muted">${x.muted}</li>`;
-    const cls=(x.s==='-')?'minus':(x.s==='+')?'plus':(x.s==='g')?'goal':'';
+    const cls=((x.s==='-')?'minus':(x.s==='+')?'plus':(x.s==='g')?'goal':'')+(x.bold?' goal':'');
     /* 符号は金額のときだけ付ける（「手元資金で充当」のような文言に＋が付くのを防ぐ） */
     const numeric=/^[0-9]/.test(String(x.v||''));
     const sign=!numeric?'':(x.s==='-')?'−':(x.s==='+')?'＋':'';
@@ -6576,7 +6773,8 @@ function renderMonteCarlo(P, baseRows){
   const muLbl=res.useAssets?'配分から決まる想定利回り':'想定利回り';
   const muNote=(res.useAssets&&Math.abs(res.muEff-res.mu)>0.0005)
     ? '（資産形成タブの想定利回り '+(res.mu*100).toFixed(1)+'% ではなく、現預金を含めた配分全体の期待値で判定しています）' : '';
-  el.innerHTML='<div class="mc-head">'+res.trials.toLocaleString('ja-JP')+'回の試算のうち、<b>'+res.alive95Pct.toFixed(0)+'%</b> のケースで95歳時点でも資産が残りました（'+muLbl+' '+muTxt+'%・年ごとのブレ幅 ±'+(res.sigma*100).toFixed(0)+'%）。運用の実現利回りが低いほど、資産がもつ年齢は下がります。基準は想定利回りを固定した現状の試算です。</div>'
+  el.innerHTML='<div class="mc-head" style="color:var(--slate-2);font-size:11.5px;margin-bottom:6px">これは未来の確率ではありません。<b>設定した期待リターン・標準偏差・相関・インフレ率を前提にした試算結果</b>であり、前提を変えれば数字も変わります。</div>'
+    +'<div class="mc-head">'+res.trials.toLocaleString('ja-JP')+'回の試算のうち、<b>'+res.alive95Pct.toFixed(0)+'%</b> のケースで95歳時点でも資産が残りました（'+muLbl+' '+muTxt+'%・年ごとのブレ幅 ±'+(res.sigma*100).toFixed(0)+'%）。運用の実現利回りが低いほど、資産がもつ年齢は下がります。基準は想定利回りを固定した現状の試算です。</div>'
     +'<div class="mc-head" style="margin-top:8px">'+muLbl+' <b>'+muTxt+'%</b> を実際に達成できたのは <b>'+res.hitPct.toFixed(0)+'%</b> のケースでした（実現利回りの中央値 <b>'+(res.gmMedian*100).toFixed(1)+'%</b>、上位10% '+(res.gmHigh*100).toFixed(1)+'%／下位10% '+(res.gmLow*100).toFixed(1)+'%）。'+muNote
     +(res.hitPct<50?'値動きのある資産は、良い年と悪い年が交互に来ると平均どおりには増えないため（複利の性質）、達成率は50%を下回るのが普通です。':'')
     +'</div>'
