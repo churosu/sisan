@@ -1635,7 +1635,7 @@
           <th class="l">経過</th><th>本人</th><th>相手</th><th class="l">子</th>
           <th class="l">ライフイベント</th>
           <th>額面年収</th><th>月手取り</th><th>月生活費</th><th>月住宅費</th><th>ボーナス</th>
-          <th>年間貯蓄</th><th>NISA積立</th><th id="thNisaV">NISA評価</th><th>NISA元本</th><th>ローン残高</th>
+          <th>年間貯蓄</th><th>NISA積立</th><th id="thNisaV">NISA評価</th><th id="thNisaP">NISA元本</th><th>ローン残高</th>
           <th>現預金</th><th>総資産</th><th class="l">イベント費用（備考）</th>
         </tr></thead><tbody id="tbody"></tbody></table>
       </div>
@@ -1935,7 +1935,7 @@ function eduTotalPerChild(P){ let t=0; for(let a=3;a<=21;a++) t+=eduAnnual(a,P);
 function insurance(age){ if(age<30)return 8; if(age<40)return 14; if(age<50)return 22; if(age<60)return 28; if(age<70)return 22; return 14; }
 /* 公的年金（令和7年度基準・概算）: 老齢基礎満額83.17万/年、報酬比例乗率5.481/1000（2003年4月〜）、標準報酬の年間上限概算1230万 */
 const CURRENT_YEAR=new Date().getFullYear();
-const APP_VERSION='0.0.57';   /* 更新するたびに末尾を増やす */
+const APP_VERSION='0.0.58';   /* 更新するたびに末尾を増やす */
 const MAX_AGE=120;  /* 生活資金が尽きなかった場合の試算上限 */
 const PENSION_FULL=83.17, PENSION_RATE=5.481/1000;
 /* 報酬比例部分の計算に使う「年間の標準報酬の上限」。
@@ -3276,6 +3276,17 @@ function simulate(P){
     }
     const netWorth=busted?0:(cash+eduAccount+nisaV+taxVNet+dcValue*(1-P.dcTaxRate));
     const defl=Math.pow(1+P.inflation,i);
+    /* ★年末にも生涯投資枠の上限を保証する（年初の調整に加えた二重の歯止め）。
+       枠を超えた簿価は非課税では持てないため、その割合の評価額とあわせて特定口座へ移す。 */
+    {
+      const capEnd=P.nisaCap*(1+((P.hasPartnerNisa&&married)?1:0));
+      if(nisaP>capEnd+1e-9){
+        const ratio=Math.min(1,(nisaP-capEnd)/nisaP);
+        const moveV=nisaV*ratio;
+        nisaV=Math.max(0,nisaV-moveV); nisaP=capEnd;
+        if(moveV>0){ taxV+=moveV; taxP+=moveV; }
+      }
+    }
     const events=eventsFor(P,age,childAges,L);
     /* 表示用の保有比率。実際に購入できた不動産の額に合わせ、買えていないぶんは投資信託に寄せる
        （最低購入価格に届くまでの年に、実在しない不動産が円グラフに出ないようにするため） */
@@ -4502,8 +4513,13 @@ function render(){
   renderBalance(P);
   renderKidFunds(P,rows);
   renderAllocResult(P,rows);
-  { const th=document.getElementById('thNisaV');
-    if(th) th.textContent=(P.allocs&&P.allocs.length)?'運用資産 評価':'NISA評価'; }
+  /* この2列は NISA 口座だけの金額。特定口座は「総資産」に含まれるため、
+     「運用資産」と書くと特定口座も含むように誤解される。見出しは実体に合わせる。
+     パートナーのNISAを使う場合は2人分の合計なので、その旨も添える。 */
+  { const th=document.getElementById('thNisaV'), tp=document.getElementById('thNisaP');
+    const suf=(P.hasPartnerNisa)?'（2人分）':'';
+    if(th) th.textContent='NISA評価'+suf;
+    if(tp) tp.textContent='NISA元本'+suf; }
   renderPension(P,rows);
   renderCompare(P,rows);
   renderCompareLife(P,rows);
