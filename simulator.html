@@ -138,6 +138,85 @@
 
   /* ---- inputs ---- */
   .panel{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;}
+
+  /* ===== 計算ロジックの詳細（必要な人だけが開く） ===== */
+  .logic{border-top:1px solid var(--line); padding:2px 0;}
+  .logic > summary{cursor:pointer; list-style:none; padding:11px 2px; font-size:13.5px; font-weight:700; color:var(--ink);}
+  .logic > summary::-webkit-details-marker{display:none}
+  .logic > summary::before{content:'▶'; display:inline-block; font-size:9px; color:var(--slate-2); margin-right:8px; transition:transform .15s;}
+  .logic[open] > summary::before{transform:rotate(90deg);}
+  .logic-body{padding:2px 2px 16px; font-size:13px; line-height:1.85; color:var(--slate);}
+  .logic-body h4{margin:16px 0 4px; font-size:12.5px; color:var(--ink); font-weight:700;}
+  .logic-body h4:first-child{margin-top:4px;}
+  .logic-body p{margin:0 0 6px;}
+  .logic-body ul,.logic-body ol{margin:0 0 6px; padding-left:20px;}
+  .logic-body li{margin-bottom:3px;}
+  .logic-body b{color:var(--ink); font-weight:600;}
+  .logic-note{margin-top:10px !important; padding-top:8px; border-top:1px dashed var(--line); color:var(--slate-2); font-size:12px;}
+  .logic-tbl{border-collapse:collapse; margin:4px 0 8px; font-size:12px;}
+  .logic-tbl th,.logic-tbl td{border:1px solid var(--line); padding:4px 10px; text-align:left;}
+  .logic-tbl th{background:var(--bg-sub,#F7F7F5); font-weight:600; color:var(--ink);}
+  /* 各入力欄からロジックへ飛ぶ小さなリンク */
+  .logic-link{display:inline-block; margin-left:6px; font-size:11px; color:var(--slate-2);
+              text-decoration:underline; text-underline-offset:2px; cursor:pointer; background:none; border:0; padding:0; font-family:inherit;}
+  .logic-link:hover{color:var(--ink);}
+  @keyframes logicFlash{0%,100%{background:transparent} 30%{background:#FFF6DA}}
+  .logic-flash{animation:logicFlash 1.6s ease;}
+
+  /* ===== 結果シート ===== */
+  .rsheet{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:20px 20px 18px; margin-bottom:20px;}
+  .rs-head{display:flex; align-items:baseline; gap:10px; margin-bottom:14px;}
+  .rs-eyebrow{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--slate-2);}
+  .rs-head h2{margin:0; font-size:17px; letter-spacing:.02em;}
+  /* 資産寿命（大きく表示） */
+  .rs-hero{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
+           padding:16px 18px; border-radius:12px; border:1px solid var(--line); margin-bottom:16px;}
+  .rs-hero.ok{background:#EAF5F3; border-color:#9DCEC8;}
+  .rs-hero.ng{background:#FBEDF0; border-color:#E0AAB6;}
+  .rs-hero .rs-h-label{font-size:13px; color:var(--slate); font-weight:600;}
+  .rs-hero .rs-h-val{font-size:clamp(34px,7vw,46px); font-weight:800; line-height:1; letter-spacing:-.02em;}
+  .rs-hero.ok .rs-h-val{color:var(--teal);}
+  .rs-hero.ng .rs-h-val{color:var(--rose);}
+  .rs-hero .rs-h-note{font-size:12px; color:var(--slate); width:100%; margin-top:2px;}
+  /* 項目リスト */
+  .rs-list{display:flex; flex-direction:column;}
+  .rs-item{display:flex; align-items:baseline; gap:12px; padding:11px 2px; border-top:1px solid var(--line);}
+  .rs-item:first-child{border-top:0;}
+  .rs-k{flex:0 0 118px; font-size:13px; color:var(--slate); font-weight:600;}
+  .rs-v{font-size:19px; font-weight:700; white-space:nowrap;}
+  .rs-sub{font-size:11px; font-weight:600; color:var(--slate-2); white-space:nowrap; margin-left:-4px;}
+  /* 内訳の箇条書きは、行ごとに幅が変わると点の位置がそろわないため、幅を固定して右に寄せる */
+  .rs-d{margin-left:auto; flex:0 0 auto; width:340px; max-width:58%; font-size:12px; color:var(--slate); line-height:1.65;}
+  .rs-d b{color:var(--ink); font-weight:600;}
+  .rs-d .sep{color:var(--slate-2); margin:0 3px;}
+  /* 内訳の箇条書き（左＝項目名／右＝金額のミニ表） */
+  .rs-ul{margin:0; padding:0; list-style:none;}
+  .rs-ul li{position:relative; padding-left:12px; display:flex; align-items:baseline; gap:8px;}
+  .rs-ul li::before{content:''; position:absolute; left:2px; top:.62em; width:4px; height:4px;
+                    border-radius:50%; background:var(--slate-2);}
+  .rs-lk{flex:1 1 auto; min-width:0;}
+  .rs-lv{flex:0 0 auto; font-weight:600; color:var(--ink); font-variant-numeric:tabular-nums;}
+  .rs-lv.minus{color:var(--rose);}   /* 差し引かれるもの */
+  .rs-lv.plus{color:var(--teal);}    /* 加わるもの */
+  .rs-lv.goal{font-weight:800;}      /* 目標値 */
+  .rs-ul li.muted{color:var(--slate-2); display:block;}
+  .rs-ul li.muted::before{background:transparent;}
+  .rs-tl{margin-top:18px; padding-top:16px; border-top:1px solid var(--line);}
+  .rs-tl-title{font-size:13px; color:var(--slate); font-weight:600; margin-bottom:10px;}
+  /* 結婚・出産のように年が近いイベントはラベルが重なるため、重なる分だけ段をずらす（高さは layoutFlags が計算） */
+  .rs-tl .flags{height:72px; transition:height .12s ease;}
+  .rs-tl .flag .stem{width:1px; background:var(--line); height:6px;}
+  .rs-tl .flag .lbl{text-align:center;}
+  @media(max-width:640px){
+    .rsheet{padding:16px 14px 14px;}
+    /* スマホでは「見出し → 数字 → 内訳」の縦積みにする（横並びだと見出しが折り返して読みにくいため） */
+    .rs-item{display:block; padding:12px 2px;}
+    .rs-k{display:block; flex:none; margin-bottom:3px;}
+    .rs-v{display:block; font-size:23px; margin-bottom:5px;}
+    .rs-d{display:block; margin-left:0; width:auto; max-width:100%;}
+    /* 狭い画面ではラベルを少し小さくして、横スクロールなしで全体が収まるようにする */
+    .rs-tl .flag .lbl{font-size:9px;}
+  }
   @media(min-width:981px){ .controls{position:sticky; top:16px; max-height:calc(100vh - 32px); overflow:auto;} }
   details.grp{border-bottom:1px solid var(--line);}
   details.grp:last-child{border-bottom:none}
@@ -990,7 +1069,7 @@
         <div class="field"><label>現在の世帯人数</label><div class="ig"><input type="number" id="curHouseholdSize" value="2" step="1"><span class="unit">人</span></div></div>
         <div class="field"><label>現在の月々の生活費（家賃・特別費除く）</label><div class="ig"><input type="number" id="curMonthlyLiving" value="20" step="0.5"><span class="unit">万/月</span></div></div>
         <div class="hint" id="livingInfo">今の世帯人数と生活費から1人あたりの生活水準を割り出し、世帯人数が変わっても同水準を保つ生活費を自動算出します（等価尺度：本人1.0／配偶者0.5／子0.3・14歳以上0.5）。住居・教育・保険・旅行は別項目。</div>
-        <div class="field"><label>インフレ率（年）</label><div class="ig"><input type="number" id="inflation" value="1.0" step="0.1"><span class="unit">%</span></div></div>
+        <div class="field"><label>インフレ率（年）<button type="button" class="logic-link" data-logic="logic-inflation">計算ロジック</button></label><div class="ig"><input type="number" id="inflation" value="1.0" step="0.1"><span class="unit">%</span></div></div>
         <div class="field"><label>旅行の回数</label><div class="ig"><input type="number" id="travelCount" value="1"><span class="unit">回/年</span></div></div>
         <div class="field"><label>　└ 1回あたり費用</label><div class="ig"><input type="number" id="travelCost" value="20"><span class="unit">万</span></div></div>
         <div class="hint">保険は年齢に応じて自動計上（20代8→30代14→40代22→50代28→60代22→70代〜14 万/年）。</div>
@@ -1048,6 +1127,7 @@
         <div class="field"><label>パートナーの働き方</label><select id="partnerWorkMode"><option value="segments">区間で指定（就職・転職・育休・産休）</option><option value="single">基本の給与カーブ（通常勤務）</option><option value="none">専業主婦(夫)・収入なし</option></select></div>
         <div class="hint" id="partnerWorkModeHint" style="margin-top:0">産休・復職などを区間で指定します（既定）。</div>
         <div class="field"><label>扶養内で働く場合の「年収の壁」</label><select id="kabeMode"><option value="h106">106万円（勤務先の社会保険に加入する働き方）</option><option value="h130">130万円（週20時間未満・加入しない働き方）</option></select></div>
+        <div class="hint" style="margin-top:0;text-align:right"><button type="button" class="logic-link" data-logic="logic-tax">税・社会保険の計算ロジック</button></div>
         <details class="kabe"><summary>「年収の壁」の扱い（2026年改正対応）</summary><div class="kabe-b">2025〜2026年は年収の壁が大きく変わりました。本ツールは<b>令和8年（2026年）分</b>の制度で、壁の前後を<b>自動で判定</b>します。金額はすべて額面年収です。<br><b>・106万円の壁（社会保険）</b>…配偶者に扶養されうる側（世帯で収入の少ない側）が対象。年収106万円未満なら第3号被保険者とみなし、<b>本人負担の社会保険料は0</b>で試算します。これを超えると健康保険料・厚生年金保険料の本人負担が生じ、手取りが一時的に下がります（いわゆる働き損）。<br>　<b>2026年10月にこの賃金要件（月8.8万円）は撤廃</b>されますが、これは壁が上がるのではなく、<b>賃金が低くても週20時間以上働いていれば加入対象になる（適用が広がる）</b>改正です。本ツールは労働時間を入力しないため、撤廃後も106万円を目安に判定します（時給1,000〜1,100円なら年収106万円がおおむね週20時間に相当するため）。週20時間未満で働く場合は次の130万円が壁になります。<br><b>・130万円の壁（扶養）</b>…週20時間未満などで勤務先の社会保険に加入しない場合、この額まで被扶養者でいられます（超えると国民年金・国民健康保険に自分で加入）。壁自体は残ります。<br><b>・178万円の壁（所得税）</b>…給与所得控除（最低保障74万円）＋基礎控除（104万円）で、<b>年収178万円までは本人の所得税が0</b>（令和8・7年の時限措置。かつての103万→2025年160万→2026年178万）。年収665万円を超えると特例が縮小します。<br><b>・110万円台の壁（住民税）</b>…住民税の基礎控除は43万円のままなので、所得税より早く（おおむね年収110万円台から）住民税がかかりはじめます。<br><b>・136万円／169万円／207万円の壁（配偶者控除）</b>…2026年分から、配偶者控除の対象は給与年収<b>136万円以下</b>、配偶者特別控除の<b>満額は169万円まで</b>に拡大し、<b>約207万円で0</b>になります。本ツールは法定の逓減どおりに計算し、<b>控除は収入の多い側</b>に適用します。</div></details>
         <div id="partnerSingleFields" style="display:none">
           <div class="hint" style="margin-top:0">本人と同じくひとつの給与カーブで試算します（通常勤務）。金額は<b>額面</b>。結婚前の期間は世帯収入に含みません。</div>
@@ -1090,6 +1170,7 @@
 
     <details class="grp" id="sec-invest">
       <summary><span class="tag">資産</span>現預金・NISA<span class="chev">▶</span></summary>
+        <div class="hint" style="margin-top:0;text-align:right"><button type="button" class="logic-link" data-logic="logic-nisa">NISAの計算ロジック</button></div>
       <div class="body">
         <div class="field"><label>現在の現預金</label><div class="ig"><input type="number" id="initCash" value="250"><span class="unit">万</span></div></div>
         <div class="hint">生活防衛費は毎年自動算出：稼ぎ手が1人以下なら生活費の10ヶ月分、2人なら6ヶ月分、子どもがいる期間は（稼ぎ手数に関わらず）12ヶ月分。老後（年金生活・就労なし）は現金保有なし＝0（不足分はNISA/DCから取り崩し）。現預金はこの水準を保つよう調整します。</div>
@@ -1203,6 +1284,7 @@
 
     <details class="grp" id="sec-pension">
       <summary><span class="tag">年金</span>受給開始・制度の前提<span class="chev">▶</span></summary>
+        <div class="hint" style="margin-top:0;text-align:right"><button type="button" class="logic-link" data-logic="logic-pension">年金の計算ロジック</button></div>
       <div class="body">
         <div class="field"><label>年金の受給開始年齢</label><select id="pensionStartAge">
           <option value="60">60歳（繰上げ・−24%）</option>
@@ -1308,19 +1390,24 @@
 
   <!-- ================= RESULTS ================= -->
   <div class="results">
+    <!-- ========== 結果シート（PCでは右上・スマホでは入力の直後に表示） ========== -->
+    <section class="rsheet" id="rsheet">
+      <div class="rs-head"><span class="rs-eyebrow">Result</span><h2>結果</h2></div>
+      <div class="rs-hero" id="rsHero"></div>
+      <div class="rs-list" id="rsList"></div>
+      <div class="rs-tl">
+        <div class="rs-tl-title">ライフイベントの流れ</div>
+        <div class="ribbon-wrap">
+          <div class="ribbon" id="ribbon"></div>
+          <div class="flags" id="flags"></div>
+          <div class="axis" id="axis"></div>
+        </div>
+      </div>
+    </section>
+
     <div id="printPlanCard"></div>
     <div id="banner"></div>
     <div class="cards" id="cards"></div>
-
-    <div class="block">
-      <div class="eyebrow">Life timeline</div>
-      <h2>ライフイベントの流れ</h2>
-      <div class="ribbon-wrap">
-        <div class="ribbon" id="ribbon"></div>
-        <div class="flags" id="flags"></div>
-        <div class="axis" id="axis"></div>
-      </div>
-    </div>
 
     <div class="block" id="tabBlock">
       <div class="tabs" id="resultTabs">
@@ -1378,7 +1465,8 @@
         <div class="hint" style="margin-top:0">NISA・確定拠出年金の利回りは毎年変動します。想定利回り（<b id="mcMu">—</b>）を中心に運用成果が上下に振れた場合を多数回シミュレーションし、資産が何歳まで残るかの<b>幅</b>を見ます。基準は「想定利回りを固定した現状の試算」です。<br>「資産比率の変更」を設定している場合は、<b>資産ごとに異なるブレ幅と相関</b>を反映します（年率の標準偏差：投資信託18%・ゴールド15%・不動産7%・債券4%・現預金0%）。株式とゴールドの相関は<b>−0.15</b>で、<b>投資信託が下がる年にゴールドが上がりやすい</b>動きを再現します。債券は+0.10というごく低い連動と小さいブレ幅で安定的に働き、不動産は株式と<b>+0.45</b>の中程度の連動で、家賃収入もその年の市況に応じて増減します。これにより、分散したポートフォリオほど不調時の落ち込みが浅くなる様子を確認できます。実現利回りは<b>その年に実際に適用された配分の加重平均（現預金を含む総資産ベース）</b>で集計するため、債券や現預金を厚くした配分ほど結果の散らばりが小さく出ます。あわせて<b>想定利回りの達成率</b>も表示します。資産比率の変更を設定している場合、達成率の基準は「資産形成」タブの想定利回りではなく、<b>その配分から決まる期待利回り</b>（現預金を含む）です。</div>
         <div class="mc-run"><button id="mcRun">この設定で分析する</button><span id="mcStatus" class="mc-status"></span></div>
         <div id="mcResult"></div>
-        <details class="mc-set" id="mcSet">
+        <div class="hint" style="margin-top:0;text-align:right"><button type="button" class="logic-link" data-logic="logic-mc">モンテカルロの計算ロジック</button></div>
+      <details class="mc-set" id="mcSet">
           <summary>詳細設定（標準偏差・試行回数・相関）</summary>
           <div class="mc-fields">
             <div class="mc-f"><label>年リターンの標準偏差</label><input type="number" id="mcSigma" value="15" step="1"> <span style="font-size:11px;color:var(--slate-2)">%（株式中心なら15〜20%が目安）</span></div>
@@ -1536,6 +1624,136 @@
       </p>
     </div>
     </details>
+
+    <details class="foldblock" id="logicDocs">
+      <summary class="fold-sum">計算ロジックの詳細（税・年金・NISA・インフレ・モンテカルロ）<span class="fold-hint">タップで開閉</span><span class="fold-chev">▶</span></summary>
+    <div class="block">
+      <div class="eyebrow">Under the hood</div>
+      <h2>計算ロジックの詳細</h2>
+      <p class="hint" style="margin-top:0">この試算が内部で何をしているかをまとめたものです。数字の根拠を確かめたい方だけご覧ください。金額の単位はすべて万円、税・社会保険は<b>令和8年度（2026年度）</b>の制度にもとづきます。</p>
+
+      <details class="logic" id="logic-tax"><summary>税金の計算</summary>
+      <div class="logic-body">
+        <h4>所得税</h4>
+        <p>「給与収入 → 給与所得 → 課税所得 → 税額」の順に計算します。</p>
+        <ol>
+          <li><b>給与所得控除</b>を引いて給与所得を出します。最低保障は<b>74万円</b>（令和8・9年分の時限加算5万円込み。令和10年分以降は69万円）。収入220万円超は「収入×30%＋8万」、360万円超は「×20%＋44万」、660万円超は「×10%＋110万」、850万円超は<b>195万円で頭打ち</b>です。</li>
+          <li><b>所得控除</b>を引きます。基礎控除は合計所得489万円以下で<b>104万円</b>、655万円以下で67万円、2,350万円以下で62万円と段階的に下がります。ほかに社会保険料控除（実額）、配偶者控除・配偶者特別控除、扶養控除、iDeCo（小規模企業共済等掛金控除）を反映します。</li>
+          <li><b>超過累進税率</b>を適用します。課税所得195万円以下5%、330万円以下10%、695万円以下20%、900万円以下23%、1,800万円以下33%、4,000万円以下40%、超45%。全体に<b>復興特別所得税2.1%</b>（×1.021）を上乗せします。</li>
+        </ol>
+        <h4>住民税</h4>
+        <p>所得割<b>10%</b>＋均等割<b>5,000円</b>。基礎控除は43万円（所得税の104万円とは別）で、<b>調整控除</b>と<b>非課税限度額</b>も反映します。住民税は前年所得に対して課税されますが、本試算では簡便のため同年の所得で計算しています。</p>
+        <h4>社会保険料</h4>
+        <ul>
+          <li><b>会社員（厚生年金）</b>：標準報酬月額と標準賞与額に料率をかけ、<b>労使折半</b>した本人負担分を計上します。健康保険は都道府県別料率、介護保険は<b>40〜64歳のみ1.620%</b>、子ども・子育て支援金<b>0.230%</b>（2026年4月〜）、厚生年金<b>18.3%</b>、雇用保険<b>0.5%</b>（本人負担）。標準賞与額は健康保険が年度累計573万円、厚生年金が1回150万円で頭打ちです。</li>
+          <li><b>自営業（国民年金）</b>：国民年金保険料 月<b>1.79万円</b>（20〜59歳）＋国民健康保険（所得割10%・均等割・上限あり）の目安計算。自治体差が大きいため概算です。</li>
+        </ul>
+        <h4>年収の壁</h4>
+        <p>扶養内で働く場合、<b>106万円</b>（勤務先の社会保険に加入する働き方）か<b>130万円</b>（週20時間未満で加入しない働き方）を選べます。壁を超えると本人に社会保険料が発生し、手取りが一時的に下がる「逆転」も再現します。</p>
+        <h4>運用・不動産・贈与にかかる税</h4>
+        <ul>
+          <li><b>特定口座の譲渡益・分配金</b>：20.315%（所得税15%＋復興特別0.315%＋住民税5%）。売却したときだけ課税し、含み益には課税しません。</li>
+          <li><b>不動産の譲渡</b>：所有5年超は長期20.315%、5年以下は短期39.63%。取得費は「取得価額＋取得諸費用−減価償却累計」で計算します。</li>
+          <li><b>家賃収入</b>：総合課税なので、その年の<b>課税所得</b>から限界税率（所得税×1.021＋住民税10%）を求めて差し引きます。給与収入ではなく課税所得で判定するのがポイントで、減価償却で赤字になる年は<b>損益通算</b>により税が戻ります。</li>
+          <li><b>贈与税</b>：暦年課税は基礎控除110万円＋超過累進（特例贈与／一般贈与で税率が異なる）。相続時精算課税は基礎控除110万円＋特別控除2,500万円（累計）、超過分は一律20%。</li>
+          <li><b>相続税</b>：基礎控除「3,000万円＋600万円×法定相続人」、法定相続分に応じた税額の総額を按分。配偶者は「配偶者の税額軽減」で法定相続分または1億6,000万円まで非課税。</li>
+        </ul>
+        <p class="logic-note">未反映：住民税の前年課税、ふるさと納税、医療費控除、生命保険料控除、小規模宅地等の特例、生前贈与加算（相続開始前7年）、障害者控除。</p>
+      </div>
+      </details>
+
+      <details class="logic" id="logic-pension"><summary>年金の計算</summary>
+      <div class="logic-body">
+        <h4>老齢基礎年金</h4>
+        <p>満額<b>83.17万円</b>（令和8年度）に納付月数の割合をかけます。40年（480月）納付で満額です。</p>
+        <h4>老齢厚生年金（報酬比例部分）</h4>
+        <p>「<b>平均標準報酬額 × 5.481/1000 × 加入月数</b>」で計算します。本試算では毎年の標準報酬（年額・上限1,230万円）を積み上げた累計に料率をかける形で等価に処理しています。過去の加入実績は「平均年収 × 加入年数」で初期値として加算します。</p>
+        <h4>繰上げ・繰下げ</h4>
+        <p>繰上げは1ヶ月あたり<b>−0.4%</b>（60歳まで最大−24%）、繰下げは1ヶ月あたり<b>＋0.7%</b>（75歳まで最大＋84%）。減額・増額は生涯続きます。</p>
+        <h4>在職老齢年金</h4>
+        <p>働きながら受給する場合、報酬比例部分と給与の合計が支給停止基準額を超えると、超過額の<b>半分</b>が支給停止になります。基礎年金は対象外です。</p>
+        <h4>マクロ経済スライド（3ケース）</h4>
+        <p>財政検証にもとづき、給付水準が実質的に目減りしていく姿を再現します。</p>
+        <ul>
+          <li><b>標準</b>：基礎年金は2036年度まで調整、報酬比例は2026年度に調整終了</li>
+          <li><b>楽観</b>（成長型経済移行・継続）：2037年度で調整終了</li>
+          <li><b>保守</b>（1人当たりゼロ成長）：2059年度に国民年金の積立金が枯渇し完全賦課方式へ。実質給付が現在の約6割まで低下</li>
+        </ul>
+        <p>いずれのケースでも、報酬比例部分について財政検証が織り込む実質賃金上昇による増加分は<b>見込まず</b>、安全側に寄せています。</p>
+        <h4>遺族年金</h4>
+        <p>遺族厚生年金は報酬比例部分の<b>3/4</b>（加入300月未満は300月みなし）。遺族基礎年金は18歳到達年度末までの子がいる間、中高齢寡婦加算は妻が40〜65歳の間。<b>2028年4月の改正</b>（子のない60歳未満の配偶者は原則5年の有期給付、有期給付加算で約1.3倍）も反映しています。遺族年金は<b>非課税</b>です。</p>
+        <p class="logic-note">年金は物価スライドで名目化し、受給額には手取り率<b>90%</b>（税・社会保険料の控除後）をかけて現金計上します。未反映：加給年金、振替加算、女性の支給開始年齢引上げの詳細（「死亡時40歳未満の妻」で近似）。</p>
+      </div>
+      </details>
+
+      <details class="logic" id="logic-nisa"><summary>NISAの計算</summary>
+      <div class="logic-body">
+        <h4>2つの枠</h4>
+        <ul>
+          <li><b>年間投資枠</b>：1人あたり年<b>360万円</b>（つみたて120万＋成長240万）。毎年リセットされます。</li>
+          <li><b>生涯投資枠（非課税保有限度額）</b>：1人あたり<b>1,800万円</b>。<b>簿価（買った値段）</b>で管理するので、値上がりして評価額が1,800万円を超えても問題ありません。</li>
+        </ul>
+        <p>パートナーのNISAを使う設定にすると、両方の枠が2倍になります。</p>
+        <h4>売却したときの枠の復活</h4>
+        <p>ここが最も間違えやすい点です。NISAを売却すると<b>売却した分の簿価</b>だけ生涯投資枠が空きますが、実際に使えるようになるのは<b>翌年</b>です。本試算では売却時に簿価を比例控除したうえで別枠に退避し、その年のあいだは「枠を使っている」ものとして扱い、翌年の初めに解放します。年間投資枠は復活しません。</p>
+        <h4>NISA内で商品を入れ替える場合</h4>
+        <p>「売却 → 買い直し」となるため、<b>買い直し額（＝時価）ぶんの年間枠・生涯枠を消費</b>します。売却で戻る枠は簿価ぶんなので、<b>含み益が大きいほど枠を余分に使う</b>ことになります。資産比率の変更で一括リバランスを選んだ場合、この制約により目標比率に到達するまで数年かかることがあります。</p>
+        <h4>枠を超えた分の扱い</h4>
+        <p>年間枠・生涯枠を使い切ると、超過分は<b>特定口座（課税口座）</b>へ回ります。特定口座は簿価を追跡し、売却時に含み益へ20.315%を課税します。画面の資産表示は<b>税引後の評価額</b>です。</p>
+        <h4>取り崩しの順序</h4>
+        <p>現預金が生活防衛費を下回った年に、<b>特定口座 → NISA・確定拠出年金</b>の順で取り崩します。課税口座を先に使い、非課税のNISAをできるだけ長く運用に残す考え方です。現物不動産は1件単位でしか売れないため、取り崩しの対象外としています。</p>
+      </div>
+      </details>
+
+      <details class="logic" id="logic-inflation"><summary>インフレの扱い</summary>
+      <div class="logic-body">
+        <h4>名目で計算し、実質で確認する</h4>
+        <p>試算はすべて<b>名目値（その年に実際に動く金額）</b>で行います。そのうえで「今の価値に直すといくらか」を知りたい場面では、<b>(1＋インフレ率)<sup>経過年数</sup></b> で割り戻した実質値を併記します。</p>
+        <h4>インフレを適用するもの</h4>
+        <ul>
+          <li>生活費・医療費・介護費・家賃：毎年インフレ率で増加</li>
+          <li>年金：物価スライドで名目化（そのうえでマクロ経済スライドによる実質目減りを適用）</li>
+          <li>車の買替え費用：専用の価格上昇率</li>
+          <li>物件価格：不動産の値上がり率（モンテカルロではブレも加味）</li>
+        </ul>
+        <h4>インフレを適用しないもの</h4>
+        <ul>
+          <li><b>NISAの年間枠360万円・生涯枠1,800万円</b>：法律で決まった金額のため据え置き。結果として、積立額を名目で固定すると<b>実質の積立額は年々目減りします</b>。</li>
+          <li>給与：昇給率で別途設定（インフレ率とは独立）。昇給率がインフレ率を下回ると実質賃金は低下します。</li>
+          <li>住宅ローンの返済額：固定金利のため名目で一定＝<b>インフレが進むほど実質負担は軽くなります</b>。</li>
+          <li>税・社会保険の各種控除額、退職金：制度改定を織り込まないため据え置き。</li>
+        </ul>
+        <p class="logic-note">「最大支出」がいつの年かを判定する際は、名目額で比べるとインフレのぶん必ず最終年が最大になってしまうため、<b>実質額で判定</b>しています。</p>
+      </div>
+      </details>
+
+      <details class="logic" id="logic-mc"><summary>モンテカルロ（資産運用のブレ）</summary>
+      <div class="logic-body">
+        <h4>やっていること</h4>
+        <p>「毎年きっちり想定利回りが得られる」という前提を外し、<b>年ごとの運用成績をランダムに変動させた試算を何百回も繰り返して</b>、結果がどれくらいばらつくかを見ます。</p>
+        <h4>乱数の作り方</h4>
+        <p>正規分布（Box-Muller法）で、平均＝想定利回り、標準偏差＝設定値（既定18%）の乱数を毎年つくります。年ごとの相関（前年の成績が翌年に影響する度合い）も設定できます。</p>
+        <h4>資産クラス別の変動</h4>
+        <p>資産比率を設定している場合は、資産ごとに異なるブレを与えたうえで<b>コレスキー分解</b>により相関を持たせます。</p>
+        <table class="logic-tbl"><thead><tr><th>資産</th><th>年間の標準偏差</th></tr></thead><tbody>
+          <tr><td>投資信託（インデックス）</td><td>18.0%</td></tr>
+          <tr><td>ゴールド</td><td>15.0%</td></tr>
+          <tr><td>債券</td><td>4.0%</td></tr>
+          <tr><td>不動産</td><td>7.0%</td></tr>
+          <tr><td>現預金</td><td>0%</td></tr>
+        </tbody></table>
+        <p>株式とゴールドは弱い逆相関（−0.15）を置くなど、資産間の相関も反映します。画面のブレ幅スライダーは<b>投資信託の標準偏差</b>を指し、ほかの資産はその比率で連動します。不動産は家賃収入（空室率）にもブレが波及します。</p>
+        <h4>読み取り方</h4>
+        <ul>
+          <li><b>95歳時点で資産が残った割合</b>：この前提がどれくらい「もつ」かの目安</li>
+          <li><b>実現利回りの中央値・上位10%・下位10%</b>：<b>現預金を含めた総資産ベース</b>の年平均（幾何平均）です。運用資産だけで見ると、現預金を厚くしてもブレが縮まないように見えてしまうためです。</li>
+          <li><b>想定利回りの達成率</b>：資産比率を設定している場合、基準は「資産形成」タブの想定利回りではなく<b>その配分から決まる期待利回り</b>（現預金込み）です。債券中心の配分に対して株式前提の利回りを基準にしても意味がないためです。</li>
+        </ul>
+        <p class="logic-note">注意：正規分布は現実の暴落（ファットテール）を過小評価します。また、収入・支出・寿命は固定でブレさせていません。運用リスクだけを取り出して見るための機能とお考えください。</p>
+      </div>
+      </details>
+    </div>
+    </details>
   </div>
 </div>
 
@@ -1584,7 +1802,7 @@ function eduTotalPerChild(P){ let t=0; for(let a=3;a<=21;a++) t+=eduAnnual(a,P);
 function insurance(age){ if(age<30)return 8; if(age<40)return 14; if(age<50)return 22; if(age<60)return 28; if(age<70)return 22; return 14; }
 /* 公的年金（令和7年度基準・概算）: 老齢基礎満額83.17万/年、報酬比例乗率5.481/1000（2003年4月〜）、標準報酬の年間上限概算1230万 */
 const CURRENT_YEAR=new Date().getFullYear();
-const APP_VERSION='0.0.45';   /* 更新するたびに末尾を増やす */
+const APP_VERSION='0.0.53';   /* 更新するたびに末尾を増やす */
 const MAX_AGE=120;  /* 生活資金が尽きなかった場合の試算上限 */
 const PENSION_FULL=83.17, PENSION_RATE=5.481/1000, PENSION_CAP=1230, PENSION_NET=0.90;
 /* マクロ経済スライドの調整期間（2024年財政検証・過去30年投影ケース）
@@ -2262,13 +2480,27 @@ function simulate(P){
     const emgMonths = dep.length>0 ? 12 : (retired ? 0 : (earners>=2 ? 6 : 10));
     const emergency = living*emgMonths/12;
     let housing=0,oneoff=0,oneoffLbl=[];
-    if(P.hasDivorce && age===P.divorceAge && (P.divorceCost||0)!==0){ oneoff+=P.divorceCost; oneoffLbl.push('財産分与 '+manU(P.divorceCost)); }
-    if(P.hasSelfDeath && age===P.selfDeathAge && (P.funeralCost||0)>0){ oneoff+=P.funeralCost; oneoffLbl.push('葬儀費用（本人） '+manU(P.funeralCost)); }
-    if(P.hasPartnerDeath && P.marriageRow>=0 && age===P.partnerDeathAge && (P.funeralCost||0)>0){ oneoff+=P.funeralCost; oneoffLbl.push('葬儀費用（パートナー） '+manU(P.funeralCost)); }
-    if(P.hasJobChange && age===P.jobChangeAge && (P.jobChangeGap||0)>0){ oneoff+=P.jobChangeGap; oneoffLbl.push('転職の空白期間 '+manU(P.jobChangeGap)); }
-    if(P.marriageAgeFrac>P.currentAgeFrac && i===P.marriageRow && (P.weddingCost||0)>0){ oneoff+=P.weddingCost; oneoffLbl.push('挙式・新生活 '+manU(P.weddingCost)); }
-    if(P.buyAge==null||age<P.buyAge){ housing=P.rentMonthly*12; }
-    else { const sb=age-P.buyAge; if(age===P.buyAge){ oneoff+=P.downpay; oneoffLbl.push('頭金 '+manU(P.downpay)); const closing=P.price*(P.closingRate||0); if(closing>0){ oneoff+=closing; oneoffLbl.push('購入諸費用 '+manU(closing)); } } const _danshin=(selfDead&&P.hasDanshin!==false); if(sb<P.loanYears && !_danshin)housing+=L.annualPay; housing+=P.propertyTax; if(P.repair1Year>0 && sb>0 && sb%P.repair1Year===0){oneoff+=P.repair1Cost;oneoffLbl.push('水廻り修繕 '+manU(P.repair1Cost));} if(sb===P.repair2Year){oneoff+=P.repair2Cost;oneoffLbl.push('リフォーム '+manU(P.repair2Cost));} }
+    /* 一時支出は合計だけでなく内訳（項目名と金額）も保持する。結果シートで「一時支出」と
+       ひとまとめにせず、頭金・購入諸費用・車購入などを個別に出すため。 */
+    const oneoffItems=[];
+    const addOneoff=(lbl,amt)=>{ if(!(amt>0)) return; oneoff+=amt; oneoffLbl.push(lbl+' '+manU(amt)); oneoffItems.push({lbl,amt}); };
+    /* 住宅費の中身（家賃／ローン返済／完済後の維持費）。結果シートの表記を切り替えるのに使う */
+    let housingKind='rent';
+    if(P.hasDivorce && age===P.divorceAge && (P.divorceCost||0)!==0){ addOneoff('財産分与',P.divorceCost); }
+    if(P.hasSelfDeath && age===P.selfDeathAge && (P.funeralCost||0)>0){ addOneoff('葬儀費用（本人）',P.funeralCost); }
+    if(P.hasPartnerDeath && P.marriageRow>=0 && age===P.partnerDeathAge && (P.funeralCost||0)>0){ addOneoff('葬儀費用（パートナー）',P.funeralCost); }
+    if(P.hasJobChange && age===P.jobChangeAge && (P.jobChangeGap||0)>0){ addOneoff('転職の空白期間',P.jobChangeGap); }
+    if(P.marriageAgeFrac>P.currentAgeFrac && i===P.marriageRow && (P.weddingCost||0)>0){ addOneoff('挙式・新生活',P.weddingCost); }
+    if(P.buyAge==null||age<P.buyAge){ housing=P.rentMonthly*12; housingKind='rent'; }
+    else { const sb=age-P.buyAge;
+      if(age===P.buyAge){ addOneoff('自宅購入の頭金',P.downpay); addOneoff('購入諸費用（登記・仲介など）',P.price*(P.closingRate||0)); }
+      const _danshin=(selfDead&&P.hasDanshin!==false);
+      const paying=(sb<P.loanYears && !_danshin);
+      if(paying)housing+=L.annualPay;
+      housing+=P.propertyTax;
+      housingKind=paying?'loan':'own';
+      if(P.repair1Year>0 && sb>0 && sb%P.repair1Year===0) addOneoff('水廻り修繕',P.repair1Cost);
+      if(sb===P.repair2Year) addOneoff('リフォーム',P.repair2Cost); }
     /* 多子世帯の大学無償化：扶養中の子が3人以上いる間、第3子以降（扶養中）の大学授業料相当を免除。
        兄姉が扶養（childIndependAge）を外れて扶養数が3人未満になると適用されなくなる。仕送りは対象外で残る。 */
     const edu=P.children.reduce((s,c)=>{
@@ -2288,7 +2520,7 @@ function simulate(P){
       const isFirst=(age===P.carFirstAge);
       const tradeIn=isFirst?0:P.carTradeIn*lastCarPrice;
       const carOut=Math.max(0,price-tradeIn);
-      oneoff+=carOut; oneoffLbl.push((isFirst?'車購入 ':'車買替 ')+manU(carOut));
+      addOneoff(isFirst?'車の購入':'車の買替え', carOut);
       lastCarPrice=price;
     }
     let dcContrib=0, dcDed=0;
@@ -2859,7 +3091,7 @@ function simulate(P){
       const wRd=(invEnd>0)?Math.min(mixDisp.real, Math.max(0,realHeld)/invEnd):0;
       if(mixDisp.real>wRd){ mixDisp.index+=(mixDisp.real-wRd); mixDisp.real=wRd; }
     }
-    rows.push({i,age,pAge,married,childAges,dep:dep.length,earners,emgMonths,emergency,pension:pensionNom,gross,bonus,pGross,net,taxSocial,taxIncome,taxResident,selfDead,widowed,survivorPen,survivorParts,deathBenefit,living,housing,edu,oneoff,oneoffLbl,saving,contrib,sweep,ded,dcContrib,dcCorp,dcDed,retireNet,dcLumpFree,dcValue,eduFund,sideInc,drawNisa,drawDc,drawEdu,dcTaxPaid,taxV,taxP,taxVNet,taxContrib,drawTaxable,taxPaidCg,rebalance,mixNow:mixDisp,inheritGross,inheritTax,inheritNet,giftGross,giftTaxPaid,giftNet,allocNow,realHeld,realIncomeNet,realIncomeAfterTax,yieldUsed:_yr,yieldAll:_yrAll,realShortfall,realUnits,realDepr,realBasis,drawdown,shortfall,shortfallCum,liquid,busted,nisaV,nisaP,cash,netWorth,loanBal,kidFundNow,housingSubsidy,debtPay,debtBal,defl,livingBase,ins,trav,care,med,eduSave:eduSaveAnnual,eduTransfer,eduPayCash,eduAccount,incomeCash,expense,events});
+    rows.push({i,age,pAge,married,childAges,dep:dep.length,earners,emgMonths,emergency,pension:pensionNom,gross,bonus,pGross,net,taxSocial,taxIncome,taxResident,selfDead,widowed,survivorPen,survivorParts,deathBenefit,living,housing,edu,oneoff,oneoffLbl,saving,contrib,sweep,ded,dcContrib,dcCorp,dcDed,retireNet,dcLumpFree,dcValue,eduFund,sideInc,drawNisa,drawDc,drawEdu,dcTaxPaid,taxV,taxP,taxVNet,taxContrib,drawTaxable,taxPaidCg,rebalance,mixNow:mixDisp,inheritGross,inheritTax,inheritNet,giftGross,giftTaxPaid,giftNet,allocNow,realHeld,realIncomeNet,realIncomeAfterTax,yieldUsed:_yr,yieldAll:_yrAll,oneoffItems,housingKind,realShortfall,realUnits,realDepr,realBasis,drawdown,shortfall,shortfallCum,liquid,busted,nisaV,nisaP,cash,netWorth,loanBal,kidFundNow,housingSubsidy,debtPay,debtBal,defl,livingBase,ins,trav,care,med,eduSave:eduSaveAnnual,eduTransfer,eduPayCash,eduAccount,incomeCash,expense,events});
     /* 生活資金が尽きた（＝支出をまかなえなくなった）時点で試算を終了する */
     if(selfDead && !married) break;   /* 世帯を継続する人がいないためここで終了 */
     if(busted) break;
@@ -3681,10 +3913,177 @@ function renderSnapshot(){
   if(sw && dots.length){ sw.addEventListener('scroll',()=>{ const k=Math.round(sw.scrollLeft/Math.max(1,sw.clientWidth)); dots.forEach((d,i)=>d.classList.toggle('active',i===k)); }); }
 }
 
+
+/* ライフイベントのラベルは、年が近いと横に重なってしまう。
+   実際のラベル幅を測って「重ならない段」に順番へ割り当てることで、
+   横スクロールなしで全イベントを表示できるようにする。 */
+function layoutFlags(){
+  const wrap=document.getElementById('flags'); if(!wrap) return;
+  const flags=[...wrap.children]; if(!flags.length) return;
+  const W=wrap.clientWidth||wrap.offsetWidth||0;
+  if(!W){ requestAnimationFrame(layoutFlags); return; }   /* 非表示のときは描画後にやり直す */
+  /* 1段あたりの高さは、実際のラベルの高さから決める（2行ぶんの高さより狭いと縦に重なるため） */
+  const lbl0=flags[0].querySelector('.lbl');
+  const LANE=Math.max(16,(lbl0?lbl0.offsetHeight:0)+3);
+  const GAP=5;                /* ラベル同士の最小すき間(px) */
+  const ends=[]; let maxLane=0;
+  flags.forEach(el=>{
+    const lbl=el.querySelector('.lbl'), stem=el.querySelector('.stem');
+    const x=W*(parseFloat(el.style.left)||0)/100;
+    const w=(lbl?lbl.offsetWidth:0)||40;
+    const l=x-w/2-GAP, r=x+w/2+GAP;
+    let lane=0;
+    while(ends[lane]!=null && ends[lane]>l) lane++;   /* 手前の段と重なる間は下へ */
+    ends[lane]=r; if(lane>maxLane) maxLane=lane;
+    if(stem) stem.style.height=(6+lane*LANE)+'px';
+  });
+  wrap.style.height=(LANE+18+maxLane*LANE)+'px';
+}
+let _flagsRaf=null;
+window.addEventListener('resize', function(){
+  if(_flagsRaf) cancelAnimationFrame(_flagsRaf);
+  _flagsRaf=requestAnimationFrame(layoutFlags);
+});
+
+/* ===== 結果シート =====
+   ・資産寿命／現在の手取り年収／最終総資産／最大支出／今から始める積立／教育積立費 をまとめて表示する。
+   ・「今から始める積立」は、近い将来に現金で必要になるまとまった支出（挙式・車・住宅頭金・リフォーム）を
+     時期の早い順に並べ、いま使える現預金（生活防衛費を除く）を早いものから充当したうえで、
+     残りを目標時期までの月数で割って必要な積立額を出す。 */
+function renderResultSheet(P, rows){
+  const heroEl=document.getElementById('rsHero'), listEl=document.getElementById('rsList');
+  if(!heroEl||!listEl) return;
+  /* 月額は小さな数字になるため、10万円未満は小数第1位まで出す（「月 0万円」を避ける） */
+  const monY=v=>Math.abs(v)<10?(Math.round(v*10)/10).toLocaleString('ja-JP',{maximumFractionDigits:1})+'万円':manY(v);
+  const monU=v=>Math.abs(v)<10?(Math.round(v*10)/10).toLocaleString('ja-JP',{maximumFractionDigits:1})+'万':manU(v);
+  const last=rows[rows.length-1], first=rows[0];
+  const now=Math.floor(P.currentAgeFrac!=null?P.currentAgeFrac:P.currentAge);
+
+  /* --- 1. 資産寿命 --- */
+  const lifeAge=last.age;
+  const survived=!last.busted;
+  const ok=lifeAge>=85;
+  heroEl.className='rs-hero '+(ok?'ok':'ng');
+  heroEl.innerHTML=`<span class="rs-h-label">資産寿命</span>`
+    +`<span class="rs-h-val">${survived?`${MAX_AGE}歳＋`:`${lifeAge}歳`}</span>`
+    +`<span class="rs-h-note">${survived
+        ? `試算の上限（${MAX_AGE}歳）まで資産が残る見込みです。`
+        : (ok? `${lifeAge}歳で現預金・運用資産が尽きる試算です（平均寿命は上回っています）。`
+             : `${lifeAge}歳で現預金・運用資産が尽きる試算です。積立や支出の見直しを検討してください。`)}</span>`;
+
+  const items=[];
+
+  /* --- 2. 現在の手取り年収（内訳つき） --- */
+  const dedu=[{k:`額面${first.earners>1?'（世帯2人分）':'（本人のみ）'}`, v:manU(first.gross), s:'+'}];
+  if((first.taxSocial||0)>0.05) dedu.push({k:'社会保険', v:manU(first.taxSocial), s:'-'});
+  if((first.taxIncome||0)>0.05) dedu.push({k:'所得税', v:manU(first.taxIncome), s:'-'});
+  if((first.taxResident||0)>0.05) dedu.push({k:'住民税', v:manU(first.taxResident), s:'-'});
+  dedu.push({k:'月あたりの手取り', v:monU(first.net/12), s:'g'});
+  items.push({k:'現在の手取り年収', v:manY(first.net), d:dedu});
+
+  /* --- 3. 最終総資産 --- */
+  items.push({k:'最終総資産', v:manY(last.netWorth), sub:`${last.age}歳時`, d:[]});
+
+  /* --- 4. 最大支出 --- */
+  /* ★名目額で比べるとインフレのぶん必ず最終年が最大になってしまうため、
+     「今の価値」に直した実質額で、いちばん負担が重い年を選ぶ。 */
+  let mx={real:-Infinity,v:0,age:0,r:null};
+  rows.forEach(r=>{ const rv=r.expense/(r.defl||1); if(rv>mx.real) mx={real:rv,v:r.expense,age:r.age,r:r}; });
+  const mr=mx.r||{};
+  const br=[];
+  if((mr.living||0)>0.5) br.push({k:'生活費', v:manU(mr.living), s:'-'});
+  /* 「住宅」だけでは購入費と誤解されるため、その年の中身（家賃／ローン返済／完済後の維持費）を書き分ける */
+  if((mr.housing||0)>0.5){
+    const hk=(mr.housingKind==='loan')?'住宅ローン返済・固定資産税'
+            :(mr.housingKind==='own')?'固定資産税・維持費':'家賃';
+    br.push({k:hk, v:manU(mr.housing), s:'-'});
+  }
+  if((mr.edu||0)>0.5) br.push({k:'教育費', v:manU(mr.edu), s:'-'});
+  /* 一時支出はまとめずに、頭金・購入諸費用・車の購入などを項目ごとに並べる */
+  (mr.oneoffItems||[]).forEach(o=>{ if(o.amt>0.5) br.push({k:o.lbl, v:manU(o.amt), s:'-'}); });
+  items.push({k:'最大支出', v:manY(mx.v), sub:`${mx.age}歳・${Math.max(0,mx.age-now)}年後`, d:br});
+
+  /* --- 5. 今から始める積立 --- */
+  let goals=[];
+  if(P.marriageRow>=0 && P.marriageAgeFrac>P.currentAgeFrac && (P.weddingCost||0)>0)
+    goals.push({name:'結婚費', age:P.marriageAgeEff, amt:P.weddingCost});
+  if(P.buyAge!=null && P.buyAge>now && ((P.downpay||0)+(P.price||0)*(P.closingRate||0))>0)
+    goals.push({name:'住宅頭金', age:P.buyAge, amt:(P.downpay||0)+(P.price||0)*(P.closingRate||0), note:'諸経費込'});
+  if(P.hasCar && (P.carPrice||0)>0){
+    let ca=P.carFirstAge;
+    while(ca<=now && ca<P.carReturnAge) ca+=Math.max(1,P.carCycle);
+    if(ca>now && ca<P.carReturnAge)
+      goals.push({name:'車費', age:ca, amt:(P.carPrice||0)*Math.pow(1+(P.carInflation||0),Math.max(0,ca-now))});
+  }
+  if(P.buyAge!=null){
+    [[P.repair1Year,P.repair1Cost],[P.repair2Year,P.repair2Cost]].forEach(([y,c])=>{
+      if((c||0)>0 && y>0){ const a=P.buyAge+y; if(a>now) goals.push({name:'リフォーム費', age:a, amt:c}); }
+    });
+  }
+  /* 「今から始める積立」は近い将来に備えるものなので、20年より先の支出は対象外にする
+     （老後のリフォームまで含めると、いま始めるべき金額がぼやけてしまうため） */
+  const GOAL_HORIZON=20;
+  goals.sort((a,b)=>a.age-b.age);
+  const far=goals.filter(g=>g.age-now>GOAL_HORIZON);
+  goals=goals.filter(g=>g.age-now<=GOAL_HORIZON);
+  /* いま使える現預金（生活防衛費を除く）を、時期の早い目標から順に充当する */
+  let pool=Math.max(0,(P.initCash||0)-(first.emergency||0));
+  let monthly=0; const detail=[];
+  for(const g of goals){
+    const use=Math.min(pool, g.amt); pool-=use;
+    const need=Math.max(0, g.amt-use);
+    const months=Math.max(1,(g.age-now)*12);
+    const m=need/months;
+    monthly+=m;
+    if(detail.length<6){
+      const head=`${g.name}${g.note?`（${g.note}）`:''}・<b>${Math.max(1,g.age-now)}年後</b>までに <b>${manU(g.amt)}</b>`;
+      if(need>0){
+        detail.push({k:head, v:`月 ${monU(m)}`, s:'g'});
+        if(use>0.5) detail.push({k:'　└ 手元の現預金から充当', v:manU(use), s:'+'});
+      } else {
+        /* 手元の現預金だけでまかなえる目標は、積立不要として1行で示す */
+        detail.push({k:head, v:'手元資金で充当', s:'+'});
+      }
+    }
+  }
+  const dl=detail.length?detail.slice()
+    :[{muted:goals.length?'いまある現預金でまかなえる見込みです':'近い将来のまとまった支出は設定されていません'}];
+  if(far.length) dl.push({muted:`${GOAL_HORIZON}年より先の支出（${[...new Set(far.map(g=>g.name))].join('・')}）は含めていません`});
+  items.push({k:'今から始める積立', v:monthly>0.005?`月 ${monY(monthly)}`:'—', d:dl});
+
+  /* --- 6. 教育積立費 --- */
+  const kidsN=(P.children||[]).length;
+  if(kidsN>0){
+    const per=eduTotalPerChild(P);
+    const perMonth=per/(EDU_SAVE_END*12);
+    items.push({k:'教育積立費', v:`月 ${monY(perMonth*kidsN)}`, d:[
+      {k:'子ども1人あたりの総額', v:manU(per), s:'g'},
+      {k:`1人あたりの積立（× ${kidsN}人）`, v:`月 ${monU(perMonth)}`},
+      {muted:`0〜${EDU_SAVE_END}歳の${EDU_SAVE_END}年で準備した場合`}]});
+  }
+
+  /* 内訳は右側に箇条書きで並べる。
+     差し引かれるものは −（赤）、加わるものは ＋（緑）、目標値は太字にする。 */
+  const ul=d=>(!d||!d.length)?'':`<ul class="rs-ul">`+d.map(x=>{
+    if(typeof x==='string') return `<li><span class="rs-lk">${x}</span></li>`;
+    if(x.muted!=null) return `<li class="muted">${x.muted}</li>`;
+    const cls=(x.s==='-')?'minus':(x.s==='+')?'plus':(x.s==='g')?'goal':'';
+    /* 符号は金額のときだけ付ける（「手元資金で充当」のような文言に＋が付くのを防ぐ） */
+    const numeric=/^[0-9]/.test(String(x.v||''));
+    const sign=!numeric?'':(x.s==='-')?'−':(x.s==='+')?'＋':'';
+    return `<li><span class="rs-lk">${x.k}</span><span class="rs-lv ${cls}">${sign}${x.v}</span></li>`;
+  }).join('')+`</ul>`;
+  listEl.innerHTML=items.map(x=>
+    `<div class="rs-item"><span class="rs-k">${x.k}</span><span class="rs-v num">${x.v}</span>`
+    +(x.sub?`<span class="rs-sub">${x.sub}</span>`:'')
+    +`<span class="rs-d">${ul(x.d)}</span></div>`).join('');
+}
+
 function render(){
   const P=readParams();
   const rows=simulate(P);
   if(!rows.length) return;
+  try{ renderResultSheet(P,rows); }catch(e){ console.error('resultSheet',e); }
   /* 表示用に「実際に試算できた最終年齢」を反映する（資金が尽きた年 or 140歳） */
   P.endAge=rows[rows.length-1].age;
   const survivedToMax = P.endAge>=MAX_AGE;
@@ -3815,6 +4214,7 @@ function render(){
     const left=((f.age-start)/span)*100;
     return `<div class="flag" style="left:${left}%"><div class="dot"></div><div class="stem"></div><div class="lbl">${f.lbl}<br>${f.age}歳</div></div>`;
   }).join('');
+  layoutFlags();
   document.getElementById('axis').innerHTML=`<span>${start}歳</span><span>${Math.round((start+P.endAge)/2)}歳</span><span>${P.endAge}歳</span>`;
 
   /* --- charts --- */
@@ -6352,6 +6752,20 @@ var _pph=document.getElementById('psetPartHome'); if(_pph) _pph.addEventListener
   }
 })();
 document.getElementById('addKid').addEventListener('click',()=>{ kids.push({birthAge:34}); renderKids(); render(); });
+
+/* 「計算ロジック」リンク：該当する項目だけを開いて、その位置までスクロールする。
+   目立たせたくないので、リンク自体は小さなテキストにしてある。 */
+document.addEventListener('click', function(ev){
+  const b=ev.target.closest('.logic-link'); if(!b) return;
+  ev.preventDefault();
+  const id=b.dataset.logic, el=document.getElementById(id); if(!el) return;
+  let p=el.parentElement;
+  while(p){ if(p.tagName==='DETAILS') p.open=true; p=p.parentElement; }   /* 親のfoldblockも開く */
+  el.open=true;
+  el.scrollIntoView({behavior:'smooth', block:'start'});
+  el.classList.remove('logic-flash'); void el.offsetWidth; el.classList.add('logic-flash');
+});
+
 document.getElementById('resetBtn').addEventListener('click',()=>{
   setDefaults();
   /* 資産比率の変更もリセットの対象にする（残ったままだと初期状態に戻らないため） */
