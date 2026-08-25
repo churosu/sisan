@@ -1214,7 +1214,8 @@
       <div class="body">
         <div class="field"><label>現在の現預金</label><div class="ig"><input type="number" id="initCash" value="250"><span class="unit">万</span></div></div>
         <div class="hint">生活防衛費は毎年自動算出：稼ぎ手が1人以下なら生活費の10ヶ月分、2人なら6ヶ月分、子どもがいる期間は（稼ぎ手数に関わらず）12ヶ月分。老後（年金生活・就労なし）は現金保有なし＝0（不足分はNISA/DCから取り崩し）。現預金はこの水準を保つよう調整します。<span class="srcbadge own">独自初期値</span><br>この「何ヶ月分」という基準に公的な定めはなく、収入が途絶えたときの立て直しやすさから逆算した<b>Mirai Shishin独自のモデル</b>です（一般には3〜12ヶ月分と幅があります）。</div>
-        <div class="field"><label>現在のNISA元本</label><div class="ig"><input type="number" id="initNisaP" value="0"><span class="unit">万</span></div></div>
+        <div class="field"><label>現在のNISA元本</label><div class="ig"><input type="number" id="initNisaP" value="0" min="0" max="3600"><span class="unit">万</span></div></div>
+        <div class="hint" style="margin-top:0">元本（簿価）は生涯投資枠の上限（1人1,800万円／パートナーのNISAを使う場合は3,600万円）を超えられません。超える値を入れた場合は上限までで試算します。</div>
         <div class="field"><label>現在のNISA評価額</label><div class="ig"><input type="number" id="initNisaV" value="0"><span class="unit">万</span></div></div>
         <div class="hint">すでに積立中の場合は開始時点の元本（と含み益込みの評価額）を入力。評価額が0なら元本と同額として扱い、生涯投資枠の残りも元本ぶん差し引きます。</div>
         <div class="field"><label>NISA 積立額</label><div class="ig"><input type="number" id="nisaMonthly" value="3" step="0.5"><span class="unit">万/月</span></div></div>
@@ -1796,7 +1797,7 @@
           <li><b>年間投資枠</b>：1人あたり年<b>360万円</b>（つみたて120万＋成長240万）。毎年リセットされます。</li>
           <li><b>生涯投資枠（非課税保有限度額）</b>：1人あたり<b>1,800万円</b>。<b>簿価（買った値段）</b>で管理するので、値上がりして評価額が1,800万円を超えても問題ありません。</li>
         </ul>
-        <p>パートナーのNISAを使う設定にすると、両方の枠が2倍になります。</p>
+        <p>パートナーのNISAを使う設定にすると、両方の枠が2倍になります。ただし枠が2人分になるのは<b>結婚している間だけ</b>で、離婚・死別で口座が1つに戻ると枠も1人分に戻ります。そのとき上限を超えて保有していた分は非課税では持てないため、超過した割合ぶんを<b>特定口座へ移して</b>試算を続けます（パートナー名義の資産が世帯から外れる、という扱い。移した時点の時価が新しい簿価になります）。</p>
         <h4>売却したときの枠の復活</h4>
         <p><b>売却しても生涯投資枠が失われることはありません。</b>2つの枠を分けて考えると分かりやすくなります。</p>
         <ul>
@@ -1934,7 +1935,7 @@ function eduTotalPerChild(P){ let t=0; for(let a=3;a<=21;a++) t+=eduAnnual(a,P);
 function insurance(age){ if(age<30)return 8; if(age<40)return 14; if(age<50)return 22; if(age<60)return 28; if(age<70)return 22; return 14; }
 /* 公的年金（令和7年度基準・概算）: 老齢基礎満額83.17万/年、報酬比例乗率5.481/1000（2003年4月〜）、標準報酬の年間上限概算1230万 */
 const CURRENT_YEAR=new Date().getFullYear();
-const APP_VERSION='0.0.56';   /* 更新するたびに末尾を増やす */
+const APP_VERSION='0.0.57';   /* 更新するたびに末尾を増やす */
 const MAX_AGE=120;  /* 生活資金が尽きなかった場合の試算上限 */
 const PENSION_FULL=83.17, PENSION_RATE=5.481/1000;
 /* 報酬比例部分の計算に使う「年間の標準報酬の上限」。
@@ -2520,6 +2521,21 @@ function simulate(P){
     const widowed=!!(P.hasPartnerDeath && P.marriageRow>=0 && age>=P.partnerDeathAge && P.partnerDeathAge>=P.marriageAgeEff && !(P.hasDivorce&&P.divorceAge<=P.partnerDeathAge));
     if(widowed) marriedFrac=0;   /* 配偶者の死亡以降は単身世帯になる */
     const married=marriedFrac>0;
+    /* ★NISAの生涯投資枠は口座の数で決まる。パートナーのNISAを使う設定でも、
+       離婚・死別で口座が1つに戻れば枠は1人分に戻る。すでに枠を超えて保有している簿価は
+       非課税では持てないため、その割合ぶんを特定口座へ移す
+       （パートナー名義の資産が世帯から外れる、という扱い。移した時点の時価が新しい簿価になる）。
+       入力された初期元本が上限を超えている場合も、ここで同じ処理で吸収する。 */
+    {
+      const capNow=P.nisaCap*(1+((P.hasPartnerNisa&&married)?1:0));
+      if(nisaP>capNow+1e-9){
+        const overP=nisaP-capNow;
+        const ratio=(nisaP>0)?Math.min(1,overP/nisaP):0;
+        const moveV=nisaV*ratio;
+        nisaV=Math.max(0,nisaV-moveV); nisaP=capNow;
+        if(moveV>0){ taxV+=moveV; taxP+=moveV; }
+      }
+    }
     const adults=(selfDead?0:1)+marriedFrac;   /* 生存している大人の人数 */
     const childAges=P.children.map(c=>{const a=age-c.birthAge; return a>=0?a:null;});
     const dep=childAges.filter(a=>a!=null && a<P.childIndependAge);
@@ -3324,7 +3340,7 @@ function readParams(){
     curHouseholdSize:num('curHouseholdSize'), curMonthlyLiving:num('curMonthlyLiving'), inflation:num('inflation')/100,
     travelCount:num('travelCount'), travelCost:num('travelCost'),
     initCash:num('initCash'), nisaMonthly:num('nisaMonthly'),
-    initNisaP:num('initNisaP'), initNisaV:num('initNisaV'),
+    initNisaP:Math.min(num('initNisaP'), num('nisaCap')*(document.getElementById('hasPartnerNisa').checked?2:1)), initNisaV:num('initNisaV'),
     nisaYield:num('nisaYield')/100, nisaCap:num('nisaCap'),
     allocs:(ALLOCS||[]).slice().sort((a,b)=>a.age-b.age),
     alcYield:{index:num('alcYieldIndex')/100, gold:num('alcYieldGold')/100, bond:num('alcYieldBond')/100, cash:num('alcYieldCash')/100},
