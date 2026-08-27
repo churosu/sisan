@@ -147,6 +147,21 @@
 
   .tsub{display:block; font-size:8.5px; color:var(--slate-2); font-weight:600; line-height:1.2;}
 
+  /* 改善案の「実施する」ボタンと通知 */
+  .p-apply{margin-top:10px; padding:9px 16px; border:1.5px solid var(--teal); border-radius:9px;
+           background:#fff; color:var(--teal); font-size:12.5px; font-weight:800; cursor:pointer;
+           font-family:inherit; letter-spacing:.02em;}
+  .p-apply:hover{background:var(--teal); color:#fff;}
+  .ptoast{position:fixed; left:50%; transform:translateX(-50%) translateY(20px); bottom:calc(var(--dockh,64px) + 14px);
+          z-index:60; max-width:min(560px,92vw); display:flex; align-items:center; gap:12px;
+          background:var(--ink); color:#fff; border-radius:11px; padding:12px 14px; font-size:12.5px; line-height:1.6;
+          box-shadow:0 6px 22px rgba(15,42,60,.25); opacity:0; pointer-events:none; transition:opacity .18s, transform .18s;}
+  .ptoast.on{opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto;}
+  .ptoast button{flex:0 0 auto; background:none; border:1px solid rgba(255,255,255,.5); color:#fff;
+                 border-radius:7px; padding:5px 11px; font-size:12px; font-weight:800; cursor:pointer; font-family:inherit;}
+  .ptoast button:hover{background:rgba(255,255,255,.15);}
+  @media print{ .ptoast{display:none!important} }
+
   /* ===== オススメ改善ポイント（結果の直後） ===== */
   .nextmove{background:#EFF6F3; border:1px solid #9DCEC8; border-radius:var(--radius);
             padding:18px 18px 16px; margin-bottom:20px;}
@@ -163,6 +178,8 @@
           background:var(--teal); color:#fff; font-size:14px; font-weight:800; cursor:pointer;
           font-family:inherit; letter-spacing:.02em;}
   .nm-btn:hover{filter:brightness(1.06);}
+  .nm-btn.nm-sub{margin-top:9px; background:#fff; color:var(--teal); border:1.5px solid var(--teal);}
+  .nm-btn.nm-sub:hover{background:#EFF6F3; filter:none;}
 
   /* ===== 入力セクションのグループ見出し ===== */
   .grp-head{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
@@ -1968,7 +1985,7 @@ function eduTotalPerChild(P){ let t=0; for(let a=3;a<=21;a++) t+=eduAnnual(a,P);
 function insurance(age){ if(age<30)return 8; if(age<40)return 14; if(age<50)return 22; if(age<60)return 28; if(age<70)return 22; return 14; }
 /* 公的年金（令和7年度基準・概算）: 老齢基礎満額83.17万/年、報酬比例乗率5.481/1000（2003年4月〜）、標準報酬の年間上限概算1230万 */
 const CURRENT_YEAR=new Date().getFullYear();
-const APP_VERSION='0.0.70';   /* 更新するたびに末尾を増やす */
+const APP_VERSION='0.0.71';   /* 更新するたびに末尾を増やす */
 const MAX_AGE=120;  /* 生活資金が尽きなかった場合の試算上限 */
 const PENSION_FULL=83.17, PENSION_RATE=5.481/1000;
 /* 報酬比例部分の計算に使う「年間の標準報酬の上限」。
@@ -3794,7 +3811,8 @@ function renderProposals(P, rows){
 
   /* --- 対案を実測 --- */
   const cands=[];
-  const test=(cond,icon,label,how,note,patch)=>{ if(!cond)return; try{ const m=metricsOf(simulate({...P,...patch})); cands.push({icon,label,how,note,m}); }catch(e){} };
+  /* patch も持たせておき、「実施する」で入力欄へ書き戻せるようにする */
+  const test=(cond,icon,label,how,note,patch)=>{ if(!cond)return; try{ const m=metricsOf(simulate({...P,...patch})); cands.push({icon,label,how,note,m,patch}); }catch(e){} };
   const early=rows.slice(0,Math.min(10,rows.length));
   const avgSave=early.reduce((s,r)=>s+r.saving,0)/Math.max(1,early.length);
 
@@ -3833,10 +3851,59 @@ function renderProposals(P, rows){
       <div class="p-title">${c.icon} ${c.label}</div>
       <div class="p-eff">${eff.join('　／　')}</div>
       <div class="p-how">変更箇所：${c.how}${c.note?`　<span>${c.note}</span>`:''}</div>
+      <button type="button" class="p-apply" data-i="${i}">この案を実施する</button>
     </div></div>`;
   }).join('');
+  /* 「実施する」で入力欄を書き換え、そのまま再計算する */
+  PROPOSALS=scored;
+  el.querySelectorAll('.p-apply').forEach(b=>b.addEventListener('click',()=>{
+    applyProposal(scored[+b.dataset.i]);
+  }));
   renderNextMove(scored[0], base);
   return {count:scored.length, warn:diagWarn};
+}
+
+/* ============ 改善案の実施 ============
+   提案が持っている patch（変更後の値）を、そのまま入力欄へ書き戻す。
+   もとの値は控えておき、「元に戻す」で1回だけ取り消せるようにする。 */
+let PROPOSALS=[];
+let LAST_UNDO=null;
+function applyProposal(c){
+  if(!c||!c.patch) return;
+  const undo={}, changed=[];
+  for(const k in c.patch){
+    const el=document.getElementById(k); if(!el) continue;
+    undo[k]=(el.type==='checkbox')?el.checked:el.value;
+    const v=c.patch[k];
+    if(el.type==='checkbox') el.checked=!!v; else el.value=String(v);
+    el.dispatchEvent(new Event('change',{bubbles:true}));
+    el.dispatchEvent(new Event('input',{bubbles:true}));
+    changed.push(k);
+  }
+  if(!changed.length){ toastProposal('この案は自動で反映できませんでした。'+c.how+' を手動で変更してください。',null); return; }
+  LAST_UNDO={undo, label:c.label};
+  render();
+  toastProposal(`「${c.label}」を反映しました（${c.how}）。`, ()=>{
+    for(const k in undo){
+      const el=document.getElementById(k); if(!el) continue;
+      if(el.type==='checkbox') el.checked=!!undo[k]; else el.value=undo[k];
+      el.dispatchEvent(new Event('change',{bubbles:true}));
+      el.dispatchEvent(new Event('input',{bubbles:true}));
+    }
+    LAST_UNDO=null; render();
+    toastProposal('もとの設定に戻しました。', null);
+  });
+  const sheet=document.getElementById('rsheet');
+  if(sheet) sheet.scrollIntoView({behavior:'smooth', block:'start'});
+}
+/* 反映したことを知らせる小さな通知（「元に戻す」つき） */
+function toastProposal(msg, onUndo){
+  let t=document.getElementById('propToast');
+  if(!t){ t=document.createElement('div'); t.id='propToast'; t.className='ptoast'; document.body.appendChild(t); }
+  t.innerHTML=`<span>${msg}</span>`+(onUndo?'<button type="button" id="ptUndo">元に戻す</button>':'');
+  t.classList.add('on');
+  if(onUndo){ const u=document.getElementById('ptUndo'); if(u) u.onclick=()=>{ t.classList.remove('on'); onUndo(); }; }
+  clearTimeout(t._tm); t._tm=setTimeout(()=>t.classList.remove('on'), onUndo?9000:4000);
 }
 
 /* ============ Mirai Shishin オススメ改善ポイント ============
@@ -3856,8 +3923,11 @@ function renderNextMove(c, base){
     <div class="nm-title">${c.icon} ${c.label}</div>
     <div class="nm-eff">この変更を実測すると、${eff.join('　／　')}。</div>
     <div class="nm-how">変更箇所：${c.how}</div>
-    <button type="button" class="nm-btn" id="nmGo">ほかの改善案も見る →</button>
+    <button type="button" class="nm-btn" id="nmApply">この案を実施する</button>
+    <button type="button" class="nm-btn nm-sub" id="nmGo">ほかの改善案も見る →</button>
   </div>`;
+  const ap=document.getElementById('nmApply');
+  if(ap) ap.addEventListener('click',()=>applyProposal(c));
   const btn=document.getElementById('nmGo');
   if(btn) btn.addEventListener('click',()=>{
     const tab=document.querySelector('[data-tab="tab-proposal"]');
