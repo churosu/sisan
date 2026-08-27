@@ -1968,7 +1968,7 @@ function eduTotalPerChild(P){ let t=0; for(let a=3;a<=21;a++) t+=eduAnnual(a,P);
 function insurance(age){ if(age<30)return 8; if(age<40)return 14; if(age<50)return 22; if(age<60)return 28; if(age<70)return 22; return 14; }
 /* 公的年金（令和7年度基準・概算）: 老齢基礎満額83.17万/年、報酬比例乗率5.481/1000（2003年4月〜）、標準報酬の年間上限概算1230万 */
 const CURRENT_YEAR=new Date().getFullYear();
-const APP_VERSION='0.0.69';   /* 更新するたびに末尾を増やす */
+const APP_VERSION='0.0.70';   /* 更新するたびに末尾を増やす */
 const MAX_AGE=120;  /* 生活資金が尽きなかった場合の試算上限 */
 const PENSION_FULL=83.17, PENSION_RATE=5.481/1000;
 /* 報酬比例部分の計算に使う「年間の標準報酬の上限」。
@@ -6479,7 +6479,7 @@ function buildPrintDoc(){
     +'<p class="disc-p">金額は特記のない限り<b>名目額</b>（その年の円）です。「実質」と書かれた金額は、インフレ率で割り戻した<b>今日の物価に換算した金額</b>です。給与は額面で入力し、手取りへ自動換算しています。</p>'
     +'<p class="disc-p">社会保険料は報酬月額を等級表にあてはめた「標準報酬月額」で決まるため、手当などで<b>等級が1つ上がると保険料が手当より大きく増える</b>ことがあります。これは実際の制度でも起こる現象で、計算の誤りではありません。</p>'
     +'<div class="sec-t">制度の変更予定について</div>'
-    +'<p class="disc-p">こどもNISAは2027年1月開始予定の新制度で、詳細は2026年中に公表される予定のため変更される可能性があります。社会保険の「106万円の壁」は2026年10月に賃金要件が撤廃されますが、これは壁が上がるのではなく適用が広がる改正です。国民健康保険（自営業）は自治体差が大きいため目安の計算です。</p>'
+    +'<p class="disc-p">こどもNISAは2027年1月開始予定の制度案で、詳細は2026年中に公表される予定のため変更される可能性があります。社会保険の「106万円の壁」は2026年10月に賃金要件が撤廃されますが、これは壁が上がるのではなく適用が広がる改正です。国民健康保険（自営業）は自治体差が大きいため目安の計算です。</p>'
     +'<div class="sec-t">免責事項</div>'
     +'<p class="disc-p">本ツールは<b>試算を目的としたもので、投資・税務・保険の助言ではありません</b>。将来の制度改正・運用成果・物価動向により実際の結果は大きく変わります。数値はあくまで目安としてご覧いただき、重要な意思決定の際は税理士・ファイナンシャルプランナー等の専門家にご相談ください。</p>'
     +'<p class="disc-p">本ツールは入力内容をサーバーに送信しません。すべての計算はご利用の端末内で完結します。</p>'
@@ -7342,13 +7342,50 @@ function shareApp(btn){
     urlP.then(u=>{ finish(); copyShare(u,_shareBtnRef); });
   });
 })();
+/* ===== 印刷・PDF出力の前処理 =====
+   折りたたみやタブで隠れているグラフは canvas の大きさが 0 のままで、
+   一度も開かずに印刷すると白紙のページができてしまう。
+   出力前にすべて開き、レイアウトを確定させてからグラフを描き直す。
+   元の開閉状態は afterprint で戻す。 */
+function preparePrint(){
+  document.querySelectorAll('details.foldblock, details.logic').forEach(d=>{
+    if(!d.open){ d.dataset.wasClosed='1'; d.open=true; }
+  });
+  /* タブは1枚しか表示されないので、印刷中だけ全パネルを表示状態にする */
+  document.querySelectorAll('#tabBlock .tab-panel').forEach(p=>{
+    if(!p.classList.contains('active')){ p.dataset.wasHidden='1'; p.classList.add('active'); }
+  });
+  void document.body.offsetHeight;   /* ここでレイアウトを確定させる */
+  /* Chart.js のグラフは実サイズで作り直す */
+  document.querySelectorAll('canvas').forEach(cv=>{
+    try{
+      const c=(window.Chart && Chart.getChart)?Chart.getChart(cv):null;
+      if(c){ c.resize(); c.update('none'); }
+    }catch(e){}
+  });
+  /* 自前描画のグラフ（円グラフなど）も含めて、開いた状態で描き直す */
+  try{ render(); }catch(e){ console.error(e); }
+}
+function restoreAfterPrint(){
+  document.querySelectorAll('details.foldblock, details.logic').forEach(d=>{
+    if(d.dataset.wasClosed==='1'){ d.open=false; d.dataset.wasClosed=''; }
+  });
+  document.querySelectorAll('#tabBlock .tab-panel').forEach(p=>{
+    if(p.dataset.wasHidden==='1'){ p.classList.remove('active'); p.dataset.wasHidden=''; }
+  });
+}
 document.getElementById('pdfBtnDock').addEventListener('click',()=>{
+  try{ preparePrint(); }catch(e){ console.error(e); }
   try{ buildPrintDoc(); }catch(e){ console.error(e); }
-  window.print();
+  /* 描き直しが画面に反映されてから印刷ダイアログを開く */
+  setTimeout(()=>{ window.print(); },60);
 });
 /* ブラウザのメニューから印刷された場合にも組み版を用意する */
-window.addEventListener('beforeprint',()=>{ try{ buildPrintDoc(); }catch(e){ console.error(e); } });
-window.addEventListener('afterprint',()=>{ document.querySelectorAll('.foldblock').forEach(d=>{ if(d.dataset.wasClosed==='1'){ d.open=false; d.dataset.wasClosed=''; } }); });
+window.addEventListener('beforeprint',()=>{
+  try{ preparePrint(); }catch(e){ console.error(e); }
+  try{ buildPrintDoc(); }catch(e){ console.error(e); }
+});
+window.addEventListener('afterprint',restoreAfterPrint);
 document.getElementById('jobType').addEventListener('change',e=>{ const kosei=(e.target.value==='kaisha'||e.target.value==='komuin'); document.getElementById('pensionType').value=kosei?'kosei':'kokumin'; render(); });
 
 function syncDcFields(){
