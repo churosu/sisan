@@ -1240,6 +1240,8 @@
         <div class="hint" style="margin-top:0"><b>こどもNISA</b>は、令和8年度税制改正大綱で創設が<b>予定されている制度案</b>です（<b>2027年1月開始予定</b>・0〜17歳の子ども名義でNISA口座を開設でき、運用益は<b>非課税</b>）。2023年末に終了したジュニアNISA以降、18歳未満が使える非課税制度がなかった空白を埋めるものです。<b>2026年8月時点では法制化前</b>のため、内容が変わる可能性があります。<br>・年間投資枠は<b>60万円（月5万円）</b>まで。入力がこれを超えても60万円で頭打ちにします。<br>・非課税保有限度額は<b>600万円</b>（元本ベース）。上限に達したら積立を止めます。<br>・非課税保有期間は無期限で、18歳になると成人のNISAへ引き継がれます。本ツールでは17歳まで積み立て、その後も非課税のまま運用を続ける前提です。<br>・払出しができるのは原則<b>12歳以降</b>（本人のための資金であることなどの要件あり）です。<br>この資産は<b>世帯の総資産には含めず</b>、指定した年齢時点の金額を結果に表示します（生活防衛費を下回らない範囲で毎年拠出し、2027年より前の年は積み立てません）。制度の詳細は2026年中に公表される予定のため、変更される可能性があります。</div>
         </div>
         <div class="field"><label>現預金の上限超過分をNISAへ</label><input type="checkbox" id="sweepNisa"></div>
+        <div class="field"><label>老後の生活防衛費（不足額の何年分を現金で持つか）</label><div class="ig"><input type="number" id="emgRetireYears" value="3" min="0" max="10" step="1"><span class="unit">年分</span></div></div>
+        <div class="hint" style="margin-top:0">年金生活に入ると、毎年の不足分を運用資産から取り崩すことになります。暴落した年に売ると安値で手放すことになるため（収益率配列リスク）、<b>「収入でまかなえない金額 ×この年数」</b>を現金で確保し、相場が悪い年は現金から取り崩せるようにします。<b>0にすると従来どおり</b>、老後は現金を持たず全額を運用資産から取り崩します。一時支出（車の買替え・リフォームなど）は毎年ではないため、年数を掛けずにその年の分だけ上乗せします。</div>
         <div class="field"><label>　└ 現預金の上限</label><div class="ig"><input type="number" id="cashCap" value="500"><span class="unit">万</span></div></div>
         <div class="hint">オンにすると、生活防衛費とは別に設けた上限を超えた現預金を、年間枠（360万）・生涯投資枠の範囲でNISAに自動で回します。</div>
         <div class="hint">現預金が不足する年は、NISAを自動で取り崩して充当します（元本・評価額に反映）。</div>
@@ -1592,6 +1594,8 @@
         <h2>資産比率の変更</h2>
         <div id="allocRows"></div>
         <button type="button" class="btn-sub" id="allocAdd" style="margin-top:8px">＋ 変更を追加（最大3つ）</button>
+        <button type="button" class="btn-sub" id="allocSuggest" style="margin-top:8px">おすすめの3段階を入れる</button>
+        <div class="hint" id="allocSuggestNote" style="margin-top:8px">「おすすめの3段階」は、<b>いまの試算にあわせて時期を自動で決めます</b>。①総資産1,000万円に到達した年、②子育てが一段落して入金力が高まる年、③老後を見据えて安全側に寄せる60歳前後、の3つです。押すと今の設定は置き換わります。</div>
 
         <details class="alc-det"><summary>この機能の説明</summary><div class="ad-in">
           <div class="hint" style="margin-top:0">資産配分は<b>総資産（現預金＋運用資産）</b>に対する目標比率です。既定では<b>既存の資産は売らず</b>、指定年齢以降の新しい投資だけを目標比率に寄せていきます。<br><details class="logic" style="border-top:0;margin-top:6px"><summary>くわしい前提（一括入替・NISA枠・不動産）</summary><div class="logic-body">指定した年齢で、<b>総資産（現預金＋運用資産）に対する配分</b>を切り替えます。合計が100%になるように入力してください（100%でない場合は自動で正規化します）。<br>
@@ -1926,7 +1930,18 @@
           <tr><td>不動産</td><td>7.0%</td></tr>
           <tr><td>現預金</td><td>0%</td></tr>
         </tbody></table>
-        <p>株式とゴールドは弱い逆相関（−0.15）を置くなど、資産間の相関も反映します。画面のブレ幅スライダーは<b>投資信託の標準偏差</b>を指し、ほかの資産はその比率で連動します。不動産は家賃収入（空室率）にもブレが波及します。</p>
+        <p>資産どうしの相関は次のとおりです（1に近いほど同じ方向に動く）。</p>
+        <table class="logic-tbl"><thead><tr><th></th><th>投資信託</th><th>ゴールド</th><th>債券</th><th>不動産</th></tr></thead><tbody>
+          <tr><th>投資信託</th><td>1.00</td><td>−0.15</td><td>0.10</td><td>0.45</td></tr>
+          <tr><th>ゴールド</th><td>−0.15</td><td>1.00</td><td>0.15</td><td>0.10</td></tr>
+          <tr><th>債券</th><td>0.10</td><td>0.15</td><td>1.00</td><td>0.10</td></tr>
+          <tr><th>不動産</th><td>0.45</td><td>0.10</td><td>0.10</td><td>1.00</td></tr>
+        </tbody></table>
+        <p>画面のブレ幅スライダーは<b>投資信託の標準偏差</b>を指し、ほかの資産はその比率で連動します。不動産は家賃収入（空室率）にもブレが波及します。</p>
+        <h4>投資信託と債券の前提<span class="srcbadge own">独自初期値</span></h4>
+        <p>債券の標準偏差<b>4%</b>は、<b>為替ヘッジありの先進国債券ファンド</b>を想定した水準です。<b>為替ヘッジなしの外国債券</b>は為替の変動がそのまま乗るため実際には<b>9〜10%</b>程度になり、この試算より値動きが大きくなります。国内債券のみなら2〜3%程度です。</p>
+        <p>投資信託と債券の相関<b>0.10</b>は長期の平均的な水準です。ただしこの関係は<b>時期によって大きく変わります</b>。2000〜2021年ごろは −0.3 前後で、株が下がると債券が上がって損失を和らげていました。一方<b>2022年は金利上昇により株と債券が同時に下落</b>し、相関は +0.5 程度まで上がりました。本試算は全期間で同じ相関を使うため、<b>2022年のような「債券も一緒に下がる」局面は再現できません</b>。債券を厚くした配分の安全性は、やや高めに出ている可能性があります。</p>
+        <p>また、債券の期待利回りは入力値をそのまま毎年使います。実際の債券は金利が上がった年の翌年から利回りが改善する（平均回帰する）性質がありますが、これは反映していません。</p>
         <h4>読み取り方</h4>
         <ul>
           <li><b>95歳時点で資産が残った割合</b>：この前提がどれくらい「もつ」かの目安</li>
@@ -1986,7 +2001,7 @@ function eduTotalPerChild(P){ let t=0; for(let a=3;a<=21;a++) t+=eduAnnual(a,P);
 function insurance(age){ if(age<30)return 8; if(age<40)return 14; if(age<50)return 22; if(age<60)return 28; if(age<70)return 22; return 14; }
 /* 公的年金（令和7年度基準・概算）: 老齢基礎満額83.17万/年、報酬比例乗率5.481/1000（2003年4月〜）、標準報酬の年間上限概算1230万 */
 const CURRENT_YEAR=new Date().getFullYear();
-const APP_VERSION='0.0.72';   /* 更新するたびに末尾を増やす */
+const APP_VERSION='0.0.75';   /* 更新するたびに末尾を増やす */
 const MAX_AGE=120;  /* 生活資金が尽きなかった場合の試算上限 */
 const PENSION_FULL=83.17, PENSION_RATE=5.481/1000;
 /* 報酬比例部分の計算に使う「年間の標準報酬の上限」。
@@ -2536,6 +2551,7 @@ function simulate(P){
   /* 現物不動産の保有状態。物件は1件単位でしか売買できないため件数で管理する。
      realBasis＝取得費（取得価額＋取得諸費用−減価償却累計）、realBldgCost＝建物部分の取得価額。 */
   let realUnits=0, realBasis=0, realBldgCost=0, realDeprCum=0, realBuyYear=null;
+  let realIncomePrev=0;   /* 前年の家賃収入（税引後）。老後の生活防衛費の見積もりに使う */
   /* 1件あたりの物件価格。★モンテカルロでは値上がり率にブレが乗るため、想定値ではなく
      その年に実際に適用された不動産の利回りで改定していく（taxV に含まれる不動産の時価とずれないようにするため） */
   let lotPrice=Math.max(0,((P.alcReal&&P.alcReal.min)||0));
@@ -2751,7 +2767,7 @@ function simulate(P){
     if(married && _partnerActive(P,age)) earners++;
     const retired = age>=P.reemployTo;
     const emgMonths = dep.length>0 ? 12 : (retired ? 0 : (earners>=2 ? 6 : 10));
-    const emergency = living*emgMonths/12;
+    let emergency = living*emgMonths/12;   /* 老後は収入が確定したあとで下で組み直す */
     let housing=0,oneoff=0,oneoffLbl=[];
     /* 一時支出は合計だけでなく内訳（項目名と金額）も保持する。結果シートで「一時支出」と
        ひとまとめにせず、頭金・購入諸費用・車購入などを個別に出すため。 */
@@ -2862,6 +2878,19 @@ function simulate(P){
     net+=survivorPen;
     /* 副業・不動産の所得は netIncome 内で給与と合算課税済みのため、ここでは二重計上しない */
     const housingSubsidyNet=(housingSubsidy>0 && P.housingSubsidyTaxable===false)?housingSubsidy:0;   /* 非課税手当は手取りに直接加算 */
+    /* ★老後の生活防衛費（現金クッション）
+       年金生活に入ると毎年の不足分を運用資産から取り崩すことになるが、
+       暴落した年に売ると安値で手放すことになり資産の減りが加速する（収益率配列リスク）。
+       そこで「収入でまかなえない金額の数年分」を現金で持ち、相場が悪い年は
+       現金から取り崩して運用資産に手をつけずに済むようにする。
+       ※一時支出（車の買替え・リフォームなど）は毎年発生するものではないため、
+         数年分を掛けずにその年の金額だけを上乗せする（掛けると必要額を大きく見誤る）。 */
+    if(retired){
+      const yrs=Math.max(0, P.emgRetireYears||0);
+      const income=Math.max(0, net)+Math.max(0, realIncomePrev);
+      const recur=Math.max(0, (living+housing+edu) - income);
+      emergency=recur*yrs + Math.max(0, oneoff);
+    }
     const incomeCash=net+allowance+grant+credit+ded+dcDed+deathBenefit+housingSubsidyNet+inheritNet+giftNet;
     // 表示用：世帯の支出・純貯蓄（教育費も支出に含む）
     const expense=living+housing+edu+oneoff;
@@ -3298,7 +3327,13 @@ function simulate(P){
           } }
       } }
     // 取り崩し：現預金が生活防衛費を下回る年のみ（この年は上のとおり入金していない）
-    const target=emergency;
+    /* ★現金クッションの使いどころ
+       運用がマイナスだった年は、安値で売らずに済むよう<b>現金を取り崩して耐える</b>。
+       つまりその年はクッションの積み直しをせず、現金が尽きそうなときだけ運用資産に手をつける。
+       プラスの年に目標額まで積み直すことで、次の下落に備える（バケツ戦略）。
+       クッションを持たない設定（0年分）では、従来どおり毎年 emergency まで補充する。 */
+    const _cushion=(P.emgRetireYears||0)>0 && retired;
+    const target=(_cushion && _yr<0 && cash>=0) ? 0 : emergency;
     /* NISAの売却：非課税で全額が現金化される。売却した簿価分の生涯投資枠が復活するのは【翌年】なので、
        sellNisa が簿価を nisaLocked へ退避し、その年のあいだは枠を使っているものとして扱う。 */
     const takeNisa=(need)=>{ const sold=sellNisa(need); if(sold>0){ cash+=sold; drawNisa+=sold; } };
@@ -3372,6 +3407,7 @@ function simulate(P){
       const c0=Math.max(0,cash), inv=Math.max(0,nisaV+taxV), t0=c0+inv;
       _yrAll=(t0>0)?(_yr*inv+_yCash*c0)/t0:_yr;
     }
+    realIncomePrev=realIncomeAfterTax;
     const events=eventsFor(P,age,childAges,L);
     /* 表示用の保有比率。実際に購入できた不動産の額に合わせ、買えていないぶんは投資信託に寄せる
        （最低購入価格に届くまでの年に、実在しない不動産が円グラフに出ないようにするため） */
@@ -3446,7 +3482,7 @@ function readParams(){
              appr:num('alcRealAppr')/100, min:num('alcRealMin'),
              acq:num('alcRealAcq')/100, sell:num('alcRealSell')/100,
              bldg:num('alcRealBldg')/100, life:Math.max(1,num('alcRealLife')||47)},
-    sweepNisa:document.getElementById('sweepNisa').checked, cashCap:num('cashCap'),
+    sweepNisa:document.getElementById('sweepNisa').checked, cashCap:num('cashCap'), emgRetireYears:num('emgRetireYears'),
     hasDC:document.getElementById('hasDC').checked, dcType:val('dcType'), dcMonthly:num('dcMonthly'), corpDcMode:val('corpDcMode'), corpDcRate:num('corpDcRate'), corpDcFixed:num('corpDcFixed'), dcReceiveAge:num('dcReceiveAge'),
     hasRetireBonus:document.getElementById('hasRetireBonus').checked, retireBonus:num('retireBonus'), joinAge:num('joinAge'),
     withdrawOrder:val('withdrawOrder'), dcTaxRate:num('dcTaxRate')/100,
@@ -4838,7 +4874,7 @@ const DEFAULTS={currentAge:24,currentAgeMonths:0,marriageAge:31,marriageAgeMonth
   buyAge:41,rentMonthly:7.5,price:3830,downpay:400,closingRate:7,rate:1.5,loanYears:35,propertyTax:15,
   repair1Year:10,repair1Cost:120,repair2Year:35,repair2Cost:500,creditYears:13,creditRate:0.7,creditCap:21,
   hasHousingSubsidy:false,housingSubsidyMode:'fixed',housingSubsidyFixed:2,housingSubsidyRate:0.1,housingSubsidyYears:10,housingSubsidyTaxable:true,
-  kabeMode:'h106',curHouseholdSize:1,curMonthlyLiving:12.0,inflation:1.5,travelCount:1,travelCost:12,
+  kabeMode:'h106',emgRetireYears:3,curHouseholdSize:1,curMonthlyLiving:12.0,inflation:1.5,travelCount:1,travelCost:12,
   initCash:50,nisaMonthly:2,nisaYield:4.0,nisaCap:1800,initNisaP:0,initNisaV:0,
   sweepNisa:false,cashCap:300,
   hasDC:false,dcType:'ideco',dcMonthly:2.0,corpDcMode:'rate',corpDcRate:2.5,corpDcFixed:1.0,dcReceiveAge:65,hasRetireBonus:true,retireBonus:1500,joinAge:22,
@@ -6766,6 +6802,51 @@ let ALLOCS=[];
 const ALLOC_MAX=3;
 const ALLOC_KEYS=[['index','投資信託'],['gold','ゴールド'],['bond','債券'],['real','不動産'],['cash','現預金']];
 function allocDefault(){ return {age:60,index:50,gold:10,bond:20,real:0,cash:20,lump:false}; }
+
+/* ===== おすすめの資産配分（3段階） =====
+   資産形成の局面ごとに、取れるリスクは変わる。
+   ①資産が1,000万円に届いたころ：期間が長く、下落しても回復を待てるので株式中心
+   ②子育てが一段落し入金力が高まるころ：金額が大きくなるので分散を始める
+   ③60歳前後：取り崩しが近く、下落からの回復を待てないので安全資産を厚くする
+   時期はユーザー自身の試算から拾い、配分だけを提案する。 */
+function suggestAllocs(){
+  const P=readParams(); const rows=simulate(P);
+  const now=Math.floor(P.currentAgeFrac!=null?P.currentAgeFrac:P.currentAge);
+  const ret=P.selfRetire||65;
+  /* ① 総資産が1,000万円に到達する年（届かない試算なら5年後を目安に） */
+  const hit=rows.find(r=>r.netWorth>=1000);
+  let a1=hit?hit.age:now+5;
+  /* ② 末子が独立して教育費が終わる年（子どもがいなければ50歳ごろ） */
+  let a2=null;
+  if(P.children && P.children.length){
+    const lastBirth=Math.max(...P.children.map(c=>c.birthAge));
+    a2=lastBirth+(P.childIndependAge||22);
+  }
+  if(a2==null||!isFinite(a2)) a2=Math.max(now+10, Math.min(ret-10, 50));
+  /* ③ 定年の5年前、または60歳の早いほう */
+  let a3=Math.min(60, ret-5);
+  /* 順序と範囲を整える（いまの年齢より前や、逆転した並びにしない） */
+  /* すでに過ぎた段階は「いま」に寄せる */
+  const stages=[
+    /* 株式中心。まだ増やす局面なので、現預金は生活防衛費ぶんにとどめる */
+    {age:Math.max(now,Math.round(a1)), index:75, gold:5,  bond:0,  real:0, cash:20, lump:false},
+    /* 金額が大きくなるため、値動きの異なる資産を少しずつ足して分散する */
+    {age:Math.max(now,Math.round(a2)), index:60, gold:10, bond:10, real:0, cash:20, lump:false},
+    /* 取り崩しが近い。下落からの回復を待てないので債券と現預金を厚くする */
+    {age:Math.max(now,Math.min(75,Math.round(a3))), index:40, gold:10, bond:25, real:0, cash:25, lump:true}
+  ];
+  /* ★年齢が近すぎる段階はまとめる。
+     たとえば58歳の人に「58歳→59歳→60歳」と3段階を出しても意味がないため、
+     次の段階が3年以内に来る場合は手前を省き、より保守的な後ろの配分だけを残す。 */
+  const res=[];
+  for(let i=0;i<stages.length;i++){
+    const nx=stages[i+1];
+    if(nx && nx.age-stages[i].age<3) continue;
+    res.push(stages[i]);
+  }
+  return res;
+}
+
 function renderAllocRows(){
   const box=document.getElementById('allocRows'); if(!box) return;
   box.innerHTML=ALLOCS.map((a,i)=>{
@@ -7230,6 +7311,18 @@ var _alcTax=document.getElementById('alcUseTaxable');
 if(_alcTax) _alcTax.addEventListener('change',function(){ render(); });
 var _alcRE=document.getElementById('alcRealEnable');
 if(_alcRE) _alcRE.addEventListener('change',function(){ render(); });
+var _allocSug=document.getElementById('allocSuggest');
+if(_allocSug) _allocSug.addEventListener('click',function(){
+  try{
+    ALLOCS=suggestAllocs();
+    saveAllocs(); renderAllocRows(); render();
+    const n=document.getElementById('allocSuggestNote');
+    if(n) n.innerHTML='<b>おすすめの配分を'+ALLOCS.length+'段階で入れました。</b>'
+      +(ALLOCS.length<3?'（いまの年齢に近い段階はまとめています）':'')+'<br>'
+      +ALLOCS.map(function(a,i){ return (i+1)+'）<b>'+a.age+'歳</b>から 投資信託'+a.index+'／ゴールド'+a.gold+'／債券'+a.bond+'／現預金'+a.cash+'%'; }).join('<br>')
+      +'<br>年齢も配分も、このあと自由に変更できます。';
+  }catch(e){ console.error(e); }
+});
 var _allocAdd=document.getElementById('allocAdd');
 if(_allocAdd) _allocAdd.addEventListener('click',function(){ if(ALLOCS.length>=ALLOC_MAX) return; ALLOCS.push(allocDefault()); saveAllocs(); renderAllocRows(); render(); });
 ['alcYieldIndex','alcYieldGold','alcYieldBond','alcYieldCash','alcRealGross','alcVacancy','alcRealCost','alcRealAppr','alcRealMin','alcRealAcq','alcRealSell','alcRealBldg','alcRealLife','alcTaxRate'].forEach(function(id){
