@@ -147,6 +147,9 @@
 
   .tsub{display:block; font-size:8.5px; color:var(--slate-2); font-weight:600; line-height:1.2;}
 
+  .mc-hist-t{font-size:12.5px; font-weight:700; color:var(--slate); margin:16px 0 6px;}
+  #mcHist{width:100%; display:block;}
+
   /* 改善案の「実施する」ボタンと通知 */
   .p-apply{margin-top:10px; padding:9px 16px; border:1.5px solid var(--teal); border-radius:9px;
            background:#fff; color:var(--teal); font-size:12.5px; font-weight:800; cursor:pointer;
@@ -180,6 +183,9 @@
   .nm-btn:hover{filter:brightness(1.06);}
   .nm-btn.nm-sub{margin-top:9px; background:#fff; color:var(--teal); border:1.5px solid var(--teal);}
   .nm-btn.nm-sub:hover{background:#EFF6F3; filter:none;}
+
+  .lt-cmp td.bst{background:#E7F1EC; font-weight:800; color:#1F6B54;}
+  .lt-cmp th:first-child,.lt-cmp td:first-child{width:30%;}
 
   /* ===== 入力セクションのグループ見出し ===== */
   .grp-head{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
@@ -1560,6 +1566,11 @@
         <div class="hint" style="margin-top:0">NISA・確定拠出年金の利回りは毎年変動します。想定利回り（<b id="mcMu">—</b>）を中心に運用成果が上下に振れた場合を多数回シミュレーションし、資産が何歳まで残るかの<b>幅</b>を見ます。<br><details class="logic" style="border-top:0;margin-top:6px"><summary>結果の読み方と前提</summary><div class="logic-body">基準は「想定利回りを固定した現状の試算」です。<br>「資産比率の変更」を設定している場合は、<b>資産ごとに異なるブレ幅と相関</b>を反映します（年率の標準偏差：投資信託18%・ゴールド15%・不動産7%・債券4%・現預金0%）。株式とゴールドの相関は<b>−0.15</b>で、<b>投資信託が下がる年にゴールドが上がりやすい</b>動きを再現します。債券は+0.10というごく低い連動と小さいブレ幅で安定的に働き、不動産は株式と<b>+0.45</b>の中程度の連動で、家賃収入もその年の市況に応じて増減します。これにより、分散したポートフォリオほど不調時の落ち込みが浅くなる様子を確認できます。実現利回りは<b>その年に実際に適用された配分の加重平均（現預金を含む総資産ベース）</b>で集計するため、債券や現預金を厚くした配分ほど結果の散らばりが小さく出ます。あわせて<b>想定利回りの達成率</b>も表示します。資産比率の変更を設定している場合、達成率の基準は「資産形成」タブの想定利回りではなく、<b>その配分から決まる期待利回り</b>（現預金を含む）です。<br><button type="button" class="logic-link" data-logic="logic-mc">モンテカルロの計算ロジック</button></div></details></div>
         <div class="mc-run"><button id="mcRun">この設定で分析する</button><span id="mcStatus" class="mc-status"></span></div>
         <div id="mcResult"></div>
+        <div id="mcHistWrap" style="display:none">
+          <div class="mc-hist-t">資産寿命のちらばり</div>
+          <canvas id="mcHist"></canvas>
+          <div class="hint" style="margin-top:2px">横軸は<b>資産が尽きた年齢</b>（5歳きざみ）、縦軸はその範囲に入った試算の割合です。右端の「尽きず」は<b>最後まで資産が残った</b>ケース。<span style="color:#C2526B;font-weight:700">赤い柱</span>は下位10%（悪いほうから1割）が入る範囲です。</div>
+        </div>
         <div class="hint" style="margin-top:0;text-align:right"><button type="button" class="logic-link" data-logic="logic-mc">モンテカルロの計算ロジック</button></div>
       <details class="mc-set" id="mcSet">
           <summary>詳細設定（標準偏差・試行回数・相関）</summary>
@@ -1595,7 +1606,9 @@
         <div id="allocRows"></div>
         <button type="button" class="btn-sub" id="allocAdd" style="margin-top:8px">＋ 変更を追加（最大3つ）</button>
         <button type="button" class="btn-sub" id="allocSuggest" style="margin-top:8px">おすすめの3段階を入れる</button>
-        <div class="hint" id="allocSuggestNote" style="margin-top:8px">「おすすめの3段階」は、<b>いまの試算にあわせて時期を自動で決めます</b>。①総資産1,000万円に到達した年、②子育てが一段落して入金力が高まる年、③老後を見据えて安全側に寄せる60歳前後、の3つです。押すと今の設定は置き換わります。</div>
+        <button type="button" class="btn-sub" id="allocCmpBtn" style="margin-top:8px">配分ごとの結果を比べる</button>
+        <div id="allocCmp"></div>
+        <div class="hint" id="allocSuggestNote" style="margin-top:8px"><b>おすすめの3段階</b>＝①1,000万円に到達した年／②子育てが一段落する年／③60歳前後、の3つの時期に配分を切り替える案です（時期は試算から自動で決まります）。<br><b>配分ごとの結果を比べる</b>＝代表的な5つの配分で試算し、どれが有利かを表にします。</div>
 
         <details class="alc-det"><summary>この機能の説明</summary><div class="ad-in">
           <div class="hint" style="margin-top:0">資産配分は<b>総資産（現預金＋運用資産）</b>に対する目標比率です。既定では<b>既存の資産は売らず</b>、指定年齢以降の新しい投資だけを目標比率に寄せていきます。<br><details class="logic" style="border-top:0;margin-top:6px"><summary>くわしい前提（一括入替・NISA枠・不動産）</summary><div class="logic-body">指定した年齢で、<b>総資産（現預金＋運用資産）に対する配分</b>を切り替えます。合計が100%になるように入力してください（100%でない場合は自動で正規化します）。<br>
@@ -2001,7 +2014,7 @@ function eduTotalPerChild(P){ let t=0; for(let a=3;a<=21;a++) t+=eduAnnual(a,P);
 function insurance(age){ if(age<30)return 8; if(age<40)return 14; if(age<50)return 22; if(age<60)return 28; if(age<70)return 22; return 14; }
 /* 公的年金（令和7年度基準・概算）: 老齢基礎満額83.17万/年、報酬比例乗率5.481/1000（2003年4月〜）、標準報酬の年間上限概算1230万 */
 const CURRENT_YEAR=new Date().getFullYear();
-const APP_VERSION='0.0.75';   /* 更新するたびに末尾を増やす */
+const APP_VERSION='0.0.81';   /* 更新するたびに末尾を増やす */
 const MAX_AGE=120;  /* 生活資金が尽きなかった場合の試算上限 */
 const PENSION_FULL=83.17, PENSION_RATE=5.481/1000;
 /* 報酬比例部分の計算に使う「年間の標準報酬の上限」。
@@ -4625,12 +4638,18 @@ function render(){
   const bProp=document.getElementById('tabBadgeProposal'); if(bProp){ bProp.textContent=propMeta.count||''; bProp.className='tb-badge'+(propMeta.warn?' warn':''); }
 
   const b=document.getElementById('banner');
-  if(minCash.cash<0){
-    b.className='banner warn'; b.innerHTML=`⚠️ <div><b>資金が不足する試算です</b>：この前提では、NISAを取り崩しても${minCash.age}歳ごろに資産が足りなくなる計算になりました。収入・支出・購入額・積立額の前提を見直すと結果が変わります。</div>`;
+  /* ★資産が尽きる試算（busted）は、取り崩しが一度も起きていなくても必ず警告にする。
+     取り崩す資産がそもそも無い場合は firstDraw が立たず、
+     「取り崩さずに暮らせる」という逆の意味に読めてしまうため。 */
+  if(minCash.cash<0 || (last.busted && last.age<MAX_AGE)){
+    const na=(minCash.cash<0)?minCash.age:last.age;
+    b.className='banner warn';
+    b.innerHTML=`⚠️ <div><b>${na}歳ごろに資産が足りなくなる試算です。</b>収入・支出・積立額などの前提を見直すと結果が変わります。</div>`;
   } else if(firstDraw!=null){
-    b.className='banner ok'; b.innerHTML=`<div>この前提では、給与・年金で足りない分を${firstDraw}歳以降に資産（${P.withdrawOrder==='dc'?'確定拠出年金→NISA':'NISA→確定拠出年金'}）から取り崩してまかなう計算になりました（現預金の目安：生活費の最大12ヶ月／老後は取り崩し前提で0）。${P.endAge}歳時点の税引後総資産は${manY(last.netWorth)}という試算です。</div>`;
+    /* 総資産や資産寿命は上の結果シートに出ているので、ここでは繰り返さない */
+    b.className='banner ok'; b.innerHTML=`<div><b>${firstDraw}歳から資産の取り崩しが始まります。</b>給与・年金だけでは足りない分を、${P.withdrawOrder==='dc'?'確定拠出年金 → NISA':'NISA → 確定拠出年金'}の順に取り崩してまかなう計算です。</div>`;
   } else {
-    b.className='banner ok'; b.innerHTML=`<div>この前提では、全期間を収入だけでまかない、NISAの取り崩しは発生しない計算になりました。現預金は生活費の目安（現役最大12ヶ月・老後0）を上回って推移し、${P.endAge}歳時点の総資産は${manY(last.netWorth)}という試算です。</div>`;
+    b.className='banner ok'; b.innerHTML=`<div><b>資産を取り崩さずに暮らせる試算です。</b>全期間を収入だけでまかなえる計算になりました。</div>`;
   }
 
   /* --- timeline ribbon --- */
@@ -4794,9 +4813,13 @@ function renderAllocResult(P,rows){
     const avg=a=>a.reduce((x,y)=>x+y,0)/a.length;
     const yInv=avg(yRows.map(r=>r.yieldUsed)), yAll=avg(yRows.map(r=>r.yieldAll));
     const cAvg=avg(yRows.map(r=>{const t=r.cash+r.nisaV+r.taxV; return t>0?r.cash/t:0;}));
+    const psA=portfolioSigmaOf(yRows, 1);
+    const sgTxt=psA?`<br><b>この配分のブレ幅（標準偏差）</b>：<b>±${(psA.sigma*100).toFixed(1)}%</b>／年。`
+      +`投資信託だけなら ±${ASSET_VOL.index.toFixed(0)}% ですが、`
+      +`債券・現預金・ゴールドを混ぜることでこの水準まで下がります（資産ごとの標準偏差と相関から計算）。`:'';
     yTxt=`<br><b>この配分の想定利回り</b>：運用資産だけなら <b>${(yInv*100).toFixed(2)}%</b>、`
       +`現預金を含めた総資産では <b>${(yAll*100).toFixed(2)}%</b>（現預金の比率は平均 ${(cAvg*100).toFixed(0)}%）。`
-      +`モンテカルロの「想定利回り」は<b>総資産ベース</b>の方を使います。`
+      +`モンテカルロの「想定利回り」は<b>総資産ベース</b>の方を使います。`+sgTxt
       +((cAvg>0.02 && Math.abs(cAvg*100-(P.allocs&&P.allocs.length?0:0))>=0)
         ? `<br><span style="color:var(--slate-2)">生活防衛費として最低限の現預金を確保するため、実際の現預金比率は指定した比率どおりにならない年があります。</span>`:'');
   }
@@ -6809,6 +6832,71 @@ function allocDefault(){ return {age:60,index:50,gold:10,bond:20,real:0,cash:20,
    ②子育てが一段落し入金力が高まるころ：金額が大きくなるので分散を始める
    ③60歳前後：取り崩しが近く、下落からの回復を待てないので安全資産を厚くする
    時期はユーザー自身の試算から拾い、配分だけを提案する。 */
+
+/* ===== 配分ごとの結果を比べる =====
+   期待利回りだけを見ると「株式100%が最善」に見えるが、
+   実際には「悪い側がどこまで沈むか」と「良い側がどこまで伸びるか」は逆方向に動く。
+   代表的な配分でモンテカルロを回し、そのトレードオフを1枚の表で示す。 */
+const ALC_PRESETS=[
+  {name:'株式100%',            index:100, gold:0,  bond:0,  real:0, cash:0},
+  {name:'株式80／債券20',       index:80,  gold:0,  bond:20, real:0, cash:0},
+  {name:'株式60／金10／債券30', index:60,  gold:10, bond:30, real:0, cash:0},
+  {name:'株式40／金10／債券40／現10', index:40, gold:10, bond:40, real:0, cash:10},
+  {name:'債券100%',            index:0,   gold:0,  bond:100,real:0, cash:0}
+];
+
+/* 比較表の下に、結果を一文でまとめる。
+   表の数字を自分で読み解かなくても「で、どうすればいいのか」が分かるようにする。 */
+function cmpSummary(rows, ageT){
+  const byLo=[...rows].sort((a,b)=>b.lo-a.lo||b.alive-a.alive)[0];   /* 悪い側がいちばん良い配分 */
+  const byUp=[...rows].sort((a,b)=>b.alive-a.alive||b.lo-a.lo)[0];   /* 95歳生存率がいちばん高い配分 */
+  const same=(byLo.name===byUp.name);
+  const head=same
+    ? `<b>この試算では「${byLo.name}」がいちばんバランスの取れた結果でした。</b>`
+      +`悪い側（下位10%）で ${ageT(byLo.lo)}、95歳まで資産が残る確率は ${byLo.alive.toFixed(0)}% と、両方で最良です。`
+    : `<b>重視する点で答えが変わります。</b>`
+      +`資産を<b>長持ちさせたい</b>なら「${byLo.name}」（悪い側 ${ageT(byLo.lo)}）、`
+      +`<b>大きく増やしたい</b>なら「${byUp.name}」（95歳生存率 ${byUp.alive.toFixed(0)}%）です。`;
+  return '<div class="hint" style="margin-top:8px">'+head
+    +'<br>分散を増やすほど<b>悪い側は改善し、そのぶん増える力は落ちます</b>。色つきの数字が各列の最良値です。'
+    +'<br><span style="color:var(--slate-2)">400回の試算による目安です。実行のたびに数%動きます。</span></div>';
+}
+
+function compareAllocs(){
+  const box=document.getElementById('allocCmp'); if(!box) return;
+  box.innerHTML='<div class="hint" style="margin-top:0">計算中…（数秒かかります）</div>';
+  setTimeout(()=>{
+    try{
+      const P0=readParams();
+      const now=Math.floor(P0.currentAgeFrac!=null?P0.currentAgeFrac:P0.currentAge);
+      const trialsEl=document.getElementById('mcTrials'), keep=trialsEl?trialsEl.value:null;
+      if(trialsEl) trialsEl.value='400';   /* 比較用は試行数を抑える */
+      const rowsOut=ALC_PRESETS.map(pr=>{
+        const P={...P0, allocs:[{age:now, index:pr.index, gold:pr.gold, bond:pr.bond, real:pr.real, cash:pr.cash, lump:true}]};
+        const r=runMonteCarlo(P);
+        const S=[...r.survives].sort((a,b)=>a-b);
+        const q=f=>S[Math.floor(S.length*f)];
+        return {name:pr.name, sg:r.sigmaEff, mu:r.muEff, lo:q(0.10), md:q(0.50), hi:q(0.90), alive:r.alive95Pct};
+      });
+      if(trialsEl&&keep!=null) trialsEl.value=keep;
+      const ageT=v=>v>=MAX_AGE?'尽きず':(v+'歳');
+      const bestLo=Math.max(...rowsOut.map(r=>r.lo)), bestAlive=Math.max(...rowsOut.map(r=>r.alive));
+      box.innerHTML='<table class="logic-tbl lt-cmp"><thead><tr>'
+        +'<th>配分</th><th>期待<br>利回り</th><th>ブレ幅</th><th>悪い側<br>下位10%</th><th>中央値</th><th>95歳<br>生存率</th></tr></thead><tbody>'
+        +rowsOut.map(r=>'<tr>'
+          +'<td>'+r.name+'</td>'
+          +'<td>'+(r.mu*100).toFixed(2)+'%</td>'
+          +'<td>±'+(r.sg*100).toFixed(1)+'%</td>'
+          +'<td'+(r.lo===bestLo?' class="bst"':'')+'>'+ageT(r.lo)+'</td>'
+          +'<td>'+ageT(r.md)+'</td>'
+          +'<td'+(r.alive===bestAlive?' class="bst"':'')+'>'+r.alive.toFixed(0)+'%</td>'
+          +'</tr>').join('')
+        +'</tbody></table>'
+        +cmpSummary(rowsOut, ageT);
+    }catch(e){ box.innerHTML='<div class="hint">計算できませんでした。</div>'; console.error(e); }
+  }, 30);
+}
+
 function suggestAllocs(){
   const P=readParams(); const rows=simulate(P);
   const now=Math.floor(P.currentAgeFrac!=null?P.currentAgeFrac:P.currentAge);
@@ -7111,6 +7199,30 @@ const ASSET_CORR={
   cash: {index:0, gold:0, bond:0, real:0, cash:1.00}
 };
 const ASSET_ORDER=['index','gold','bond','real','cash'];
+/* 配分から決まるポートフォリオ全体の標準偏差。
+   各年の資産構成（現預金を含む総資産に対する比率）を平均し、
+   σ_p = √(ΣΣ w_i w_j ρ_ij σ_i σ_j) で求める。
+   投資信託1本のときの標準偏差をそのまま見せると、債券や現預金を厚くした配分の
+   安定度が伝わらないため、この値を表示に使う。 */
+function portfolioSigmaOf(rows, scale){
+  const wSum={index:0,gold:0,bond:0,real:0,cash:0}; let n=0;
+  for(const r of rows){
+    if(!r.mixNow) continue;
+    const inv=Math.max(0,(r.nisaV||0)+(r.taxV||0)), c0=Math.max(0,r.cash||0), tot=inv+c0;
+    if(tot<=0) continue;
+    const wi=inv/tot;
+    wSum.index+=wi*r.mixNow.index; wSum.gold+=wi*r.mixNow.gold;
+    wSum.bond+=wi*r.mixNow.bond;   wSum.real+=wi*r.mixNow.real;
+    wSum.cash+=c0/tot; n++;
+  }
+  if(!n) return null;
+  const w={}; ASSET_ORDER.forEach(k=>{ w[k]=(wSum[k]||0)/n; });
+  let v=0;
+  ASSET_ORDER.forEach(a=>ASSET_ORDER.forEach(b=>{
+    v+=w[a]*w[b]*ASSET_CORR[a][b]*(ASSET_VOL[a]/100)*(ASSET_VOL[b]/100);
+  }));
+  return {sigma:Math.sqrt(Math.max(0,v))*(scale==null?1:scale), w};
+}
 /* コレスキー分解（相関行列 → 下三角行列）。相関のある正規乱数を作るために使う。 */
 function _cholesky(M){
   const n=M.length, L=Array.from({length:n},()=>new Array(n).fill(0));
@@ -7177,12 +7289,19 @@ function runMonteCarlo(P){
   /* 想定利回りの比較基準。資産配分を設定している場合は、その配分から決まる期待利回り
      （ブレなしで試算したときの総資産ベースの年平均）を基準にする。
      配分後の期待値が2%の人に「想定利回り4%を達成できたか」を問うのは意味がないため。 */
-  let muEff=mu;
+  let muEff=mu, sigmaEff=sigma;
   if(useAssets){
     const baseRows=simulate({...P, yieldSeq:null, assetShockSeq:null});
     let p2=1,c2=0;
     for(const r of baseRows){ if(r.yieldAll!=null){ p2*=(1+r.yieldAll); c2++; } }
     if(c2>0) muEff=Math.pow(p2,1/c2)-1;
+    /* ★配分から決まる「実際のブレ幅」を求める。
+       画面のスライダー（既定18%）は投資信託1本のときの値なので、
+       債券や現預金を厚くした配分では実態よりずっと大きく見えてしまう。
+       各年の資産構成（現預金を含む総資産に対する比率）を平均し、
+       σ_p = √(ΣΣ w_i w_j ρ_ij σ_i σ_j) で portfolio の標準偏差を出す。 */
+    const ps=portfolioSigmaOf(baseRows, volScale);
+    if(ps) sigmaEff=ps.sigma;
   }
   const notBust=res.filter(r=>!r.bust).length;
   const alive95=res.filter(r=>r.alive95).length;
@@ -7194,13 +7313,78 @@ function runMonteCarlo(P){
   const hit=res.filter(x=>x.gm>=muEff-1e-9).length;
   const gmSorted=res.map(x=>x.gm).sort((a,b)=>a-b);
   const gmAt=q=>gmSorted[Math.min(gmSorted.length-1,Math.max(0,Math.round((gmSorted.length-1)*q)))];
-  return { trials,sigma,rho,mu,muEff,useAssets, good:pick(0.90), bad:pick(0.10),
+  return { trials,sigma,sigmaEff,rho,mu,muEff,useAssets, survives:res.map(r=>r.survive), good:pick(0.90), bad:pick(0.10),
            hitPct:hit/trials*100, gmMedian:gmAt(0.5), gmLow:gmAt(0.10), gmHigh:gmAt(0.90),
            survivedPct:notBust/trials*100, alive95Pct:alive95/trials*100 };
 }
+
+/* ===== 資産寿命のヒストグラム =====
+   「平均で何歳まで」ではなく「何歳で尽きるケースがどれくらいあるか」を見せる。
+   中央値と、下位10%（悪いほうから1割）に印を付けて、幅を読み取れるようにする。 */
+let MC_SURVIVES=null;
+function renderMcHist(survives){
+  if(survives) MC_SURVIVES=survives; else survives=MC_SURVIVES;
+  const cv=document.getElementById('mcHist'); if(!cv||!survives||!survives.length) return;
+  const S=[...survives].sort((a,b)=>a-b);
+  const med=S[Math.floor(S.length*0.5)], p10=S[Math.floor(S.length*0.10)];
+  /* 5歳きざみ。最後の階級は「MAX_AGEまで尽きなかった」ケースをまとめる */
+  const lo=Math.max(40, Math.floor(S[0]/5)*5);
+  const bins=[]; for(let a=lo;a<MAX_AGE;a+=5) bins.push({from:a,to:a+5,n:0});
+  const survived={n:0};
+  S.forEach(v=>{
+    if(v>=MAX_AGE){ survived.n++; return; }
+    const b=bins.find(x=>v>=x.from&&v<x.to); if(b) b.n++; else if(bins.length) bins[0].n++;
+  });
+  const cells=bins.concat([{from:MAX_AGE,to:null,n:survived.n}]);
+  const max=Math.max(1,...cells.map(c=>c.n));
+  const dpr=Math.min(2,window.devicePixelRatio||1);
+  const W=cv.clientWidth||600, H=190;
+  cv.width=W*dpr; cv.height=H*dpr; cv.style.height=H+'px';
+  const g=cv.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0);
+  g.clearRect(0,0,W,H);
+  const padL=8, padR=8, padB=34, padT=10;
+  const iw=W-padL-padR, ih=H-padT-padB;
+  const bw=iw/cells.length;
+  cells.forEach((c,i)=>{
+    const h=ih*(c.n/max), x=padL+i*bw, y=padT+ih-h;
+    const isLast=(c.to===null);
+    const inP10=(!isLast && p10>=c.from && p10<c.to);
+    g.fillStyle=isLast?'#0E7C73':(inP10?'#C2526B':'#9DCEC8');
+    g.fillRect(x+1.5, y, Math.max(1,bw-3), h);
+    /* 件数（0は書かない） */
+    if(c.n>0 && bw>18){
+      g.fillStyle='#5C6478'; g.font='600 9px system-ui,sans-serif'; g.textAlign='center';
+      g.fillText(Math.round(c.n/S.length*100)+'%', x+bw/2, y-3);
+    }
+    /* 目盛り */
+    g.fillStyle='#8A98AB'; g.font='600 9px system-ui,sans-serif'; g.textAlign='center';
+    if(isLast) g.fillText('尽きず', x+bw/2, padT+ih+13);
+    else if(i%2===0) g.fillText(c.from+'', x+bw/2, padT+ih+13);
+  });
+  /* 中央値の線 */
+  const idx=cells.findIndex(c=>c.to===null? med>=MAX_AGE : (med>=c.from&&med<c.to));
+  if(idx>=0){
+    const x=padL+idx*bw+bw/2;
+    g.strokeStyle='#0F2A3C'; g.lineWidth=1.5; g.setLineDash([4,3]);
+    g.beginPath(); g.moveTo(x,padT); g.lineTo(x,padT+ih); g.stroke(); g.setLineDash([]);
+    g.fillStyle='#0F2A3C'; g.font='700 10px system-ui,sans-serif'; g.textAlign='center';
+    g.fillText('中央値 '+(med>=MAX_AGE?'尽きず':med+'歳'), Math.max(38,Math.min(W-38,x)), padT+ih+28);
+  }
+}
+
+/* 画面幅が変わったら描き直す（canvas は幅を実測して描いているため） */
+let _histRaf=null;
+window.addEventListener('resize',function(){
+  if(!MC_SURVIVES) return;
+  if(_histRaf) cancelAnimationFrame(_histRaf);
+  _histRaf=requestAnimationFrame(function(){ try{ renderMcHist(null); }catch(e){} });
+});
 function renderMonteCarlo(P, baseRows){
   const res=runMonteCarlo(P);
   const el=document.getElementById('mcResult'); if(!el) return;
+  /* 資産寿命のヒストグラムも描く（この関数の最後で内容が確定するため、ここで表示だけ用意する） */
+  const hw=document.getElementById('mcHistWrap');
+  if(hw){ hw.style.display=''; setTimeout(()=>{ try{ renderMcHist(res.survives); }catch(e){ console.error(e); } },0); }
   const bl=baseRows[baseRows.length-1];
   const baseReal95=_real95(baseRows);
   const ageTxt=a=>a>=MAX_AGE?('生涯（試算上限'+MAX_AGE+'歳）'):(a+'歳');
@@ -7212,10 +7396,18 @@ function renderMonteCarlo(P, baseRows){
   const muLbl=res.useAssets?'配分から決まる想定利回り（現預金を含む総資産ベース）':'想定利回り';
   const muNote=(res.useAssets&&Math.abs(res.muEff-res.mu)>0.0005)
     ? '（資産形成タブの想定利回り '+(res.mu*100).toFixed(1)+'% ではなく、現預金を含めた配分全体の期待値で判定しています）' : '';
-  el.innerHTML='<div class="mc-head" style="color:var(--slate-2);font-size:11.5px;margin-bottom:6px">これは未来の確率ではありません。<b>設定した期待リターン・標準偏差・相関・インフレ率を前提にした試算結果</b>であり、前提を変えれば数字も変わります。</div>'
-    +'<div class="mc-head">'+res.trials.toLocaleString('ja-JP')+'回の試算のうち、<b>'+res.alive95Pct.toFixed(0)+'%</b> のケースで95歳時点でも資産が残りました（'+muLbl+' '+muTxt+'%・年ごとのブレ幅 ±'+(res.sigma*100).toFixed(0)+'%）。運用の実現利回りが低いほど、資産がもつ年齢は下がります。基準は想定利回りを固定した現状の試算です。</div>'
-    +'<div class="mc-head" style="margin-top:8px">'+muLbl+' <b>'+muTxt+'%</b> を実際に達成できたのは <b>'+res.hitPct.toFixed(0)+'%</b> のケースでした（実現利回りの中央値 <b>'+(res.gmMedian*100).toFixed(1)+'%</b>、上位10% '+(res.gmHigh*100).toFixed(1)+'%／下位10% '+(res.gmLow*100).toFixed(1)+'%）。'+muNote
-    +(res.hitPct<50?'値動きのある資産は、良い年と悪い年が交互に来ると平均どおりには増えないため（複利の性質）、達成率は50%を下回るのが普通です。':'')
+  /* ブレ幅も、投資信託1本のときの値ではなく配分から決まる値を出す */
+  const sgNote='';   /* ブレ幅は資産比率タブに常時表示しているため、ここでは繰り返さない */
+  const S=[...res.survives].sort((x,y)=>x-y);
+  const q=f=>{const v=S[Math.floor(S.length*f)]; return v>=MAX_AGE?'尽きず':(v+'歳');};
+  el.innerHTML='<div class="mc-head" style="color:var(--slate-2);font-size:11.5px;margin-bottom:6px">これは未来の確率ではありません。設定した利回り・ブレ幅・相関・インフレ率を前提にした試算です。</div>'
+    +'<div class="mc-head"><b>資産が尽きるのは '+q(0.50)+'</b>（中央値）。'
+      +'悪いほうから1割で <b>'+q(0.10)+'</b>、良いほうから1割で <b>'+q(0.90)+'</b> でした。'
+      +'95歳まで資産が残ったのは <b>'+res.alive95Pct.toFixed(0)+'%</b> です。</div>'
+    +'<div class="mc-head" style="margin-top:8px">実現利回りの中央値は <b>'+(res.gmMedian*100).toFixed(1)+'%</b>'
+      +'（上位10% '+(res.gmHigh*100).toFixed(1)+'%／下位10% '+(res.gmLow*100).toFixed(1)+'%）。'
+      +muLbl+' '+muTxt+'% に届いたのは <b>'+res.hitPct.toFixed(0)+'%</b> です。'+muNote
+    +(res.hitPct<50?'<br><span style="color:var(--slate-2)">値動きがあると平均どおりには増えないため、達成率が50%を下回るのは普通です。</span>':'')
     +'</div>'
     +'<div class="mc-grid">'
     +card('bad','不調（実現利回り 下位10%）', res.bad.gm, res.bad.survive, res.bad.real95)
@@ -7311,6 +7503,8 @@ var _alcTax=document.getElementById('alcUseTaxable');
 if(_alcTax) _alcTax.addEventListener('change',function(){ render(); });
 var _alcRE=document.getElementById('alcRealEnable');
 if(_alcRE) _alcRE.addEventListener('change',function(){ render(); });
+var _allocCmpB=document.getElementById('allocCmpBtn');
+if(_allocCmpB) _allocCmpB.addEventListener('click',function(){ compareAllocs(); });
 var _allocSug=document.getElementById('allocSuggest');
 if(_allocSug) _allocSug.addEventListener('click',function(){
   try{
