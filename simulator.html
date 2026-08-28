@@ -957,7 +957,7 @@
     .pd-tbl tr:nth-child(even) td{background:#FAFCFE}
     /* 年次明細：行数に応じて --rowh / --fs を決め、ページの縦を使い切る（行の高さは全行そろえる） */
     .pd-detail{letter-spacing:-.01em}
-    .pd-detail thead th{height:8mm; box-sizing:border-box; font-size:calc(var(--fs) * .90);
+    .pd-detail thead th{text-align:center!important; height:8mm; box-sizing:border-box; font-size:calc(var(--fs) * .90);
       padding:0 2px; line-height:1.15; white-space:normal; overflow:hidden; vertical-align:middle}
     .pd-detail td>*{display:inline; white-space:nowrap}
     /* 画面用の td.ev（11px・折り返しあり・最小幅150px）を確実に打ち消す。
@@ -972,6 +972,7 @@
     .pd-detail{border-collapse:collapse; border-spacing:0}
     .pd-note.pd-detail-note{height:12mm; box-sizing:border-box; margin:2mm 0 0}
     .pd-detail .l{text-align:left}
+    .pd-detail thead th .thsub{display:block; font-weight:600; font-size:calc(var(--fs) * .74); opacity:.75; line-height:1.1}
     .pd-note{font-size:8.5px; color:#7A8899; line-height:1.65; margin-top:6px}
     .rankrow{display:flex; align-items:center; gap:9px; border:1.5px solid #111; border-radius:9px; padding:9px 12px; margin-bottom:9px}
     .rankrow .rb{font-size:30px; font-weight:800; color:#0CA795; line-height:1}
@@ -1985,7 +1986,7 @@ function eduTotalPerChild(P){ let t=0; for(let a=3;a<=21;a++) t+=eduAnnual(a,P);
 function insurance(age){ if(age<30)return 8; if(age<40)return 14; if(age<50)return 22; if(age<60)return 28; if(age<70)return 22; return 14; }
 /* 公的年金（令和7年度基準・概算）: 老齢基礎満額83.17万/年、報酬比例乗率5.481/1000（2003年4月〜）、標準報酬の年間上限概算1230万 */
 const CURRENT_YEAR=new Date().getFullYear();
-const APP_VERSION='0.0.71';   /* 更新するたびに末尾を増やす */
+const APP_VERSION='0.0.72';   /* 更新するたびに末尾を増やす */
 const MAX_AGE=120;  /* 生活資金が尽きなかった場合の試算上限 */
 const PENSION_FULL=83.17, PENSION_RATE=5.481/1000;
 /* 報酬比例部分の計算に使う「年間の標準報酬の上限」。
@@ -6494,7 +6495,19 @@ function buildPrintDoc(){
   const COLS='<colgroup>'+[3.6,3.6,3.6,3.2,10.2,5.9,5.3,5.3,5.3,5.1,5.7,5.1,5.7,5.7,5.7,5.7,5.9,9.4]
     .map(w=>'<col style="width:'+w+'%">').join('')+'</colgroup>';
   if(tbl){
-    const head=tbl.querySelector('thead') ? tbl.querySelector('thead').outerHTML : '';
+    /* PDFの表見出しは画面のものを流用する。ここで印刷向けに整える：
+       ・全セルを中央揃えにする
+       ・月額で表示している列には「（月あたり）」を改行して添える（年額と誤読されないように） */
+    let head='';
+    if(tbl.querySelector('thead')){
+      const th=tbl.querySelector('thead').cloneNode(true);
+      const MONTHLY={'月手取り':'手取り','月生活費':'生活費','月住宅費':'住宅費'};
+      th.querySelectorAll('th').forEach(c=>{
+        const t=(c.textContent||'').trim();
+        if(MONTHLY[t]) c.innerHTML=MONTHLY[t]+'<span class="thsub">（月あたり）</span>';
+      });
+      head=th.outerHTML;
+    }
     const trs=[...tbl.querySelectorAll('tbody tr')];
     /* ① 1ページは最大22行。ページ数を決め、行数はページ間で均等に配る
           （例：97行 → 5ページ・20,20,19,19,19／65行 → 3ページ・22,22,21） */
