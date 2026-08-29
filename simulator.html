@@ -150,6 +150,54 @@
   .mc-hist-t{font-size:12.5px; font-weight:700; color:var(--slate); margin:16px 0 6px;}
   #mcHist{width:100%; display:block;}
 
+
+  /* ===== スマホ用の下部バー＋シート ===== */
+  .mbar{display:none; position:fixed; left:0; right:0; bottom:0; z-index:48;
+        background:var(--card); border-top:1px solid var(--line);
+        box-shadow:0 -2px 10px rgba(15,42,60,.08);
+        padding-bottom:env(safe-area-inset-bottom);
+        transition:transform .22s ease;}
+  .mbar.hide{transform:translateY(110%);}
+  .mbar-b{flex:1 1 0; display:flex; flex-direction:column; align-items:center; gap:2px;
+          background:none; border:0; padding:9px 4px 8px; font-family:inherit;
+          font-size:11px; font-weight:700; color:var(--slate); cursor:pointer;}
+  .mbar-b:active{background:var(--bg-sub,#F7F7F5);}
+  .mbar-i{width:21px; height:21px; display:block;}
+  .msheet{position:fixed; inset:0; z-index:70;}
+  .msheet-bd{position:absolute; inset:0; background:rgba(15,42,60,.38);}
+  .msheet-p{position:absolute; left:0; right:0; bottom:0; background:var(--card);
+            border-radius:16px 16px 0 0; max-height:76vh; display:flex; flex-direction:column;
+            padding-bottom:env(safe-area-inset-bottom); animation:msUp .2s ease;}
+  @keyframes msUp{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
+  .msheet-h{display:flex; align-items:center; justify-content:space-between;
+            padding:14px 16px 10px; border-bottom:1px solid var(--line); font-size:14px;}
+  .msheet-h button{background:none; border:0; color:var(--teal); font-weight:800;
+                   font-size:13px; cursor:pointer; font-family:inherit; padding:4px 2px;}
+  .msheet-body{overflow-y:auto; padding:12px 14px 18px;}
+  .ms-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px;}
+  .ms-grid.share{grid-template-columns:1fr 1fr;}
+  .ms-btn{padding:12px 6px; border:1px solid var(--line); border-radius:10px; background:#fff;
+          font-size:12.5px; font-weight:700; color:var(--slate); cursor:pointer; font-family:inherit;
+          white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .ms-btn.pri{background:var(--teal); color:#fff; border-color:var(--teal);}
+  .ms-sec{font-size:11px; font-weight:800; color:var(--slate-2); margin:14px 0 6px; letter-spacing:.04em;}
+  .ms-sec:first-child{margin-top:0;}
+  @media(max-width:720px){
+    .mbar{display:flex;}
+    /* 従来の上部ミニナビと下部ドックはスマホでは出さない */
+    body.wiz-done:not(.wiz-on) .mininav,
+    body.wiz-done:not(.wiz-on) .dockbar{display:none!important;}
+    body.wiz-done{padding-top:0!important; padding-bottom:64px!important;}
+  }
+  @media print{ .mbar,.msheet{display:none!important} }
+
+  /* 絵文字の置き換えアイコン */
+  .ic-sv{width:1.15em; height:1.15em; display:inline-block; vertical-align:-.19em;
+         fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round;}
+  .a-ico .ic-sv{width:22px; height:22px; vertical-align:0;}
+  .wz-opt .ic .ic-sv{width:24px; height:24px; vertical-align:0;}
+  .p-title .ic-sv, .nm-title .ic-sv{width:1.05em; height:1.05em; margin-right:2px;}
+
   /* 改善案の「実施する」ボタンと通知 */
   .p-apply{margin-top:10px; padding:9px 16px; border:1.5px solid var(--teal); border-radius:9px;
            background:#fff; color:var(--teal); font-size:12.5px; font-weight:800; cursor:pointer;
@@ -1085,7 +1133,11 @@
 
 <style>
   .site-nav{display:flex;align-items:center;gap:16px;flex-wrap:wrap;max-width:1080px;margin:0 auto;padding:12px 18px}
+  /* ロゴとテキストの間だけに gap を効かせる。
+     Mirai と Shishin を直接 flex の子にすると、間の空白文字も1つの要素として扱われ、
+     gap が両側に付いて不自然に広い隙間ができるため、2語はひとつの span にまとめる。 */
   .site-nav-brand{display:inline-flex;align-items:center;gap:8px;font-weight:800;text-decoration:none;font-size:18px;letter-spacing:.3px}
+  .site-nav-brand .nav-word{white-space:nowrap}
   .site-nav-brand .nav-mark{height:25px;width:auto;flex:0 0 auto;display:block}
   .site-nav-brand .bw1{color:#1F2937}
   .site-nav-brand .bw2{color:#1F9C80}
@@ -1095,7 +1147,7 @@
   .site-nav-links a:hover{color:#0CA795}
 </style>
 <nav class="site-nav">
-  <a class="site-nav-brand" href="index.html"><img class="nav-mark" src="icon.svg" alt=""><span class="bw1">Mirai</span>&nbsp;<span class="bw2">Shishin</span></a>
+  <a class="site-nav-brand" href="index.html"><img class="nav-mark" src="icon.svg" alt=""><span class="nav-word"><span class="bw1">Mirai</span> <span class="bw2">Shishin</span></span></a>
   <span class="site-nav-links">
     <a href="index.html">コラム</a>
     <a href="simulator.html" aria-current="page">シミュレーター</a>
@@ -1410,7 +1462,7 @@
       </div>
     </details>
 <details class="grp" id="sec-others">
-      <summary><span class="tag">ライフイベント</span><span class="impbadge adv">詳細</span>副業・転職・介護・離婚・死亡<span class="chev">▶</span></summary>
+      <summary><span class="tag">その他</span><span class="impbadge adv">詳細</span>副業・転職・介護・離婚・死亡<span class="chev">▶</span></summary>
       <div class="body">
         <div class="hint" style="margin-top:0">起こるかどうか分からない出来事をまとめています。使う項目だけ開いてチェックを入れてください。</div>
         <details class="subgrp" id="sec-side"><summary>副業・不動産収入<span class="sg-chev">▶</span></summary><div class="sg-body">
@@ -1982,6 +2034,33 @@
 </footer>
 
 <div id="printDoc" aria-hidden="true"></div>
+<!-- ===== スマホ用：下部1本のバー＋シート（PCでは非表示） =====
+     上部ミニナビ＋下部ドックで画面の37%を占めていたため、
+     スマホでは1本のバー（56px）に集約し、中身はシートで開く。 -->
+<div class="mbar" id="mbar">
+  <button type="button" class="mbar-b" data-sheet="toc">
+    <svg class="mbar-i" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M4 7h16M4 12h16M4 17h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>目次</button>
+  <button type="button" class="mbar-b" id="mbarResult">
+    <svg class="mbar-i" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M3 20h18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <path d="M5 15.5 L10 10 L13.5 13 L19.5 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="19.5" cy="5.5" r="2" fill="currentColor"/>
+    </svg>結果へ</button>
+  <button type="button" class="mbar-b" data-sheet="share">
+    <svg class="mbar-i" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M12 16V4M12 4 L7.5 8.5M12 4 L16.5 8.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M4.5 14v4.5a1.5 1.5 0 0 0 1.5 1.5h12a1.5 1.5 0 0 0 1.5-1.5V14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>保存・共有</button>
+</div>
+<div class="msheet" id="msheet" hidden>
+  <div class="msheet-bd" id="msheetBd"></div>
+  <div class="msheet-p">
+    <div class="msheet-h"><b id="msheetT"></b><button type="button" id="msheetX">閉じる</button></div>
+    <div class="msheet-body" id="msheetBody"></div>
+  </div>
+</div>
 <div class="dockbar" id="dockBar">
   <button type="button" class="bar-toggle" id="dockToggle" aria-controls="dockBar" aria-expanded="true"><span class="bt-l">保存・共有</span><span class="bt-c">▼</span></button>
   <div class="dock-inner">
@@ -1994,6 +2073,61 @@
 </div>
 
 <script>
+
+/* ===== アイコン（絵文字の置き換え） =====
+   絵文字は端末やOSで見た目・大きさが変わり、印刷にも乗りにくいため、
+   すべて自前のSVGに統一する。currentColor を使うので文字色にそろう。 */
+const ICON_SPRITE = `
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><defs>
+<g id="ic-ring"><circle cx="12" cy="15" r="6"/><path d="M9 9l3-4 3 4"/></g>
+<g id="ic-heart"><path d="M12 20s-7-4.4-7-9a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 4.6-7 9-7 9z"/></g>
+<g id="ic-person"><circle cx="12" cy="7.5" r="3.2"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/></g>
+<g id="ic-baby"><circle cx="12" cy="9" r="4.2"/><path d="M10.4 8.6h.01M13.6 8.6h.01"/><path d="M6.5 20a5.5 5.5 0 0 1 11 0"/></g>
+<g id="ic-cap"><path d="M12 5 2.5 9.5 12 14l9.5-4.5L12 5z"/><path d="M6.5 11.5V16c0 1.7 2.5 3 5.5 3s5.5-1.3 5.5-3v-4.5"/></g>
+<g id="ic-home"><path d="M3.5 10.5 12 3.5l8.5 7"/><path d="M5.5 9.6V20h13V9.6"/><path d="M10 20v-5h4v5"/></g>
+<g id="ic-key"><circle cx="8" cy="12" r="3.5"/><path d="M11.5 12H21"/><path d="M17.5 12v3M20 12v2.2"/></g>
+<g id="ic-building"><path d="M5.5 20V5.5h13V20"/><path d="M3 20h18"/><path d="M9 9h2M13 9h2M9 13h2M13 13h2"/><path d="M10.5 20v-3.5h3V20"/></g>
+<g id="ic-wrench"><path d="M15.5 4.5a4.5 4.5 0 0 0-5.6 5.8L4 16.2 6.8 19l5.9-5.9a4.5 4.5 0 0 0 5.8-5.6l-2.6 2.6-2.2-2.2 2.6-2.6z"/></g>
+<g id="ic-tools"><path d="M14.5 4.5a4 4 0 0 0-4.9 5.1L4 15.2 6.8 18l5.6-5.6a4 4 0 0 0 5.1-4.9l-2.3 2.3-2-2 2.3-2.3z"/><path d="M15 15l4.5 4.5"/></g>
+<g id="ic-car"><path d="M4 15.5h16"/><path d="M5.5 15.5v2.2M18.5 15.5v2.2"/><path d="M4.5 15.5v-3l2-4.5h11l2 4.5v3z"/><circle cx="8" cy="15.5" r="1.6"/><circle cx="16" cy="15.5" r="1.6"/></g>
+<g id="ic-sunrise"><path d="M3 19h18"/><path d="M6.5 15.5a5.5 5.5 0 0 1 11 0"/><path d="M12 3.5v3M5 6.5l2 2M19 6.5l-2 2M2.5 15.5h2M19.5 15.5h2"/></g>
+<g id="ic-warn"><path d="M12 3.8 21 19.5H3L12 3.8z"/><path d="M12 10v4"/><path d="M12 17h.01"/></g>
+<g id="ic-trend"><path d="M3 19h18"/><path d="M5 15 10 9.5l3.2 3L19 6"/><path d="M15 6h4v4"/></g>
+<g id="ic-refresh"><path d="M20 12a8 8 0 0 1-13.7 5.6"/><path d="M4 12a8 8 0 0 1 13.7-5.6"/><path d="M17.5 3v3.6h-3.6M6.5 21v-3.6h3.6"/></g>
+<g id="ic-bank"><path d="M3 9.8 12 4.5l9 5.3"/><path d="M3 20h18"/><path d="M6 11.5V18M10 11.5V18M14 11.5V18M18 11.5V18"/></g>
+<g id="ic-receipt"><path d="M6 3.5h12V21l-2-1.3-2 1.3-2-1.3-2 1.3-2-1.3L6 21V3.5z"/><path d="M9 8h6M9 12h6"/></g>
+<g id="ic-shuffle"><path d="M3 6.5h3.5L11 12l4.5 5.5H20M3 17.5h3.5l2.6-3.2M20 6.5h-4.5l-2.6 3.2"/><path d="M17.5 3.5 21 6.5l-3.5 3M17.5 14.5 21 17.5l-3.5 3"/></g>
+<g id="ic-basket"><path d="M3.5 9.5h17l-1.6 9.2a1.6 1.6 0 0 1-1.6 1.3H6.7a1.6 1.6 0 0 1-1.6-1.3L3.5 9.5z"/><path d="M8 9.5 10 4M16 9.5 14 4"/><path d="M9.5 13.5v3M14.5 13.5v3"/></g>
+<g id="ic-tie"><path d="M9.5 3.5h5l-1 3.5h-3l-1-3.5z"/><path d="M10.5 7 8.5 14l3.5 6.5L15.5 14 13.5 7"/></g>
+<g id="ic-briefcase"><path d="M3.5 8.5h17V19h-17z"/><path d="M9 8.5V6a1.5 1.5 0 0 1 1.5-1.5h3A1.5 1.5 0 0 1 15 6v2.5"/><path d="M3.5 13h17"/></g>
+<g id="ic-clock"><circle cx="12" cy="12" r="8.2"/><path d="M12 7v5.2l3.2 2"/></g>
+<g id="ic-family2"><circle cx="7.5" cy="7" r="2.6"/><circle cx="16.5" cy="7" r="2.6"/><path d="M3.5 18a4 4 0 0 1 8 0M12.5 18a4 4 0 0 1 8 0"/><circle cx="12" cy="14.5" r="1.9"/><path d="M9.4 21a2.6 2.6 0 0 1 5.2 0"/></g>
+<g id="ic-family3"><circle cx="6" cy="7" r="2.4"/><circle cx="18" cy="7" r="2.4"/><path d="M2.5 17a3.6 3.6 0 0 1 7 0M14.5 17a3.6 3.6 0 0 1 7 0"/><circle cx="9.5" cy="14" r="1.7"/><circle cx="14.5" cy="14" r="1.7"/><path d="M7.2 21a2.3 2.3 0 0 1 4.6 0M12.2 21a2.3 2.3 0 0 1 4.6 0"/></g>
+<g id="ic-walk"><circle cx="13" cy="4.6" r="1.9"/><path d="M13 8.2 10 12l1.5 3.2L10 20"/><path d="M13 8.2l3 2.2.8 3.4"/><path d="M11.5 15.2 15 19.8"/></g>
+<g id="ic-rocket"><path d="M12 3.2c3 2.2 4.6 5.6 4.6 9L12 16.6 7.4 12.2c0-3.4 1.6-6.8 4.6-9z"/><circle cx="12" cy="9.5" r="1.8"/><path d="M9 15.5 6.5 18l1.4 1.4M15 15.5 17.5 18l-1.4 1.4"/></g>
+<g id="ic-coin"><circle cx="12" cy="12" r="8.2"/><path d="M12 7.5v9"/><path d="M14.4 9.6a2.6 2.6 0 0 0-4.8 1.1c0 2.6 4.8 1.4 4.8 3.6a2.6 2.6 0 0 1-4.8 1.1"/></g>
+<g id="ic-male"><circle cx="10" cy="14" r="5.4"/><path d="M15 9 21 3"/><path d="M15.6 3H21v5.4"/></g>
+<g id="ic-female"><circle cx="12" cy="9.2" r="5.4"/><path d="M12 14.6V21"/><path d="M9 18.2h6"/></g>
+<g id="ic-neutral"><circle cx="12" cy="12" r="5.4"/><path d="M12 17.4V21M9.6 19h4.8"/><path d="M16 8 20.5 3.5M16.8 3.5h3.7v3.7"/></g>
+<g id="ic-dash"><path d="M6 12h12"/></g>
+<g id="ic-car-no"><path d="M4.5 15.5v-3l2-4.5h11l2 4.5v3z"/><path d="M4 15.5h16"/><circle cx="8" cy="15.5" r="1.5"/><circle cx="16" cy="15.5" r="1.5"/><path d="M3.2 20.8 20.8 3.2"/></g>
+<g id="ic-car-buy"><path d="M3.5 14.5v-3l2-4.5h9l2 4.5v3z"/><path d="M3 14.5h13.5"/><circle cx="7" cy="14.5" r="1.5"/><circle cx="14" cy="14.5" r="1.5"/><path d="M19 15.5v6M16 18.5h6"/></g>
+<g id="ic-car-own"><path d="M3.5 14.5v-3l2-4.5h9l2 4.5v3z"/><path d="M3 14.5h13.5"/><circle cx="7" cy="14.5" r="1.5"/><circle cx="14" cy="14.5" r="1.5"/><path d="M15.8 19.2 18 21.4l4-4.6"/></g>
+<g id="ic-kid-0"><circle cx="12" cy="8.6" r="2.4"/><path d="M8.6 20v-4a3.4 3.4 0 0 1 6.8 0v4"/><path d="M3.2 20.8 20.8 3.2"/></g>
+<g id="ic-kid-1"><circle cx="12" cy="8" r="2.6"/><path d="M8.4 20.5v-4.4a3.6 3.6 0 0 1 7.2 0v4.4"/></g>
+<g id="ic-kid-2"><circle cx="7.4" cy="8.4" r="2.4"/><path d="M4.1 20.5v-4.1a3.3 3.3 0 0 1 6.6 0v4.1"/><circle cx="16.6" cy="8.4" r="2.4"/><path d="M13.3 20.5v-4.1a3.3 3.3 0 0 1 6.6 0v4.1"/></g>
+<g id="ic-kid-3"><circle cx="4.9" cy="9" r="2"/><path d="M2.2 20.5v-3.5a2.7 2.7 0 0 1 5.4 0v3.5"/><circle cx="12" cy="9" r="2"/><path d="M9.3 20.5v-3.5a2.7 2.7 0 0 1 5.4 0v3.5"/><circle cx="19.1" cy="9" r="2"/><path d="M16.4 20.5v-3.5a2.7 2.7 0 0 1 5.4 0v3.5"/></g>
+<g id="ic-home-buy"><path d="M3.2 11 12 4l8.8 7"/><path d="M5.4 12.2V20h9.2v-7.8"/><path d="M19 15.5v6M16 18.5h6"/></g>
+<g id="ic-home-own"><path d="M3.2 11 12 4l8.8 7"/><path d="M5.4 12.2V20h9.2v-7.8"/><path d="M15.8 19.2 18 21.4l4-4.6"/></g>
+<g id="ic-dc-both"><path d="M3 9.5 9 5.5l6 4"/><path d="M3.6 20h10.8"/><path d="M5.2 11.6V20M12.8 11.6V20"/><path d="M18 12.5v8M15 15.5h6"/></g>
+<g id="ic-ban"><circle cx="12" cy="12" r="8.2"/><path d="M6.4 6.4l11.2 11.2"/></g>
+</defs></svg>`;
+/* HTML に差し込む用のアイコン。size でひとまわり大きくもできる */
+function ic(name, cls){
+  return '<svg class="ic-sv'+(cls?' '+cls:'')+'" viewBox="0 0 24 24" aria-hidden="true" focusable="false">'
+    +'<use href="#ic-'+name+'"/></svg>';
+}
+
 /* ============ 計算エンジン ============ */
 const EDU = {
   kinder:{pub:8,pri:16}, elem:{pub:10,pri:100}, junior:{pub:17,pri:110},
@@ -2014,7 +2148,7 @@ function eduTotalPerChild(P){ let t=0; for(let a=3;a<=21;a++) t+=eduAnnual(a,P);
 function insurance(age){ if(age<30)return 8; if(age<40)return 14; if(age<50)return 22; if(age<60)return 28; if(age<70)return 22; return 14; }
 /* 公的年金（令和7年度基準・概算）: 老齢基礎満額83.17万/年、報酬比例乗率5.481/1000（2003年4月〜）、標準報酬の年間上限概算1230万 */
 const CURRENT_YEAR=new Date().getFullYear();
-const APP_VERSION='0.0.81';   /* 更新するたびに末尾を増やす */
+const APP_VERSION='0.0.87';   /* 更新するたびに末尾を増やす */
 const MAX_AGE=120;  /* 生活資金が尽きなかった場合の試算上限 */
 const PENSION_FULL=83.17, PENSION_RATE=5.481/1000;
 /* 報酬比例部分の計算に使う「年間の標準報酬の上限」。
@@ -3696,7 +3830,7 @@ function renderAdvice(P, rows){
   if(P.marriageRow>=0 && P.marriageAgeFrac>nowFrac && P.marriageAgeEff<=P.endAge){
     const mEff=P.marriageAgeEff; const r=rowAt(mEff); const cost=P.weddingCost||0; const dual=segCovers(mEff);
     const mo=Math.max(1,Math.round((P.marriageAgeFrac-nowFrac)*12));
-    push(mEff,'💍','結婚・新生活',[
+    push(mEff,'<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-ring"/></svg>','結婚・新生活',[
       cost>0
         ?`挙式・新生活の特別費<b>${manY(cost)}</b>を<b>${fmtYM(P.marriageAgeFrac)}</b>（${fmtAfter(mo)}）で計上済みです。${mo<=24
             ?`あと${mo}ヶ月と期間が短いため、月々<b>${yenMonthly(cost,mo)}</b>の準備か、現在の現預金${manY(P.initCash)}からの充当が現実的です。`
@@ -3714,7 +3848,7 @@ function renderAdvice(P, rows){
       const r=rowAt(c.birthAge);
       const workBefore=segCovers(c.birthAge-1), workDuring=segCovers(c.birthAge), workAfter=segCovers(c.birthAge+1);
       const gapModeled=workBefore&&(!workDuring||!workAfter);
-      push(c.birthAge,'👶',`第${idx+1}子 誕生`,[
+      push(c.birthAge,'<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-baby"/></svg>',`第${idx+1}子 誕生`,[
         gapModeled
           ?`出産前後のパートナー収入減は勤務パターンで織り込み済みです。育児休業給付（手取りの約5〜7割）を受給できる場合、実際はこの試算より少し余裕が出ます。`
           :(workDuring?`出産年もパートナーの収入が途切れない設定です。実際は産休・育休で減るため、「収入 相手」欄で${c.birthAge}歳前後の期間を分けると精度が上がります（育休中は給付で手取りの約5〜7割）。`:null),
@@ -3728,7 +3862,7 @@ function renderAdvice(P, rows){
       const r=rowAt(univAge);
       const draws=rows.filter(x=>x.age>=univAge&&x.age<=Math.min(univAge+3,P.endAge)).reduce((s,x)=>s+x.drawNisa+x.drawDc,0);
       const shortage=r?Math.max(0,univCost-r.eduFund):univCost;
-      push(univAge,'🎓',`第${idx+1}子 大学入学`,[
+      push(univAge,'<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-cap"/></svg>',`第${idx+1}子 大学入学`,[
         `大学4年間の費用は<b>約${manY(univCost)}</b>${P.eduAway?'（自宅外の仕送り込み）':''}。入学年の教育予約残高は<b>${manY(r?r.eduFund:0)}</b>の見込みで、${shortage<=1
           ?'積立でほぼ全額カバーできる試算です。'
           :`<b>約${manY(shortage)}不足</b>します。今から<b>${yenMonthly(shortage,monthsTo(univAge))}</b>を上乗せすれば埋められます。`}`,
@@ -3745,7 +3879,7 @@ function renderAdvice(P, rows){
     const r=rowAt(P.buyAge); const L=loanCalc(P); const misc=Math.round(P.price*(P.closingRate||0));
     const ratio=(r&&r.net>0)?(L.monthlyPay/(r.net/12))*100:0;
     const shortCash=r?Math.max(0,r.emergency-r.cash):0;
-    push(P.buyAge,'🏠','戸建て購入',[
+    push(P.buyAge,'<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-home"/></svg>','戸建て購入',[
       `頭金<b>${manY(P.downpay)}</b>＋購入諸費用<b>約${manY(misc)}</b>（物件価格の${(P.closingRate*100).toFixed(1)}%）＝計${manY(P.downpay+misc)}を購入年に現金で支払います（計上済み）。今から貯めるなら<b>${yenMonthly(P.downpay+misc,monthsTo(P.buyAge))}</b>が目安です。`,
       r?`あなたの返済は月<b>${yen(L.monthlyPay)}</b>。${P.buyAge}歳時点の世帯手取り月収${yen(r.net/12)}に対して<b>${ratio.toFixed(0)}%</b>で、${ratio<=25?'一般的な目安（手取りの25%以下）に収まっています。':ratio<=30?'一般的な目安（25%）をやや上回ります。物件価格や頭金を調整すると比率が下がります。':'一般的な目安（25%）を上回り、家計に占める割合が大きめです。物件価格の引き下げや時期の見直しで比率を下げられます。'}`:null,
       r?(shortCash>0
@@ -3759,7 +3893,7 @@ function renderAdvice(P, rows){
       for(let sb=iv; P.buyAge+sb<=P.endAge; sb+=iv){ const a=P.buyAge+sb; if(a>now) occ.push(a); }
       if(occ.length){
         const first=occ[0], total=occ.length*cost, r2=rowAt(first);
-        push(first,'🔧',`水廻り修繕（${iv}年ごと）`,[
+        push(first,'<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-wrench"/></svg>',`水廻り修繕（${iv}年ごと）`,[
           `購入から<b>${iv}年ごと</b>に<b>${manY(cost)}</b>が繰り返し発生します（次回は${first}歳／${P.endAge}歳までに残り<b>${occ.length}回・計${manY(total)}</b>）。`,
           `毎月<b>${yenMonthly(cost,iv*12)}</b>を修繕積立として住宅費と別に確保し続ければ、その都度の取り崩しは不要です。`,
           r2&&r2.cash<r2.emergency?`次回（${first}歳）は現預金が生活防衛費を下回る試算（${manY(r2.cash)}）。`:null
@@ -3771,7 +3905,7 @@ function renderAdvice(P, rows){
       const age=P.buyAge+P.repair2Year;
       if(age>now && age<=P.endAge){
         const r2=rowAt(age);
-        push(age,'🛠️','大型リフォーム',[
+        push(age,'<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-tools"/></svg>','大型リフォーム',[
           `購入${P.repair2Year}年目に<b>${manY(P.repair2Cost)}</b>。修繕積立<b>${yenMonthly(P.repair2Cost,monthsTo(age))}</b>を住宅費と別に確保しておけば取り崩し不要です。`,
           r2&&r2.cash<r2.emergency?`この年は現預金が生活防衛費を下回る試算（${manY(r2.cash)}）。時期を動かせる工事なら余裕のある年へずらしてください。`:null
         ], r2&&r2.cash<r2.emergency);
@@ -3783,7 +3917,7 @@ function renderAdvice(P, rows){
   if(P.hasCar && P.carFirstAge>now && P.carFirstAge<=P.endAge){
     const buys=rows.filter(r=>r.oneoffLbl.some(l=>l.startsWith('車')));
     const totalCar=buys.reduce((s,r)=>s+r.oneoffLbl.filter(l=>l.startsWith('車')).reduce((t,l)=>t+(parseInt(l.replace(/\D/g,''))||0),0),0);
-    push(P.carFirstAge,'🚗','車の初回購入',[
+    push(P.carFirstAge,'<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-car"/></svg>','車の初回購入',[
       `あなたの設定では生涯${buys.length}回の購入・買い替えで<b>計約${manY(totalCar)}</b>。買い替え費用は<b>${yenMonthly(P.carPrice,P.carCycle*12)}</b>を「車積立」として確保すると平準化できます。`,
       `維持費（税・保険・車検・燃料で年30〜50万円程度）は生活費に含めて考えてください。`
     ]);
@@ -3792,7 +3926,7 @@ function renderAdvice(P, rows){
   /* --- 定年 --- */
   if(P.selfRetire>now && P.selfRetire<=P.endAge){
     const r=rowAt(P.selfRetire);
-    push(P.selfRetire,'🏢','定年退職',[
+    push(P.selfRetire,'<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-building"/></svg>','定年退職',[
       r?`定年時の予測総資産は<b>${manY(r.netWorth)}</b>（当時の年間生活費の約${(r.netWorth/Math.max(1,r.living)).toFixed(1)}年分）。`:null,
       P.hasRetireBonus?`退職金は手取り<b>約${manY(retireBonusNet(P))}</b>で計上済み。受取直後にまとめて投資するより、数年に分けてNISAへ移すと、高値づかみの影響を抑えやすくなります。`:null,
       !P.hasDC?`iDeCo/DCが未設定です。掛金は全額所得控除のため節税効果が大きく、月2万円拠出した場合の実測効果を下の改善提案で確認できます。`:null
@@ -3807,12 +3941,12 @@ function renderAdvice(P, rows){
     const totalGap=post.reduce((s,x)=>s+Math.max(0,x.expense-x.incomeCash),0);
     const startAssets=r?r.netWorth:0;
     const bust=rows.find(x=>x.shortfall>0);
-    push(pStart,'🌅','年金生活スタート',[
+    push(pStart,'<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-sunrise"/></svg>','年金生活スタート',[
       pc?`年金は世帯手取り<b>約${manY(pc.net)}/年</b>。${P.endAge}歳までの生活費不足の累計は<b>約${manY(totalGap)}</b>で、開始時点の総資産<b>${manY(startAssets)}</b>で${startAssets>=totalGap
         ?`まかなえる試算です（余裕 約${manY(startAssets-totalGap)}）。`
         :`は<b>約${manY(totalGap-startAssets)}不足</b>します。`}`:null,
       bust
-        ?`<b>⚠️ ${bust.age}歳ごろに資産が尽きる試算です。</b>以降は想定の生活費をまかなえず、${P.endAge}歳までの不足累計は約${manY(rows[rows.length-1].shortfallCum||0)}です。下の「改善提案」に、効果を実測した具体策を挙げています。`
+        ?`<b><svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-warn"/></svg> ${bust.age}歳ごろに資産が尽きる試算です。</b>以降は想定の生活費をまかなえず、${P.endAge}歳までの不足累計は約${manY(rows[rows.length-1].shortfallCum||0)}です。下の「改善提案」に、効果を実測した具体策を挙げています。`
         :`資産は${P.endAge}歳まで持つ試算です（最終 ${manY(rows[rows.length-1].netWorth)}）。${(startAssets-totalGap)>1000?'余裕が大きいため、年金の繰下げ受給（最大75歳・+0.7%/月）や資産の「使い方」の設計も選択肢になります。':''}`
     ], !!bust||startAssets<totalGap);
   }
@@ -3866,17 +4000,17 @@ function renderProposals(P, rows){
   const early=rows.slice(0,Math.min(10,rows.length));
   const avgSave=early.reduce((s,r)=>s+r.saving,0)/Math.max(1,early.length);
 
-  if(avgSave>24) test(P.nisaMonthly<30,'📈',`NISA積立を月${P.nisaMonthly}万 → ${P.nisaMonthly+2}万に増額`,'「資産」欄：NISA 積立額',`直近10年の平均貯蓄が年${manY(avgSave)}あるため無理のない範囲です。`,{nisaMonthly:P.nisaMonthly+2});
-  else if(avgSave>12) test(P.nisaMonthly<30,'📈',`NISA積立を月${P.nisaMonthly}万 → ${P.nisaMonthly+1}万に増額`,'「資産」欄：NISA 積立額',null,{nisaMonthly:P.nisaMonthly+1});
-  test(!P.sweepNisa,'🔁','余剰現預金のNISAスイープをオン','「資産」欄：現預金の上限超過分をNISAへ',`現預金${manY(P.cashCap)}と生活防衛費は常に確保した上で、超過分だけを回します。`,{sweepNisa:true});
-  test(!P.hasDC,'🏦','iDeCo/DCを月2万円で開始','「退職」欄：確定拠出年金','掛金の全額所得控除による節税分も手取りに反映して実測しています。',{hasDC:true,dcMonthly:2});
-  test(P.hasDC&&!P.dcLumpStrategy,'🧾','DCを退職所得控除の枠内で一時金受取に','「退職」欄：枠内一時金',null,{dcLumpStrategy:true});
-  test(true,'🔀',`老後の取り崩し順を${P.withdrawOrder==='dc'?'NISA優先':'DC優先'}に変更`,'「退職」欄：老後の取り崩し順',null,{withdrawOrder:P.withdrawOrder==='dc'?'nisa':'dc'});
-  test(P.buyAge!=null&&P.buyAge>P.currentAge&&P.buyAge+2<P.endAge,'🏠',`住宅購入を2年後ろ倒し（${P.buyAge} → ${P.buyAge+2}歳）`,'「住居」欄：戸建てを購入する年齢','家賃2年分の増加と頭金準備・ローン減税の変化を込みで実測しています。',{buyAge:P.buyAge+2});
-  test(P.buyAge!=null&&P.buyAge>P.currentAge&&P.price>1000,'🏠',`物件価格を300万円圧縮（${man(P.price)} → ${manY(P.price-300)}）`,'「住居」欄：物件価格',null,{price:P.price-300});
-  test(P.curMonthlyLiving>10,'🧺','生活費を月1万円見直し','「生活費」欄：現在の月々の生活費','固定費（通信・保険・サブスク）の見直しが現実的です。',{curMonthlyLiving:P.curMonthlyLiving-1});
-  test(P.hasCar&&P.carFirstAge<P.carReturnAge,'🚗',`車の買い替え周期を${P.carCycle} → ${P.carCycle+3}年に延長`,'「車」欄：買い替え周期',null,{carCycle:P.carCycle+3});
-  test(P.reemployTo<70&&P.reemployTo>=P.selfRetire&&P.reemployIncome>0,'👔',`再雇用を70歳まで延長（現在${P.reemployTo}歳まで）`,'「収入 本人」欄：再雇用の終了年齢','再雇用収入が延び、年金開始も後ろ倒しになる簡易試算です。',{reemployTo:70});
+  if(avgSave>24) test(P.nisaMonthly<30,'<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-trend"/></svg>',`NISA積立を月${P.nisaMonthly}万 → ${P.nisaMonthly+2}万に増額`,'「資産」欄：NISA 積立額',`直近10年の平均貯蓄が年${manY(avgSave)}あるため無理のない範囲です。`,{nisaMonthly:P.nisaMonthly+2});
+  else if(avgSave>12) test(P.nisaMonthly<30,'<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-trend"/></svg>',`NISA積立を月${P.nisaMonthly}万 → ${P.nisaMonthly+1}万に増額`,'「資産」欄：NISA 積立額',null,{nisaMonthly:P.nisaMonthly+1});
+  test(!P.sweepNisa,'<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-refresh"/></svg>','余剰現預金のNISAスイープをオン','「資産」欄：現預金の上限超過分をNISAへ',`現預金${manY(P.cashCap)}と生活防衛費は常に確保した上で、超過分だけを回します。`,{sweepNisa:true});
+  test(!P.hasDC,'<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-bank"/></svg>','iDeCo/DCを月2万円で開始','「退職」欄：確定拠出年金','掛金の全額所得控除による節税分も手取りに反映して実測しています。',{hasDC:true,dcMonthly:2});
+  test(P.hasDC&&!P.dcLumpStrategy,'<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-receipt"/></svg>','DCを退職所得控除の枠内で一時金受取に','「退職」欄：枠内一時金',null,{dcLumpStrategy:true});
+  test(true,'<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-shuffle"/></svg>',`老後の取り崩し順を${P.withdrawOrder==='dc'?'NISA優先':'DC優先'}に変更`,'「退職」欄：老後の取り崩し順',null,{withdrawOrder:P.withdrawOrder==='dc'?'nisa':'dc'});
+  test(P.buyAge!=null&&P.buyAge>P.currentAge&&P.buyAge+2<P.endAge,'<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-home"/></svg>',`住宅購入を2年後ろ倒し（${P.buyAge} → ${P.buyAge+2}歳）`,'「住居」欄：戸建てを購入する年齢','家賃2年分の増加と頭金準備・ローン減税の変化を込みで実測しています。',{buyAge:P.buyAge+2});
+  test(P.buyAge!=null&&P.buyAge>P.currentAge&&P.price>1000,'<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-home"/></svg>',`物件価格を300万円圧縮（${man(P.price)} → ${manY(P.price-300)}）`,'「住居」欄：物件価格',null,{price:P.price-300});
+  test(P.curMonthlyLiving>10,'<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-basket"/></svg>','生活費を月1万円見直し','「生活費」欄：現在の月々の生活費','固定費（通信・保険・サブスク）の見直しが現実的です。',{curMonthlyLiving:P.curMonthlyLiving-1});
+  test(P.hasCar&&P.carFirstAge<P.carReturnAge,'<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-car"/></svg>',`車の買い替え周期を${P.carCycle} → ${P.carCycle+3}年に延長`,'「車」欄：買い替え周期',null,{carCycle:P.carCycle+3});
+  test(P.reemployTo<70&&P.reemployTo>=P.selfRetire&&P.reemployIncome>0,'<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-tie"/></svg>',`再雇用を70歳まで延長（現在${P.reemployTo}歳まで）`,'「収入 本人」欄：再雇用の終了年齢','再雇用収入が延び、年金開始も後ろ倒しになる簡易試算です。',{reemployTo:70});
 
   const scored=cands.map(c=>({...c,
       dFinal:c.m.final-base.final,
@@ -4644,7 +4778,7 @@ function render(){
   if(minCash.cash<0 || (last.busted && last.age<MAX_AGE)){
     const na=(minCash.cash<0)?minCash.age:last.age;
     b.className='banner warn';
-    b.innerHTML=`⚠️ <div><b>${na}歳ごろに資産が足りなくなる試算です。</b>収入・支出・積立額などの前提を見直すと結果が変わります。</div>`;
+    b.innerHTML=`<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-warn"/></svg> <div><b>${na}歳ごろに資産が足りなくなる試算です。</b>収入・支出・積立額などの前提を見直すと結果が変わります。</div>`;
   } else if(firstDraw!=null){
     /* 総資産や資産寿命は上の結果シートに出ているので、ここでは繰り返さない */
     b.className='banner ok'; b.innerHTML=`<div><b>${firstDraw}歳から資産の取り崩しが始まります。</b>給与・年金だけでは足りない分を、${P.withdrawOrder==='dc'?'確定拠出年金 → NISA':'NISA → 確定拠出年金'}の順に取り崩してまかなう計算です。</div>`;
@@ -4884,7 +5018,7 @@ function renderLoanNote(P,rows){
     +`月々返済 <b>${yen(L.monthlyPay)}</b>（年${manY(L.annualPay)}）`
     +`　家計比率 <span class="ln-ratio">${ratio.toFixed(1)}%</span>`
     +`<span style="color:var(--slate-2);font-weight:400">（購入年${P.buyAge}歳・世帯手取り${manY(annualNet)}に対して）</span>`
-    +(warn?`<br><span class="ln-warn">⚠️ 手取りの25%を超えています。</span>物件価格の引き下げ・頭金の増額・返済年数の延長で比率を下げられます（一般的な目安は手取りの20〜25%以内）。`
+    +(warn?`<br><span class="ln-warn"><svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-warn"/></svg> 手取りの25%を超えています。</span>物件価格の引き下げ・頭金の増額・返済年数の延長で比率を下げられます（一般的な目安は手取りの20〜25%以内）。`
           :`<br>手取りの25%以内に収まっており、無理のない返済計画です。`);
 }
 
@@ -5036,9 +5170,9 @@ const WZ=(function(){
       html:()=>`
         <p class="wz-sub" style="margin:0 0 8px">性別（統計の初期値と、出産後の働き方の質問に使います）</p>
         <div class="wz-choice">
-          ${opt('gender','male','\u{1F468}','男性','')}
-          ${opt('gender','female','\u{1F469}','女性','')}
-          ${opt('gender','na','\u{1F91D}','回答しない','')}
+          ${opt('gender','male','<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-male"/></svg>','男性','')}
+          ${opt('gender','female','<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-female"/></svg>','女性','')}
+          ${opt('gender','na','<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-neutral"/></svg>','回答しない','')}
         </div>
         <div class="wz-field" style="margin-top:14px"><label>いまの年齢</label><input type="number" id="wzAge" value="${A.age??24}"><span class="u">歳</span></div>
         <div class="wz-field"><label>お仕事</label><select id="wzJob">
@@ -5065,9 +5199,9 @@ const WZ=(function(){
     { g:2, q:'結婚の予定はありますか？', sub:'すでに結婚されている方は「結婚している」を選び、結婚した年齢を入力してください。',
       html:()=>`
         <div class="wz-choice">
-          ${opt('mar','yes','💍','これから結婚したい','時期を入力すると、挙式費用と世帯収支の変化を反映します')}
-          ${opt('mar','done','💑','すでに結婚している','')}
-          ${opt('mar','no','🙋','予定はない／ひとりで暮らす','単身のまま試算します')}
+          ${opt('mar','yes','<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-ring"/></svg>','これから結婚したい','時期を入力すると、挙式費用と世帯収支の変化を反映します')}
+          ${opt('mar','done','<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-heart"/></svg>','すでに結婚している','')}
+          ${opt('mar','no','<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-person"/></svg>','予定はない／ひとりで暮らす','単身のまま試算します')}
         </div>
         <div id="wzMarDetail" style="margin-top:14px;${A.mar==='no'||!A.mar?'display:none':''}">
           <div class="wz-field"><label>結婚（する／した）年齢</label><input type="number" id="wzMarAge" value="${A.marAge??31}"><span class="u">歳</span></div>
@@ -5078,20 +5212,20 @@ const WZ=(function(){
     { g:2, q:'パートナーの働き方は？', sub:'世帯収入と年金額が大きく変わります。結婚の予定がない方は、そのまま次へ進んでください。',
       html:()=>`
         <div class="wz-choice">
-          ${opt('pjob','seishain','💼','正社員として働く','厚生年金に加入。世帯収入・将来の年金とも最も厚くなります')}
-          ${opt('pjob','part_shakai','🕐','パート・契約（社会保険あり）','週20時間以上・厚生年金に加入する働き方')}
-          ${opt('pjob','part_fuyo','🧺','パート（扶養の範囲内）','年収を抑えて働く。年金は第3号（基礎のみ）')}
-          ${opt('pjob','sengyo','🏠','働かない（専業主婦・主夫）','年金は第3号（基礎のみ）')}
+          ${opt('pjob','seishain','<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-briefcase"/></svg>','正社員として働く','厚生年金に加入。世帯収入・将来の年金とも最も厚くなります')}
+          ${opt('pjob','part_shakai','<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-clock"/></svg>','パート・契約（社会保険あり）','週20時間以上・厚生年金に加入する働き方')}
+          ${opt('pjob','part_fuyo','<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-basket"/></svg>','パート（扶養の範囲内）','年収を抑えて働く。年金は第3号（基礎のみ）')}
+          ${opt('pjob','sengyo','<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-home"/></svg>','働かない（専業主婦・主夫）','年金は第3号（基礎のみ）')}
         </div>`,
       save:()=>{} },
 
     { g:2, q:'お子さんの予定は？', sub:'人数と生まれる時期から、教育費・児童手当・生活費を自動で計算します。',
       html:()=>`
         <div class="wz-choice">
-          ${opt('kids','0','🚶','予定なし','')}
-          ${opt('kids','1','👶','1人','')}
-          ${opt('kids','2','👨‍👩‍👧','2人','平均的な人数です')}
-          ${opt('kids','3','👨‍👩‍👧‍👦','3人以上','第3子以降は児童手当の加算と大学無償化の対象になります')}
+          ${opt('kids','0','<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-kid-0"/></svg>','予定なし','')}
+          ${opt('kids','1','<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-kid-1"/></svg>','1人','')}
+          ${opt('kids','2','<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-kid-2"/></svg>','2人','平均的な人数です')}
+          ${opt('kids','3','<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-kid-3"/></svg>','3人以上','第3子以降は児童手当の加算と大学無償化の対象になります')}
         </div>
         <div id="wzKidDetail" style="margin-top:14px;${!A.kids||A.kids==='0'?'display:none':''}">
           <div class="wz-field"><label>第1子が生まれる（生まれた）年齢</label><input type="number" id="wzKidAge" value="${A.kidAge??33}"><span class="u">歳</span></div>
@@ -5105,11 +5239,11 @@ const WZ=(function(){
       q:'出産後の働き方は？', sub:'産休・育休や時短など、出産後のあなた（本人）の働き方を選べます。あとから「本人の働き方」で細かく調整できます。',
       html:()=>`
         <div class="wz-choice">
-          ${opt('momwork','fulltime','💼','育休をとってフルタイムで復職','出産の年は育児休業給付（手取り目安67%・非課税）、その後は元の給与カーブに戻ります')}
-          ${opt('momwork','parttime','🕐','育休のあとは時短で働く','復職後の給与を抑えめ（基本給の約6割）で試算します')}
-          ${opt('momwork','fuyo','🧺','出産後は扶養の範囲内で働く','年収を約100万円に抑えて働く（配偶者控除の対象）。育休後にパートなどで復帰するイメージ')}
-          ${opt('momwork','homemaker','🏠','しばらく専業主婦になる','本人は収入なし・年金は基礎のみ（第3号相当）')}
-          ${opt('momwork','nobreak','🚀','休まず正社員を続ける','キャリアを継続。育休は最小限として通常の給与カーブで試算します')}
+          ${opt('momwork','fulltime','<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-briefcase"/></svg>','育休をとってフルタイムで復職','出産の年は育児休業給付（手取り目安67%・非課税）、その後は元の給与カーブに戻ります')}
+          ${opt('momwork','parttime','<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-clock"/></svg>','育休のあとは時短で働く','復職後の給与を抑えめ（基本給の約6割）で試算します')}
+          ${opt('momwork','fuyo','<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-basket"/></svg>','出産後は扶養の範囲内で働く','年収を約100万円に抑えて働く（配偶者控除の対象）。育休後にパートなどで復帰するイメージ')}
+          ${opt('momwork','homemaker','<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-home"/></svg>','しばらく専業主婦になる','本人は収入なし・年金は基礎のみ（第3号相当）')}
+          ${opt('momwork','nobreak','<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-rocket"/></svg>','休まず正社員を続ける','キャリアを継続。育休は最小限として通常の給与カーブで試算します')}
         </div>
         <div class="hint" style="margin-top:10px">育休・産休を選ぶと、出産の年に育児休業給付（額面の約67%を非課税の手取りとして計上）を反映します。社会保険料は免除され、年金の加入期間は継続する前提です。</div>`,
       save:()=>{} },
@@ -5117,9 +5251,9 @@ const WZ=(function(){
     { g:2, q:'住まいはどうしますか？', sub:'購入する場合、頭金・諸費用・ローン返済・固定資産税・修繕費まで自動で計算します。',
       html:()=>`
         <div class="wz-choice">
-          ${opt('home','buy','🏠','マイホームを買いたい','')}
-          ${opt('home','owned','🔑','すでに購入済み','購入した年齢を入力してください')}
-          ${opt('home','rent','🏢','ずっと賃貸でいい','')}
+          ${opt('home','buy','<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-home-buy"/></svg>','マイホームを買いたい','')}
+          ${opt('home','owned','<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-home-own"/></svg>','すでに購入済み','購入した年齢を入力してください')}
+          ${opt('home','rent','<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-building"/></svg>','ずっと賃貸でいい','')}
         </div>
         <div style="margin-top:14px">
           <div class="wz-field"><label>いまの家賃</label><input type="number" id="wzRent" value="${A.rent??7.5}" step="0.5"><span class="u">万</span></div>
@@ -5135,9 +5269,9 @@ const WZ=(function(){
     { g:3, q:'車は持ちますか？', sub:'購入費だけでなく、買い替えのたびの支出も自動で計算します。維持費（税・保険・車検・燃料）は生活費に含めて考えてください。',
       html:()=>`
         <div class="wz-choice">
-          ${opt('car','no','🚶','持たない','都市部で公共交通が使える場合はこちら')}
-          ${opt('car','buy','🚗','これから買う','')}
-          ${opt('car','owned','🔑','すでに持っている','いま乗っている車を「いつ・いくらで買ったか」を入力してください')}
+          ${opt('car','no','<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-car-no"/></svg>','持たない','都市部で公共交通が使える場合はこちら')}
+          ${opt('car','buy','<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-car-buy"/></svg>','これから買う','')}
+          ${opt('car','owned','<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-car-own"/></svg>','すでに持っている','いま乗っている車を「いつ・いくらで買ったか」を入力してください')}
         </div>
         <div id="wzCarDetail" style="margin-top:14px;${A.car==='no'?'display:none':''}">
           <div class="wz-field"><label>${A.car==='owned'?'いまの車を買った年齢':'買う年齢'}</label><input type="number" id="wzCarAge" value="${A.carAge??(A.car==='owned'?22:30)}"><span class="u">歳</span></div>
@@ -5159,18 +5293,18 @@ const WZ=(function(){
     { g:3, q:'確定拠出年金（iDeCo・企業型DC）は？', sub:'勤務先の制度です。分からない場合は就業規則や給与明細でご確認ください（掛金は標準的な水準で自動設定し、あとから変更できます）。',
       html:()=>`
         <div class="wz-choice">
-          ${opt('dc','none','—','入っていない／わからない','')}
-          ${opt('dc','ideco','🏦','iDeCoに入る（自分で積み立てる）','掛金が全額所得控除になり節税できます。60歳まで引き出せません')}
-          ${opt('dc','corp','🏢','企業型DCがある（会社が拠出）','会社が掛金を負担するため、手取りは減りません')}
-          ${opt('dc','both','🏦🏢','企業型DC＋iDeCoの併用','')}
+          ${opt('dc','none','<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-dash"/></svg>','入っていない／わからない','')}
+          ${opt('dc','ideco','<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-bank"/></svg>','iDeCoに入る（自分で積み立てる）','掛金が全額所得控除になり節税できます。60歳まで引き出せません')}
+          ${opt('dc','corp','<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-building"/></svg>','企業型DCがある（会社が拠出）','会社が掛金を負担するため、手取りは減りません')}
+          ${opt('dc','both','<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-dc-both"/></svg>','企業型DC＋iDeCoの併用','')}
         </div>`,
       save:()=>{} },
 
     { g:3, q:'退職金はありますか？', sub:'定年まで勤めた場合に受け取れる一時金です。金額は標準的な水準で自動設定し、あとから変更できます。',
       html:()=>`
         <div class="wz-choice">
-          ${opt('rb','yes','💰','ある','大卒・定年まで勤めた場合の標準的な水準で試算します')}
-          ${opt('rb','no','🚫','ない／わからない','自営業や制度のない会社はこちら')}
+          ${opt('rb','yes','<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-coin"/></svg>','ある','大卒・定年まで勤めた場合の標準的な水準で試算します')}
+          ${opt('rb','no','<svg class="ic-sv" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ic-ban"/></svg>','ない／わからない','自営業や制度のない会社はこちら')}
         </div>`,
       save:()=>{} },
 
@@ -7522,6 +7656,7 @@ if(_allocAdd) _allocAdd.addEventListener('click',function(){ if(ALLOCS.length>=A
 ['alcYieldIndex','alcYieldGold','alcYieldBond','alcYieldCash','alcRealGross','alcVacancy','alcRealCost','alcRealAppr','alcRealMin','alcRealAcq','alcRealSell','alcRealBldg','alcRealLife','alcTaxRate'].forEach(function(id){
   var e=document.getElementById(id); if(e) e.addEventListener('input',function(){ render(); });
 });
+document.body.insertAdjacentHTML('afterbegin', ICON_SPRITE);
 loadAllocs(); renderAllocRows();
 var _addDebt=document.getElementById('addDebt');
 if(_addDebt) _addDebt.addEventListener('click',function(){
@@ -7608,6 +7743,77 @@ document.addEventListener('click', function(ev){
   el.scrollIntoView({behavior:'smooth', block:'start'});
   el.classList.remove('logic-flash'); void el.offsetWidth; el.classList.add('logic-flash');
 });
+
+
+/* ===== スマホ用の下部バー =====
+   目次と保存・共有はシートで開く。中身は既存のボタンを「押す」だけなので、
+   元のイベント処理をそのまま使え、IDの重複も起きない。
+   下スクロール中はバーを隠し、上スクロールで戻す。 */
+(function(){
+  const bar=document.getElementById('mbar'), sh=document.getElementById('msheet');
+  if(!bar||!sh) return;
+  const body=document.getElementById('msheetBody'), ttl=document.getElementById('msheetT');
+  const close=()=>{ sh.hidden=true; document.body.style.overflow=''; };
+  document.getElementById('msheetX').addEventListener('click',close);
+  document.getElementById('msheetBd').addEventListener('click',close);
+
+  /* 元のボタンを押すだけの代理ボタンを作る */
+  const proxy=(src,cls)=>{
+    const b=document.createElement('button');
+    b.type='button'; b.className='ms-btn'+(cls?' '+cls:'');
+    b.textContent=(src.textContent||'').trim();
+    b.addEventListener('click',()=>{ close(); setTimeout(()=>src.click(),10); });
+    return b;
+  };
+  const openSheet=(kind)=>{
+    body.innerHTML='';
+    if(kind==='toc'){
+      ttl.textContent='目次';
+      const g=document.createElement('div'); g.className='ms-grid';
+      document.querySelectorAll('.mininav .mn').forEach(mn=>{
+        if(mn.classList.contains('mn-act')) return;   /* 「カンタン入力を再開」は下にまとめる */
+        g.appendChild(proxy(mn));
+      });
+      body.appendChild(g);
+      const act=document.querySelector('.mininav .mn-act');
+      if(act){ const h=document.createElement('div'); h.className='ms-sec'; h.textContent='入力し直す';
+        body.appendChild(h); body.appendChild(proxy(act,'pri')); }
+    } else {
+      ttl.textContent='保存・共有';
+      const mk=(label,ids,cls)=>{
+        const found=ids.map(id=>document.getElementById(id)).filter(Boolean);
+        if(!found.length) return;
+        const h=document.createElement('div'); h.className='ms-sec'; h.textContent=label;
+        const g=document.createElement('div'); g.className='ms-grid share';
+        found.forEach((el,i)=>g.appendChild(proxy(el, (cls&&i===0)?'pri':'')));
+        body.appendChild(h); body.appendChild(g);
+      };
+      mk('共有する',['shareBtnDock','appShareBtnDock','postBtnDock'],true);
+      mk('保存する',['imgBtnDock','pdfBtnDock']);
+    }
+    sh.hidden=false; document.body.style.overflow='hidden';
+  };
+  bar.querySelectorAll('[data-sheet]').forEach(b=>b.addEventListener('click',()=>openSheet(b.dataset.sheet)));
+  /* 「結果へ」は結果シートの先頭までスクロール */
+  const rb=document.getElementById('mbarResult');
+  if(rb) rb.addEventListener('click',()=>{
+    const t=document.getElementById('rsheet')||document.querySelector('.results');
+    if(t) t.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+
+  /* 下スクロールで隠し、上スクロールで戻す（画面を広く使うため） */
+  let lastY=window.scrollY, tick=false;
+  window.addEventListener('scroll',()=>{
+    if(tick) return; tick=true;
+    requestAnimationFrame(()=>{
+      const y=window.scrollY, d=y-lastY;
+      if(!sh.hidden){ tick=false; lastY=y; return; }   /* シートを開いている間は動かさない */
+      if(d>6 && y>90) bar.classList.add('hide');
+      else if(d<-6 || y<=90) bar.classList.remove('hide');
+      lastY=y; tick=false;
+    });
+  }, {passive:true});
+})();
 
 document.getElementById('resetBtn').addEventListener('click',()=>{
   setDefaults();
