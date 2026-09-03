@@ -2066,7 +2066,8 @@
   <div class="dock-inner">
     <button type="button" class="dock-b" id="appShareBtnDock" title="入力内容を含まない、ツールそのもののURLを共有します">Mirai Shishinを共有</button>
     <button type="button" class="dock-b primary" id="shareBtnDock" title="いまの入力内容を含むURLを作ります（パスコードで保護できます）">個人結果URLを共有</button>
-    <button type="button" class="dock-b" id="postBtnDock">結果をポスト</button>
+    <!-- 「結果をポスト」は一時的に非表示。再開するときは hidden を外すだけでよい -->
+    <button type="button" class="dock-b" id="postBtnDock" hidden>結果をポスト</button>
     <button type="button" class="dock-b" id="imgBtnDock">画像で保存</button>
     <button type="button" class="dock-b" id="pdfBtnDock">PDFで保存</button>
   </div>
@@ -2148,7 +2149,7 @@ function eduTotalPerChild(P){ let t=0; for(let a=3;a<=21;a++) t+=eduAnnual(a,P);
 function insurance(age){ if(age<30)return 8; if(age<40)return 14; if(age<50)return 22; if(age<60)return 28; if(age<70)return 22; return 14; }
 /* 公的年金（令和7年度基準・概算）: 老齢基礎満額83.17万/年、報酬比例乗率5.481/1000（2003年4月〜）、標準報酬の年間上限概算1230万 */
 const CURRENT_YEAR=new Date().getFullYear();
-const APP_VERSION='0.0.89';   /* 更新するたびに末尾を増やす */
+const APP_VERSION='0.0.90';   /* 更新するたびに末尾を増やす */
 const MAX_AGE=120;  /* 生活資金が尽きなかった場合の試算上限 */
 const PENSION_FULL=83.17, PENSION_RATE=5.481/1000;
 /* 報酬比例部分の計算に使う「年間の標準報酬の上限」。
@@ -7781,7 +7782,7 @@ document.addEventListener('click', function(ev){
     } else {
       ttl.textContent='保存・共有';
       const mk=(label,ids,cls)=>{
-        const found=ids.map(id=>document.getElementById(id)).filter(Boolean);
+        const found=ids.map(id=>document.getElementById(id)).filter(el=>el&&!el.hidden);
         if(!found.length) return;
         const h=document.createElement('div'); h.className='ms-sec'; h.textContent=label;
         const g=document.createElement('div'); g.className='ms-grid share';
