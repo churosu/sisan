@@ -1308,7 +1308,7 @@
 
     <div class="grp-head"><span class="gh-n">②</span><span class="gh-t">人生を近づける</span><span class="gh-s">家族・子ども・住まい・老後を設定</span></div>
 <details class="grp" id="sec-partner">
-      <summary><span class="tag">収入 相手</span><span class="impbadge rec">おすすめ</span>パートナーの勤務（複数可）<span class="chev">▶</span></summary>
+      <summary><span class="tag">収入 相手</span><span class="impbadge rec">おすすめ</span>パートナーの勤務形態<span class="chev">▶</span></summary>
       <div class="body">
         <div class="field"><label>パートナーの働き方</label><select id="partnerWorkMode"><option value="segments">区間で指定（就職・転職・育休・産休）</option><option value="single">基本の給与カーブ（通常勤務）</option><option value="none">専業主婦(夫)・収入なし</option></select></div>
         <div class="hint" id="partnerWorkModeHint" style="margin-top:0">産休・復職などを区間で指定します（既定）。</div>
@@ -2148,7 +2148,7 @@ function eduTotalPerChild(P){ let t=0; for(let a=3;a<=21;a++) t+=eduAnnual(a,P);
 function insurance(age){ if(age<30)return 8; if(age<40)return 14; if(age<50)return 22; if(age<60)return 28; if(age<70)return 22; return 14; }
 /* 公的年金（令和7年度基準・概算）: 老齢基礎満額83.17万/年、報酬比例乗率5.481/1000（2003年4月〜）、標準報酬の年間上限概算1230万 */
 const CURRENT_YEAR=new Date().getFullYear();
-const APP_VERSION='0.0.87';   /* 更新するたびに末尾を増やす */
+const APP_VERSION='0.0.89';   /* 更新するたびに末尾を増やす */
 const MAX_AGE=120;  /* 生活資金が尽きなかった場合の試算上限 */
 const PENSION_FULL=83.17, PENSION_RATE=5.481/1000;
 /* 報酬比例部分の計算に使う「年間の標準報酬の上限」。
@@ -5926,7 +5926,7 @@ document.getElementById('reopenWiz').onclick=()=>WZ.start(true);   /* 現在の�
     return cv;
   }
   window.postImage=postImage;   /* 検証用に公開 */
-  const TOOL_URL=(location.origin+location.pathname).replace(/index\.html$/,'');
+  const TOOL_URL=sharePath();
   function postText(){
     const d=postSummary(); if(!d) return '';
     const life=d.ran ? ('資産は '+d.keptTo+'歳 で不足する試算')
@@ -7823,7 +7823,18 @@ document.getElementById('resetBtn').addEventListener('click',()=>{
   try{ localStorage.removeItem('lifeplan'); }catch(e){}
   render();
 });
-function shareUrlFrom(payload){ return location.origin+location.pathname+location.search+'#'+payload; }
+/* 共有するURLは拡張子を出さない（miraishishin.jp/simulator の形にする）。
+   GitHub Pages は /simulator へのアクセスに /simulator.html を返すため、
+   末尾の .html は省ける。index.html はディレクトリ表記に畳む。
+   file:// で開いている場合は拡張子を外すと開けなくなるので、そのまま残す。 */
+function sharePath(){
+  let pn=location.pathname;
+  if(location.protocol==='http:'||location.protocol==='https:'){
+    pn=pn.replace(/\/index\.html$/,'/').replace(/\.html$/,'');
+  }
+  return location.origin+pn;
+}
+function shareUrlFrom(payload){ return sharePath()+location.search+'#'+payload; }
 /* リンクは長いので、手作業での選択ミスによる切れを防ぐ。
    クリップボードAPI → execCommand → 全選択済みの入力欄、の順に確実な方法へ落とす。 */
 function showCopyFallback(url){
@@ -7864,7 +7875,7 @@ function openShareModal(btn){
 }
 /* Mirai Shishinを共有：入力内容を一切含まない、ツールそのもののURLだけを共有する */
 function shareApp(btn){
-  const url=location.origin+location.pathname;
+  const url=sharePath();
   const text='Mirai Shishin（インフレに負けない資産形成）— 将来の家計をシミュレーションできる無料ツールです。';
   if(navigator.share){
     navigator.share({title:'Mirai Shishin', text:text, url:url}).catch(()=>{});
